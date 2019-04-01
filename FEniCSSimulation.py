@@ -9,6 +9,8 @@ class FEniCSSimulation:
         self.gradP = gradP_in
         self.sigma = sigma_in
         self.mu = mu_in
+        self.bc = []
+        self.V =[]
 
     def make_mesh(self, KindOfMesh, nCellsX, nCellsY):
         """generates the mesh  and returns it"""
@@ -24,8 +26,31 @@ class FEniCSSimulation:
         else:
             print("KindOfMesh has value", KindOfMesh, "which is not valid.")
             exit(1)
-        return mesh
+        self.mesh=mesh
 
 
-    def register_dofs(self, mesh):
+    def register_dofs(self, TypeOfFunctions, degree, *dim):
         """define all the ansatzfunctions and function spaces and saves them in self"""
+
+        if 'dim' in dim:
+            V = VectorFunctionSpace(self.mesh,TypeOfFunctions, degree, dim=dim['dim'])
+        else:
+            V = FunctionSpace(self.mesh, TypeOfFunctions, degree)
+
+        self.u = TrialFunctions(V)
+        self.v = TestFunctions(V)
+        self.V.append(V)
+
+    def boundary_condition(self, TypeOfBoundary, expression, space, boundary):
+        """define different boundary conditions (iteratively by calling this method as often as needed"""
+
+        if TypeOfBoundary == 'Dirichlet':
+            self.bc.append(DirichletBC(space, expression, boundary))
+
+    def impose_inital_condition:
+    def form_variational_problem(self):
+        """define the variational problem"""
+        dt=0.1
+        F=self.u*self.v*dx + dt*dot(grad(self.u), grad(self.v))*dx -self.u_n*self.v*dx-self.sigma*grad(v)*dx+self.gradP*self.v*dx
+
+
