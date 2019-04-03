@@ -47,10 +47,13 @@ class FEniCSSimulation:
         if TypeOfBoundary == 'Dirichlet':
             self.bc.append(DirichletBC(space, expression, boundary))
 
-    def impose_inital_condition:
+    def impose_initial_condition(self, expression, whichSpace):
+        """impose the initial condition for the problem"""
+        self.u_n = interpolate(expression, self.V[whichSpace])
+
     def form_variational_problem(self):
         """define the variational problem"""
-        dt=0.1
-        F=self.u*self.v*dx + dt*dot(grad(self.u), grad(self.v))*dx -self.u_n*self.v*dx-self.sigma*grad(v)*dx+self.gradP*self.v*dx
-
+        dt = 0.1
+        F = self.u*self.v*dx + dt*dot(grad(self.u), grad(self.v))*dx -self.u_n*self.v*dx-self.sigma*grad(v)*dx+self.gradP*self.v*dx
+        self.a, self.L =lhs(F), rhs(F)
 
