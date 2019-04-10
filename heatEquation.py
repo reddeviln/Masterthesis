@@ -5,7 +5,7 @@ import numpy
 
 s = Vector()
 s.init(2)
-s[0] = 1
+s[0] = 100
 s[1] = 1
 heatEquation = FEniCSSimulation(Constant(0),Constant(s), Constant(1))
 heatEquation.make_mesh(1, 10, 10)
