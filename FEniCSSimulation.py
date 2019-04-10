@@ -10,7 +10,9 @@ class FEniCSSimulation:
         self.sigma = sigma_in
         self.mu = mu_in
         self.bc = []
-        self.V =[]
+        self.V = []
+        self.u = []
+        self.v = []
 
     def make_mesh(self, KindOfMesh, nCellsX, nCellsY):
         """generates the mesh  and returns it"""
@@ -29,7 +31,7 @@ class FEniCSSimulation:
         self.mesh=mesh
 
 
-    def register_dofs(self, TypeOfFunctions, degree, *dim):
+    def register_dofs(self, TypeOfFunctions, degree, **dim):
         """define all the ansatzfunctions and function spaces and saves them in self"""
 
         if 'dim' in dim:
@@ -37,8 +39,8 @@ class FEniCSSimulation:
         else:
             V = FunctionSpace(self.mesh, TypeOfFunctions, degree)
 
-        self.u = TrialFunctions(V)
-        self.v = TestFunctions(V)
+        self.u.append(TrialFunction(V))
+        self.v.append(TestFunction(V))
         self.V.append(V)
 
     def boundary_condition(self, TypeOfBoundary, expression, space, boundary):
@@ -54,6 +56,23 @@ class FEniCSSimulation:
     def form_variational_problem(self):
         """define the variational problem"""
         dt = 0.1
-        F = self.u*self.v*dx + dt*dot(grad(self.u), grad(self.v))*dx -self.u_n*self.v*dx-self.sigma*grad(v)*dx+self.gradP*self.v*dx
-        self.a, self.L =lhs(F), rhs(F)
+        sigma_int = interpolate(self.sigma, self.V[1])
+        F = self.u[0]*self.v[0]*dx-self.mu*dt*dot(grad(self.u[0]),grad(self.v[0]))*dx-(self.u_n*self.v[0])*dx\
+            -dt*(self.gradP*self.v[0])*dx+ dot(sigma_int,grad(self.v[0]))*dx
+            #
+        self.a = lhs(F)
+        self.L = rhs(F)
 
+    def run_simulation(self, T_end, num_steps):
+        """runs the actual simulation"""
+
+        dt = T_end/num_steps
+        vtkfile = File ("output/solution.pvd")
+        u = Function(self.V[0])
+        t = 0
+
+        for n in range(num_steps):
+            t += dt
+            solve(self.a == self.L, u, self.bc)
+            vtkfile << (u,t)
+            self.u_n.assign(u)
