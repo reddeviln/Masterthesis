@@ -1,5 +1,6 @@
 from fenics import *
 import mshr
+import numpy as np
 class FEniCSSimulation:
     """Lowlevelclass for using Non-Newtonian Fluids with Navier-Stokes"""
 
@@ -13,6 +14,8 @@ class FEniCSSimulation:
         self.V = []
         self.u = []
         self.v = []
+        self.mesh = None
+        self.a =[]
 
     def make_mesh(self, KindOfMesh, nCellsX, nCellsY):
         """generates the mesh  and returns it"""
@@ -53,15 +56,48 @@ class FEniCSSimulation:
         """impose the initial condition for the problem"""
         self.u_n = interpolate(expression, self.V[whichSpace])
 
-    def form_variational_problem(self):
-        """define the variational problem"""
+    def form_variational_problem_heat(self):
+        """define the variational problem for the heat equation with additions"""
         dt = 0.1
         sigma_int = interpolate(self.sigma, self.V[1])
         F = self.u[0]*self.v[0]*dx+self.mu*dt*dot(grad(self.u[0]),grad(self.v[0]))*dx-(self.u_n*self.v[0])*dx\
             +dt*(self.gradP*self.v[0])*dx+ dt*dot(sigma_int,grad(self.v[0]))*dx
-            #
         self.a = lhs(F)
         self.L = rhs(F)
+
+    def getSigma(self, C, dim):
+        """get sigma from C"""
+        return C-Constant((1,1,1))
+
+
+
+    def form_variational_problem_full(self,Lambda):
+        """define the variational problem for the equations with stress tensor"""
+        dt = Constant(0)
+        Lambda=2
+        C, u = TrialFunctions(self.V[0])
+        CV, v = TestFunctions(self.V[0])
+        F = [0 for x in range(4)]
+        self.a = [0 for x in range(4)]
+        self.L = [0 for x in range(4)]
+        F[0] = u*v*dx-self.u_n[3]*v*dx+dt*(self.gradP*v*dx\
+            + dot(self.getSigma(C, 3),grad(v))*dx)\
+            + Constant(self.mu)*dot(grad(u),grad(v))*dx
+        F[1] = (C[0]-self.u_n[0]+1/Lambda*(C[0]-1))*CV[0]*dx+dt/Lambda*u*v.dx(1)*dx
+        F[2] = (C[1] - self.u_n[1] + 1 / Lambda * (C[1] - 1)) * CV[1] * dx + dt / Lambda * u * v.dx(2) * dx
+        F[3] = 2*dot(grad(u),C)*CV[2]*dx
+
+        self.a[0] = lhs(F[0])
+        self.a[1] = lhs(F[1])
+        self.a[2] = lhs(F[2])
+        self.a[3] = lhs(F[3])
+
+        self.L[0] = rhs(F[0])
+        self.L[1] = rhs(F[1])
+        self.L[2] = rhs(F[2])
+        self.L[3] = rhs(F[3])
+        self.a = np.asarray(self.a)
+
 
     def run_simulation(self, T_end, num_steps,filename):
         """runs the actual simulation"""
