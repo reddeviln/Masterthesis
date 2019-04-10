@@ -71,9 +71,10 @@ class FEniCSSimulation:
         u = Function(self.V[0])
         t = 0
         A=assemble(self.a)
-        b=assemble(self.L)
+
         for n in range(num_steps):
             t += dt
+            b = assemble(self.L)
             [bcu.apply(b) for bcu in self.bc]
             solve(A, u.vector(),b)
             vtkfile << (u,t)
