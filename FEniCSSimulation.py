@@ -69,10 +69,7 @@ class FEniCSSimulation:
         dt = T_end/num_steps
         vtkfile = File (filename)
         u = Function(self.V[0])
-        u1= Function(self.V[0])
         t = 0
-        u1.assign(self.u_n)
-        vtkfile << (u1, t)
         for n in range(num_steps):
             t += dt
             solve(self.a == self.L, u, self.bc[0])
