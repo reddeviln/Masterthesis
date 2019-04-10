@@ -23,4 +23,4 @@ heatEquation.impose_initial_condition(Expression('exp(-a*pow(x[0], 2) - a*pow(x[
 
 heatEquation.form_variational_problem()
 
-heatEquation.run_simulation(2,100)
+heatEquation.run_simulation(2,10, "output/heatequation/solution.pvd")

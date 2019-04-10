@@ -63,11 +63,11 @@ class FEniCSSimulation:
         self.a = lhs(F)
         self.L = rhs(F)
 
-    def run_simulation(self, T_end, num_steps):
+    def run_simulation(self, T_end, num_steps,filename):
         """runs the actual simulation"""
 
         dt = T_end/num_steps
-        vtkfile = File ("output/solution.pvd")
+        vtkfile = File (filename)
         u = Function(self.V[0])
         t = 0
 
