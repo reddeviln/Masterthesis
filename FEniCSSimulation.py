@@ -73,6 +73,6 @@ class FEniCSSimulation:
         vtkfile << (u, t)
         for n in range(num_steps):
             t += dt
-            solve(self.a == self.L, u, self.bc)
+            solve(self.a == self.L, u, self.bc[0])
             vtkfile << (u,t)
             self.u_n.assign(u)
