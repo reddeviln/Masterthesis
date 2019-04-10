@@ -76,6 +76,7 @@ class FEniCSSimulation:
             t += dt
             A = assemble(self.a)
             b = assemble(self.L)
+            [bcu.apply(A) for bcu in self.bc]
             [bcu.apply(b) for bcu in self.bc]
             solve(A, u.vector(),b)
             vtkfile << (u,t)
