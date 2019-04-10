@@ -58,7 +58,7 @@ class FEniCSSimulation:
         dt = 0.1
         sigma_int = interpolate(self.sigma, self.V[1])
         F = self.u[0]*self.v[0]*dx-self.mu*dt*dot(grad(self.u[0]),grad(self.v[0]))*dx-(self.u_n*self.v[0])*dx\
-            -dt*(self.gradP*self.v[0])*dx+ dot(sigma_int,grad(self.v[0]))*dx
+            -dt*(self.gradP*self.v[0])*dx+ dt*dot(sigma_int,grad(self.v[0]))*dx
             #
         self.a = lhs(F)
         self.L = rhs(F)
