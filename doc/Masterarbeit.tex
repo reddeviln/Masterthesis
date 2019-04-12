@@ -1,0 +1,919 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX Vorlage: Mathematische Texte
+%
+% Quelle: http://www.mi.uni-koeln.de/wp-MIEDV/% Datum: Juli 201% Copyright Universität zu Köln
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[12pt,a4paper]{scrartcl}
+
+\addtokomafont{sectioning}{\rmfamily}
+\usepackage[ngerman]{babel}% deutsches Sprachpaket wird geladen
+%\usepackage[english]{babel}% englisches Sprachpaket wird geladen
+\usepackage{tabularx}
+\usepackage[T1]{fontenc} % westeuropäische Codierung wird verlangt
+\usepackage[utf8]{inputenc}% Umlaute werden erlaubt
+\usepackage[usenames]{color} % Erlaubt die Benutzung der namen im Farbpaket und deren Änderung
+%\usepackage{showkeys} % Labels anzeigen
+\usepackage{amsmath} % Erweiterung für den Mathe-Satz
+\usepackage{amssymb} % alle Zeichen aus msam und msmb werden dargestellt
+\usepackage{framed}
+\usepackage[german]{fancyref}
+\usepackage{listings}
+\usepackage{color}
+\definecolor{mygreen}{RGB}{28,172,0} % Define colour
+\definecolor{mylilas}{RGB}{170,55,241}
+\usepackage{graphicx} % Graphiken und Bilder können eingebunden werden
+\usepackage{multirow} % erlaubt in einer Spalte einer Tabelle die Felder in mehreren Zeilen zusammenzufassen
+\usepackage{enumerate} % erlaubt Nummerierungen 
+\usepackage{url} % Dient zur Auszeichnung von URLs; setzt die Adresse in Schreibmaschinenschrift.
+\usepackage[center]{caption}  % Bildunterschrift wird zentriert
+\usepackage{subfigure} % mehrere Bilder können in einer figure-Umgebung verwendet werden
+\usepackage{longtable} % Diese Umgebung ist ähnlich definiert wie die tabular-Umgebung, erlaubt jedoch mehrseitige Tabellen.
+\usepackage{paralist} % Modifikation der bereits bestehenden Listenumgebungen
+\usepackage{lmodern}% Für die Schrift
+\usepackage{amsthm} % erlaubt die Benutzung von eigenen Theoremen
+\usepackage{hyperref} % Links und Verweise werden innerhalb von PDF Dokumenten erzeugt
+\usepackage{wrapfig} % Das Paket ermöglicht es von Schrift umflossene Bilder und Tabellen einzufügen.
+\numberwithin{equation}{section} % Nummerierungen der Gleichungen, die durch equation erstellt werden, sind gebunden an die section
+\usepackage{latexsym} % LaTeX-Symbole werden geladen
+\usepackage{tikz} % Erlaubt es mit tikz zu zeichnen
+\usepackage{tabularx} % Erlaubt Tabellen 
+\usepackage{algorithm} % Erlaubt Pseudocode
+\usepackage{algorithmic}
+\usepackage{color} % Farbpaket wird geladen
+\usepackage{stmaryrd} % St Mary Road Symbole werden geladen
+
+% Hier werden neue Theorems erstellt.
+\theoremstyle{definition}
+\newtheorem{auf}{Aufgabe}
+\newtheorem{rem}[auf]{Bemerkung}
+\newtheorem{defn}[auf]{Definition}
+\newtheorem{bsp}[auf]{Beispiel}
+\theoremstyle{plain}
+\newtheorem{kor}[auf]{Korollar}
+\newtheorem{sa}[auf]{Satz}
+\newtheorem{alg}[auf]{Algorithmus}
+\DeclareMathOperator*{\esssup}{ess\,sup} % essentiellen Supremums
+\DeclareMathOperator{\spn}{span} % Span
+\DeclareMathOperator{\supp}{supp} % Träger
+\newcommand{\abs}[1]{\left\vert #1\right\vert}
+\newcommand{\rr}{\mathbb{R}}
+\newcommand{\g}{~\textgreater ~}
+\newcommand{\ls}{~\textless ~}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\newcommand{\cc}{\mathbb{C}}
+\newcommand{\e}{\varepsilon\g 0~}
+\newcommand{\fe}{\forall \e}
+\newcommand{\so}{\sum_{k=0}^{n}}
+\newcommand{\si}{\sum_{k=1}^{n}}
+\newcommand{\soi}{\sum_{k=0}^{\infty}}
+\newcommand{\sii}{\sum_{k=1}^{\infty}}
+\newcommand{\de}{\mathrm{d}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\floatname{algorithm}{Algorithmus}
+\renewcommand{\thesubfigure}{\thefigure.\arabic{subfigure}}
+\lstset{language=Matlab,
+    basicstyle={\scriptsize \ttfamily},
+    breaklines=true,
+    morekeywords={matlab2tikz},
+    keywordstyle=\color{blue},
+    morekeywords=[2]{1}, 
+    keywordstyle=[2]{\color{black}},
+    identifierstyle=\color{black},
+    stringstyle=\color{mylilas},
+    commentstyle=\color{mygreen},
+    showstringspaces=false, %without this there will be a symbol in the places where there is a space
+    numbers=left,
+    numberstyle={\tiny \color{black}}, % size of the numbers
+    numbersep=9pt, % this defines how far the numbers are from the text
+    emph=[1]{for,end,break},
+    emphstyle=[1]\color{red}, %some words to emphasise
+}
+\makeatletter
+\renewcommand{\p@subfigure}{}
+\renewcommand{\@thesubfigure}{\thesubfigure:\hskip\subfiglabelskip}
+\makeatother
+\begin{document}
+% Hier wird die Titelseite erstellt
+\begin{titlepage}
+\pagestyle{empty}
+\begin{center}
+
+\textsc{\LARGE Universität zu Köln }\\ [0.4cm]
+\textsc{ Mathematisches Institut} \\[1.5cm]
+
+\includegraphics[width=0.45\textwidth]{uni}\\[1.5cm]  % Uni-Logo wird geladen
+
+\textsc{\Large Bachelorarbeit}\\[2mm]
+\textsc{\today}\\[10mm]
+  
+
+\newcommand{\HRule}{\rule{\linewidth}{0.7mm}}
+\HRule \\[0.4cm]
+{ \huge \bfseries Implizite Zeitdiskretisierung für lineare Advektionsgleichungen}\\[0.4cm]
+
+\HRule \\[3cm]
+
+\begin{center}
+
+\textsc{\Large Nils Dornbusch} \\[3pt]
+\textsc{\Large Prüfer: Professor Gassner}
+\end{center}
+\end{center}
+\end{titlepage}
+\section*{Danksagung}
+Ich möchte mich bei Herrn Professor Gassner und seiner Arbeitsgruppe ganz herzlich für die kompetente und umfangreiche Betreuung bedanken. Insbesondere bei Herrn Lucas Friedrich für sein außerordentliches Engagement, das weit über Sprechstundenzeiten hinaus ging. 
+\par Zusätzlich bedanke ich mich noch bei meiner Familie, meinen Freunden und Kommilitonen und meiner Freundin für ihre Geduld und ihr Verständnis.
+\\[1cm]
+Köln, \today 
+\\[1cm]
+Nils Dornbusch
+\newpage
+\tableofcontents
+\newpage
+\section{Einleitung}
+In dieser Arbeit werden wir uns mit der numerischen Lösung der linearen Advektionsgleichung beschäftigen. Dafür widmen wir uns den Finite Differenzen Verfahren.
+\par Doch warum betrachten wir eigentlich die lineare Advektionsgleichung? Es stellt sich heraus, dass diese eine Art Prototyp für skalare Erhaltungsgleichungen ist, da man diese oft in ein System von linearen Advektionsgleichungen überführen kann. Außerdem lassen sich Verfahren hier sehr gut testen, da man eine exakte analytische Lösung direkt angeben kann.
+Als Erstes wollen wir die Energie der linearen Advektionsgleichung in ein und zwei Dimensionen betrachten. Bevor wir dann zum eigentlichen Verfahren kommen, werden wir einen kleinen Exkurs in das GMRES-Verfahren vornehmen, da dies uns bei der Konstruktion begleiten wird.
+Danach wollen wir diese Verfahren tatsächlich konstruieren und auf die Unterschiede eingehen. Anschließend werden Implementierungsaspekte betrachtet und zum Schluss werden einige numerische Ergebnisse erzeugt. Hierbei wollen wir vor allem auf die Unterschiede eingehen, ob wir explizite oder implizite Berechnung des nächsten Zeitlevels vornehmen. Ziel dieser Arbeit wird es also sein, herauszufinden, wann welches Verfahren sich rentiert und wie wir das entscheiden können.
+\par Die Herleitung der Finite Differenzen Verfahren im Eindimensionalen orientiert sich stark an \cite{Gas}.
+\section{Theorie}
+Zunächst wollen wir auf die theoretischen Aspekte der linearen Advektionsgleichung eingehen. In diesem Kapitel werden wir außerdem die Finite Differenzen Verfahren für die jeweiligen Dimensionen herleiten und theoretisch analysieren. 
+\subsection{Exkurs: Das GMRES-Verfahren}
+Bevor wir uns jedoch damit auseinandersetzen, wird ein kurzer Exkurs in die "`Generalized Minimal Residual Method"' (GMRES-Verfahren) benötigt. Dieses werden wir später bei der Implementierung der impliziten Löser benötigen. Für eine ausführliche Betrachtung dieses Verfahrens verweise ich gerne auf \cite{SaadSchultz}.
+\subsubsection{Aufgabenstellung und Grundidee des Verfahrens}
+Das GMRES-Verfahren soll folgende Aufgabenstellung möglichst effizient und für eine möglichst große Klasse von Problemen lösen:
+\begin{auf}
+Sei $A\in\rr^{n\times n}$ und $b\in\rr^n$. Finde $x\in\rr^n$ so, dass 
+\begin{equation}
+\norm{Ax-b}\to\min
+\end{equation}
+\end{auf}
+Hierbei wollen wir das Problem nicht direkt über dem gesamten $\rr^n$ lösen, sondern erst über einem sogenannten \emph{\textsc{Krylov}-Raum}.
+\begin{defn}
+Für eine Matrix $A\in\rr^{n\times n}$ und zwei Vektoren $b,x^0\in\rr^n$ heißt
+\begin{equation}
+\mathcal{K}_k(r^0,A)=\text{span}\{r^0,Ar^0,\dotsc,A^{k-1}r^0\}\text{ mit }r^0=b-Ax^0
+\end{equation}
+der von $r^0$ und $A$ aufgespannte \emph{\textsc{Krylov}-Raum}.
+\end{defn}
+Die Idee dieses Lösers ist es nun, im über den Startvektor $x^0$ definierten Raum $x_0+\mathcal{K}_k(r^0,A)$, nach dem Minimum zu suchen und dann dabei über $k$ zu iterieren.\footnote{Da offensichtlich $\mathcal{K}_k\subset\mathcal{K}_{k+1}$ $\forall k<n$ gilt,   erweitern wir wirklich immer den Raum.}\\
+Doch wie genau findet man jetzt das Minimum über so einem Teilraum des $\rr^n$? 
+Dafür benutzen wir die Arnoldi-Methode, um eine Orthonormalbasis dieses Teilraums zu finden. Sie wird durch den folgenden Algorithmus beschrieben:
+\begin{algorithm}
+\caption{Arnoldi-Verfahren}
+\label{alg:1}
+\begin{algorithmic}
+\REQUIRE{Matrix A}
+\ENSURE{Orthonormalbasis $v^1,\dotsc,v^{k+1}$}
+\FOR{$j=1,\dotsc,k$}
+\STATE$w^j=Av^j$
+\FOR{$i=1\dotsc,j$}
+\STATE$h_{i,j}=\langle v^i,Av^j\rangle$
+\STATE $w^j=w^j-h_{i,j}v^i$
+\ENDFOR
+\STATE$h_{j+1,j}=\abs{w^j}$
+\STATE$v^{j+1}=\frac{w^j}{h_{j+1,j}}$
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+Wenn wir jetzt $V_n=(v^1\dotsb v^{n})\in\rr^{n\times n}$ schreiben, haben wir eine Orthonormalbasis gefunden.
+Dieser Algorithmus wendet die QR-Zerlegung an, um 
+\begin{equation}
+V\cdot A\cdot V^T=H
+\end{equation}
+zu erhalten, wobei H gegeben ist durch:
+\begin{equation}
+H=\begin{pmatrix}
+h_{1,1}&h_{1,2}&h_{1,3}&\dotsb&h_{1,n}\\
+h_{2,1}&h_{2,2}&h_{2,3}&\dotsb&h_{2,n}\\
+0&h_{3,2}&h_{3,3}&\dotsb&h_{3,n}\\
+\vdots&\ddots&\ddots&\ddots&\vdots\\
+0&\dotsb&0&h_{n,n-1}&h_{n,n}\\
+\end{pmatrix}
+\end{equation}
+mit den Einträgen, die der Algorithmus berechnet. Wird jetzt dieser Matrix noch der Eintrag $h_{n+1,n}$ hinzugefügt,  erhält man:
+\begin{equation}
+\tilde{H}=\begin{pmatrix}
+h_{1,1}&h_{1,2}&h_{1,3}&\dotsb&h_{1,n}\\
+h_{2,1}&h_{2,2}&h_{2,3}&\dotsb&h_{2,n}\\
+0&h_{3,2}&h_{3,3}&\dotsb&h_{3,n}\\
+\vdots&\ddots&\ddots&\ddots&\vdots\\
+0&\dotsb&0&h_{n,n-1}&h_{n,n}\\
+0&\dotsb&\dotsb&0&h_{n+1,n}
+\end{pmatrix}
+\end{equation}
+Wenn wir jetzt, um den Index des \textsc{Krylov}-Raums aufzugreifen, analog $\tilde{H}_n$ und $V_n$ notieren, erhalten wir folgende Gleichung:
+\begin{equation}
+A\cdot V_n=V_{n+1}\cdot \tilde{H}
+\end{equation}
+Da $V$ orthogonal ist, können wir also eine Formel für das Residuum finden:
+\begin{equation}
+\norm{Ax_n-b}=\norm{\tilde{H_n}y_n-\norm{r^0}e_1}
+\end{equation}
+Hierbei ist $e_1$ der erste Einheitsvektor. Wenn wir also das Residuum minimieren wollen, müssen wir das $y_n\in x_0+\mathcal{K}_k(r^0,A)$ finden, sodass die rechte Seite minimiert wird. Dies ist aber ein lineares Ausgleichsproblem, welches wir bereits lösen können.
+\subsubsection{Algorithmus und kurze Analyse}
+Wenn wir jetzt alles zusammenfassen, was wir im letzten Abschnitt hergeleitet haben, erhalten wir den GMRES-Algorithmus:
+\begin{enumerate}
+\item Wir berechnen das Residuum mit dem Startvektor.
+\item Für jeden affinen \textsc{Krylov}-Raum $x^0+\mathcal{K}_k(r^0,A)$ finden wir, bis das Residuum klein genug ist, eine Orthonormalbasis mit der \textsc{Arnoldi}-Methode.
+\item Wir lösen das entsprechende Ausgleichsproblem.
+\item Wenn das Residuum klein genug ist, berechnen wir die Näherungslösung und geben sie aus.
+\end{enumerate}
+Den Pseudocode sehen wir in Algorithmus \ref{alg:2} auf Seite \pageref{alg:2}.
+\begin{algorithm}
+\caption{GMRES}
+\label{alg:2}
+\begin{algorithmic}
+\REQUIRE{Wähle $x^0\in\rr^n$, $r^0=b-Ax^0$, $v^1=\frac{r^0}{\abs{r^0}}$, $\beta=z_1=\abs{r^0}$}
+\FOR{$k=1,2,\dotsc$}
+\STATE $w^k=Av^k$
+\FOR{$i=1\dotsc,k$}
+\STATE$h_{i,k}=\langle v^i,Av^k\rangle$
+\STATE$w^k=w^k-h_{i,k}v^i$
+\STATE $h_{k+1,k}=\abs{w^k}$
+\STATE $v^{k+1}=\frac{w^k}{h_{k+1,k}}$
+\COMMENT{Wende alte Givens-Rotationen auf Spalte $k$ von $\overline{H_k}$ an}
+\FOR{$i=1,\dotsc,k-1$}
+\STATE \[\begin{pmatrix}
+h_{i,k}\\h_{i+1,k}
+\end{pmatrix}
+=\begin{pmatrix}
+c_i&s_i\\-s_i&c_i\end{pmatrix}\begin{pmatrix}
+h_{i,k}\\h_{i+1,k}
+\end{pmatrix}\]
+\ENDFOR
+\STATE $\nu=\sqrt{h_{k,k}^2+h_{k+1,k}^2}$
+\STATE $c_k=\frac{h_{k,k}}{\nu}$, $s_k=\frac{h_{k+1,k}}{\nu}$
+\STATE$h_{k,k}=\nu$, $h_{k+1,k}=0$, $z_{k+1}=-s_kz_k$, $z_k=c_kz_k$
+\IF{$\frac{\abs{z_{k+1}}}{\beta}\le\varepsilon$}
+\STATE$y_k=\frac{z_k}{h_{k,k}}$
+\FOR{$i=k-1,\dotsc,1$}
+\STATE \[y_i=\frac{z_i-\sum_{j=i+1}^kh_{i,j}y_j}{h_{i,i}}\]
+\ENDFOR
+\STATE $x^k=x^0+\sum_{i=1}^ky_iv^i$
+\STATE STOP
+\ENDIF
+\ENDFOR
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+Wir sehen, dass hier zur Lösung des Ausgleichsproblems, die Methode der kleinsten Quadrate angewendet wurde. Genauer gesagt, wird über die QR-Zerlegung von $\tilde{H_n}$ das Minimum $y$ berechnet.
+\par Zum Schluss unseres Exkurses wollen wir noch einige Konvergenzresultate und Eigenschaften diskutieren.
+\begin{sa}
+Das GMRES-Verfahren konvergiert für alle Startwerte $x^0$ und spätestens nach $n$ Schritten für ein $n\times n$ System.
+\end{sa}
+\begin{proof}
+Da wir für $k=n$ $\mathcal{K}_n(r^0,A)=\rr^n$ erhalten,  ist die Aussage trivialerweise bewiesen.
+\end{proof}
+Eine Fehlerabschätzung von der exakten gegen die Näherungslösung ist bis jetzt nicht bekannt, aber wir können das Residuum abschätzen. Hier spielt das Spektrum der Systemmatrix eine große Rolle.
+\begin{defn}
+Sei $A$ eine diagonalisierbare $n\times n$-Matrix. Dann ist
+\begin{equation}
+\kappa(A)\colon =\big\lVert A\big\rVert_2\cdot\big\lVert A^{-1}\big\rVert_2
+\end{equation} 
+\end{defn}
+\begin{sa}
+Sei $A=gDg^{-1}$ (diagonalisierbar) mit den Eigenwerten $\lambda_i$, dann gilt:
+\begin{equation}
+\abs{r^k}\le\kappa(g)\min_{p\in\overline{\mathbb{P}_k}}\max_i\abs{p(\lambda_i)}\abs{r^0}
+\end{equation}
+Wobei $\overline{\mathbb{P}_k}$ der Raum der Polynome mit Grad $\le k$ mit $p(0)=1$ ist. 
+\end{sa}
+Diese sehr unhandliche Abschätzung wollen wir hier nicht beweisen. Sie soll nur verdeutlichen, dass die tatsächliche Iterationszahl sehr von den Eigenwerten abhängt. Durch numerische Experimente oder durch theoretische Analysen kann man eine Komplexität von $\mathcal{O}(n^2)$ für das GMRES-Verfahren feststellen. Da es keinerlei Voraussetzungen an das Gleichungssystem stellt\footnote{Es sollte eine Lösung existieren, sonst kann GMRES sie auch nicht finden.}, ist es perfekt für unsere impliziten Finite Differenzen Verfahren geeignet. Hierbei werden unter Umständen nämlich keine symmetrischen oder positiv definiten Matrizen erzeugt, für die schnellere Verfahren existieren (z.B. CG). Außerdem ist GMRES nicht nur als direkter Löser verwendbar, sondern kann auch für eine vorgegebene Toleranz $\varepsilon$ abbrechen. Da wir bei numerischen Approximationen Fehler nicht vermeiden können, bietet sich hier eine Toleranz, die größer als Maschinengenauigkeit ist, an. Meine GMRES-Implementierung ist in \ref{Gmrescode} zu finden.
+\subsection{Grundlegendes zur linearen Advektionsgleichung}
+Dieser Abschnitt beschäftigt sich mit den theoretischen Grundlagen der linearen Advektionsgleichung, die in der Konstruktion der Verfahren hinterher benötigt werden. Das Konzept der Energie wird für die Stabilität essentiell sein. Was überhaupt die lineare Advektionsgleichung ist, besagt folgende Definition:
+\begin{defn}
+Für $a,b\in\rr$, heißt
+\begin{equation}
+u_t+au_x+bu_y=0
+\label{eq:linAdv}
+\end{equation}
+die \emph{lineare Advektionsgleichung}.
+\end{defn}
+Die Gleichung \eqref{eq:linAdv} ist hier für 2 Raumdimensionen definiert. Diese lässt sich aber analog für beliebige Dimensionen aufstellen. 
+\begin{defn}
+Sei $\Omega\subset\rr^2$. Für eine (schwache) Lösung $u$  nennen wir
+\begin{equation}
+E=\int_\Omega\frac{u^2}{2}\de\Omega
+\label{eq:Energie}
+\end{equation}
+die \emph{Energie} der Lösung.
+\end{defn}
+Als Nächstes zeigen wir, dass die zeitliche Änderung der Lösung der Gleichung \eqref{eq:linAdv} konstant bleibt. Das besagt unser
+\begin{sa}
+Sei $\Omega\subset\rr^2$. Wenn $u$ eine (schwache) Lösung von \eqref{eq:linAdv} ist, gilt 
+\begin{equation}
+\label{eq:Enaen}
+\frac{\de}{\de t}\int_{\Omega}\frac{u^2}{2}\de x\de y =0
+\end{equation}
+\end{sa} 
+\begin{proof}
+\begin{align*}
+u_t+au_x+bu_y&=0\\
+\Rightarrow uu_t+auu_x+buu_y&=0\\
+\intertext{Jetzt können wir die Kettenregel rückwärts anwenden}
+\Rightarrow\left(\frac{u^2}{2}\right)_t+\left(a\frac{u^2}{2}\right)_x+\left(b\frac{u^2}{2}\right)_y&=0\\
+\Rightarrow\frac{\de}{\de t}\int_{\Omega}\frac{u^2}{2}\de x\de y+\int_{\Omega}\left(a\frac{u^2}{2}\right)_x\de x\de y+\int_{\Omega}\left(b\frac{u^2}{2}\right)_y\de x\de y&=0\\
+\intertext{Obwohl $u$ nicht zwangsläufig stetig ist, können wir trotzdem im zweiten Integral die Differentiale vertauschen, da $u^2$ integrierbar und $\ge 0$. Dies gilt nach Analysis III mit dem Satz von \textsc{Fubini}-\textsc{Tonelli}}
+\Rightarrow\frac{\de}{\de t}\int_{\Omega}\frac{u^2}{2}\de x\de y+\int_{\Omega}\left(a\frac{u^2}{2}\right)_x\de x\de y+\int_{\Omega}\left(b\frac{u^2}{2}\right)_y\de y\de x&=0\\
+\intertext{Nach dem Hauptsatz der Differential- und Integralrechung gilt also (mit $\Omega_1$ der $x$-Anteil von $\Omega$ und $\Omega_2$ der $y$-Anteil)}
+\Rightarrow\frac{\de}{\de t}\int_{\Omega}\frac{u^2}{2}\de x\de y+\int_{\Omega_2}\int_{\partial\Omega}\left(a\frac{u^2}{2}\right)\de\partial\Omega\de y+\int_{\Omega_1}\int_{\partial\Omega}\left(b\frac{u^2}{2}\right)\partial\Omega\de x&=0\\ 
+\intertext{Da wir periodische Randbedingungen haben, sind beide Randintegrale $0$. So vereinfacht sich der Ausdruck zu}
+\Rightarrow\frac{\de}{\de t}\int_{\Omega}\frac{u^2}{2}\de x\de y&=0\\
+\end{align*}
+\end{proof}
+Mit dieser Eigenschaft ist sichergestellt, dass die Energie endlich bleibt. Außerdem hilft es uns, Verfahren zu konstruieren, die stabil sind. Ein solches kann nicht stabil sein, wenn die Energie mit jedem Zeitschritt anwächst.
+\begin{sa}
+Die exakte Lösung von \fref{eq:linAdv} ist gegeben durch:
+\begin{equation}
+u(x,y,t)=u_0(x-at,y-bt)
+\end{equation}
+\end{sa}
+\subsection{Örtliche Diskretisierung}
+Nachdem wir grundlegende Eigenschaften diskutiert haben, werden wir uns den Verfahren zuwenden. Wir müssen also \fref{eq:linAdv} erstmal örtlich diskretisieren. Es werden  keine speziellen Eigenschaften des $\rr^2$ verwendet. So genügt es also, die Diskretisierung nur für 2 Raumdimensionen vorzunehmen. Der eindimensionale Fall folgt dann analog ohne den entsprechenden Term in $y-$Richtung.
+\par Es wird ein äquidistantes Gitter in $x$- und $y$-Richtung verwendet. Der Einfachheit halber, nehmen wir $\Delta x=\Delta y=h$ an. Außerdem simulieren wir auf dem Referenzgebiet $[0,1]\times[0,1]$ mit periodischen Randbedingungen. Die Diskretisierung besteht aus $N$ Knoten pro Dimension. Dies wird in \fref{fig:Diskretgit} verdeutlicht.
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\usetikzlibrary{patterns,arrows,decorations.pathreplacing}
+\draw grid(5,5);
+\node [below] at (0,0) {$x_0=y_0=0$};
+\node [left] at (0,5) {$y_N=1$};
+\node [below] at (5,0) {$x_N=1$};
+\draw [thick,decorate,decoration={brace,amplitude=6pt,mirror}](2,0) -- (3,0) node[black,midway,yshift=-0.4cm] {$\Delta x$};
+\draw[thick,decorate,decoration={brace,amplitude=6pt}]
+ (0,2)--(0,3) node[black,midway,xshift=-0.6cm]{$\Delta y$}; \end{tikzpicture}
+\caption{Diskretisierungsgitter in 2D}
+\label{fig:Diskretgit}
+\end{figure}
+Wir stellen fest, dass in unserem Fall $h=\frac{1}{N-1}$ ist. Außerdem gilt für die Knoten:
+\begin{equation}
+x_j=jh~j=0,\dotsc,N-1
+\end{equation} für $y_j$ natürlich analog.
+Nun wollen wir uns überlegen, wie wir mit diesem Gitter unsere \Fref{eq:linAdv} diskretisieren können. Ziel wird es sein, für jeden Punkt $u(x_i,y_j,t)$ eine gute Approximation $u^n_{i,j}$ zum Zeitpunkt $n$ zu finden \footnote{über den Zeitschritt sprechen wir im nächsten Abschnitt}. Wir haben allerdings lediglich die Funktionswerte an den Knoten gegeben. Die Gleichung \eqref{eq:linAdv} benötigt jedoch die räumlichen Ableitungen. Diese müssen also numerisch approximieren werden. Dazu gibt es hauptsächlich zwei Möglichkeiten, die wir im Folgenden besprechen werden.
+\subsubsection{Das zentrale Finite Differenzen Verfahren}
+Bei dieser Methode approximieren wir die Ableitung durch eine zentrale Differenz:
+\begin{align}
+u_x(x_i,y_j)&\approx\frac{u_{i+1,j}-u_{i-1,j}}{2h}\\
+u_y(x_i,y_j)&\approx\frac{u_{i,j+1}-u_{i,j-1}}{2h}
+\end{align}
+Damit wir es bei der Implementierung einfacher haben, wollen wir eine Matrixdarstellung für diese Finiten Differenzen finden. Da wir periodische Randbedingungen annehmen, ergeben sich folgende Diskretisierungsmatrizen:
+\begin{align}
+A=\frac{1}{2h}\begin{pmatrix}
+0&1&0&\dotsb&\dotsb&0&-1\\
+-1&0&1&\ddots&&&\vdots\\
+0&-1&0&1&\ddots&&\vdots\\
+\vdots&\ddots&\ddots&\ddots&\ddots&\ddots&\vdots\\
+\vdots&&\ddots&-1&0&1&0\\
+0&\dotsb&\dotsb&\ddots&-1&0&1\\
+1&0&0&\dotsb&0&-1&0
+\end{pmatrix}=B
+\end{align}
+Wenn wir jetzt $u$ als Matrix mit den Einträgen $u_{i,j}$ ansehen, erhalten wir:
+\begin{align}
+u_x&\approx u\cdot A^T\\
+u_y&\approx B\cdot u
+\end{align}
+Somit haben wir eine kompakte Schreibweise gefunden. Hier tritt ein kleiner Unterschied zum Eindimensionalen auf. Wenn wir unser Problem eindimensional betrachten, erhalten wir:
+\begin{equation}
+u_x\approx A\cdot u
+\end{equation}
+wobei hier jetzt $u$ der Lösungsvektor ist.\footnote{Genaueres zu den Datenstrukturen werden wir im Kapitel \ref{ch:Impl} besprechen.}
+\subsubsection{Upwind Finite Differenzen Verfahren}
+Jetzt wollen wir uns eine weitere Möglichkeit ansehen, wie man die Ableitung approximieren kann. Warum wir Alternativen benötigen, werden wir bei den numerischen Experimenten feststellen. Hierfür setzen wir $a, b >0$
+\begin{align}
+u_x(x_i,y_j)&\approx\frac{u_{i,j}-u_{i-1,j}}{h}\label{eq:upwind1}\\
+u_y(x_i,y_j)&\approx\frac{u_{i,j}-u_{i,j-1}}{h}
+\end{align}
+Die Bedingung an $a$ und $b$ ist hier notwendig, da dieses Verfahren "`mit dem Wind"' verläuft,  also die Richtung des Transports bevorzugt. Für $a,b <0$ ergibt sich nämlich:
+\begin{align}
+u_x(x_i,y_j)&\approx\frac{u_{i+1,j}-u_{i,j}}{h}\\
+u_y(x_i,y_j)&\approx\frac{u_{i,j+1}-u_{i,j}}{h}\label{eq:upwind2}
+\end{align}
+Es können auch "`Mischformen"' existieren, also $a>0,~b<0$ dann gilt die Approximation für $u_x$ von $a>0$ und für $u_y$ von $b<0$. Wir müssen also jetzt beim Aufstellen der Diskretisierungsmatrizen ebenfalls zwei Fälle unterscheiden. Den Anfang macht wieder $a,b>0$:
+\begin{align}
+A=\frac{1}{h}\begin{pmatrix}
+1&0&\dotsb&0&0&-1\\
+-1&1&\ddots&&&\vdots\\
+0&-1&1&\ddots&&\vdots\\
+\vdots&\ddots&\ddots&\ddots&\ddots&\vdots\\
+\vdots&&\ddots&-1&1&0\\
+0&\dotsb&\dotsb&0&-1&1
+\end{pmatrix}=B
+\end{align}
+Für den Fall $a,b<0$:
+\begin{align}
+A=\frac{1}{h}\begin{pmatrix}
+-1&1&0&\dotsb&\dotsb&0\\
+0&-1&1&\ddots&&\vdots\\
+\vdots&\ddots&\ddots&\ddots&\ddots&\vdots\\
+\vdots&&\ddots&-1&1&0\\
+\vdots&&&\ddots&-1&1\\
+1&0&0&\dotsb&0&-1
+\end{pmatrix}=B
+\end{align}
+Auch hier ergeben sich die räumlichen Ableitungen analog zu den zentralen Finiten Differenzen.
+\subsection{Zeitliche Diskretisierung}
+Doch wie wird $u_t$ approximiert? Hierzu sehen wir uns mal an, was wir bis jetzt erreicht haben\footnote{In diesem Abschnitt spielt es keine Rolle, ob wir $A$ und $B$ vom Zentralen oder Upwind Verfahren wählen.}
+\begin{equation}
+u_t=-a\cdot u\cdot A^T-b\cdot B\cdot u
+\end{equation}
+Das Problem wurde jetzt immerhin soweit reduziert, dass wir nur noch ein System Gewöhnlicher Differentialgleichungen lösen müssen. Das können wir jetzt mit sämtlichen erlernten Zeitintegrationsverfahren aus der Vorlesung "`Numerik Gewöhnlicher Differentialgleichungen"' lösen. Wir werden hier das explizite und das implizite \textsc{Euler}-Verfahren diskutieren. Als feste Werte geben wir uns $t=0$ als Anfangs- und $t=T$ als Endzeit vor.
+\subsubsection{Das explizite Euler-Verfahren zur Zeitintegration}
+Das explizite \textsc{Euler}-Verfahren hat allgemein die Vorschrift:
+\begin{equation}
+u^{n+1}=u^n+\Delta t\cdot f(u^n,t)
+\end{equation}
+Wobei $f$ die rechte Seite der Differentialgleichung beschreibt. In unserem Fall wird daraus also:
+\begin{equation}
+u^{n+1}=u^n-a\Delta t\cdot u^n\cdot A^T-b\Delta t\cdot B\cdot u^n\label{eq:expl}
+\end{equation}
+beziehungsweise im eindimensionalen Fall:
+\begin{equation}
+u^{n+1}=u^n-a\Delta t\cdot A\cdot u^n
+\end{equation}
+hier steht weiterhin $A^T$ für die Transponierte von $A$ steht. Doch was genau ist $\Delta t$? Das bezeichnet unseren Zeitschritt. Wie wir diesen genau wählen müssen, damit diese Kombination stabil bleibt, sehen wir im nächsten Abschnitt, wenn wir uns mit Stabilität und Konvergenz befassen.
+\subsubsection{Das implizite Euler-Verfahren}
+Zur Auffrischung gebe ich hier auch nochmal die allgemeine Vorschrift des impliziten \textsc{Euler}-Verfahrens an:
+\begin{equation}
+u^{n+1}=u^n+\Delta t\cdot f(u^{n+1},t)
+\end{equation}
+Auch hier beschreibt $f$ die rechte Hand Seite. Wir erhalten also:
+\begin{align}
+u^{n+1}&=u^n-a\Delta t\cdot u^{n+1}\cdot A^T-b\Delta t\cdot B\cdot u^{n+1}\\
+\Rightarrow u^n&=u^{n+1}+a\Delta t\cdot u^{n+1}\cdot A^T+b\Delta t\cdot B\cdot u^{n+1}\label{eq:impl}
+\end{align}
+Oder im eindimensionalen Fall:
+\begin{equation}
+u^n=(I+a\Delta t\cdot A)\cdot u^{n+1}
+\end{equation}
+Hierbei ist $I$ die entsprechende Einheitsmatrix. Man sieht, dass bei Gleichung \eqref{eq:impl} die rechte Seite linear von $u^{n+1}$ abhängt. Wir können also pro Zeitschritt mit einem linearen Gleichungssystem die nächste Iteration berechnen.
+\subsection{Theoretische Konvergenzanalyse}
+Wir haben in den bisherigen Abschnitten die beiden Verfahren konstruiert, die wir später numerisch genauer untersuchen wollen. Doch bevor wir zum Praktischen übergehen, müssen wir uns noch mit der theoretischen Konvergenz- und Stabilitätsanalyse beschäftigen. Wir vergleichen also die beiden diskutierten Verfahren je nach Zeitintegrator.
+\subsubsection{Zentrales Finite-Differenzen Verfahren}
+Wir wissen nach Numerik II, dass das explizite \textsc{Euler}-Verfahren Stabilitäts- und Konvergenzbereich
+\begin{equation}
+\abs{1+\Delta t\lambda}\le 1
+\end{equation}
+hat. Hierbei sind die $\lambda$, die Eigenwerte des Operators $R(u)$ für den $u^{n+1}=u^n+\Delta tR(u^n)$ gilt.
+Wie genau wir $R(u)$ bestimmen, wird uns im Kapitel \ref{ch:Impl} beschäftigen, da dies hierfür überaus wichtig ist. Die Eigenwerte für beispielsweise $N=6$ sind in \fref{fig:Eig} dargestellt.
+\begin{figure}[t]
+\centering
+\includegraphics[scale=0.75]{EigenwerteZentral.eps}
+\caption{Die Eigenwerte des Zentralen Finite-Differenzen Verfahrens für $N=6$ und $a=b=1$}
+\label{fig:Eig}
+\end{figure}
+In dieser Abbildung ist auch der Stabilitätsbereich des expliziten Euler-Verfahrens zu sehen. Da alle Eigenwerte Realteil $0$ haben und Imaginärteil ungleich $0$, ist es unmöglich, diese mit $\Delta t$ so zu skalieren, dass sie innerhalb des Stabilitätsbereichs liegen. Das zentrale Finite Differenzen Verfahren ist also in Verbindung mit dem explizitem \textsc{Euler}-Verfahren instabil unabhängig von der Wahl von $h$ oder $\Delta t$! Eine physikalische Erklärung hierfür wäre, dass dieses Verfahren nicht die Richtung des Informationstransports berücksichtigt. Es bildet einfach die zentrale Ableitung, obwohl die Lösung offensichtlich eine Richtung bevorzugt.
+\par Eine mathematische Erklärung kann man auch geben. Erinnern wir uns nochmal an \Fref{eq:Energie}. Dann können wir diese auch in diskreter Form schreiben:
+\begin{equation}
+E_n=\frac{h^2}{2}\sum_{i=0}^{N-1}\sum_{j=0}^{N-1}(u_{i,j}^n)^2
+\end{equation}
+Doch was ist jetzt $E_{n+1}-E_n$? Dies lässt sich mithilfe des folgenden Satzes beantworten.
+\newpage
+\begin{sa}
+Wenn wir das Zentrale Finite-Differenzen Verfahren mit dem expliziten \textsc{Euler}-Verfahren anwenden, erhalten wir
+\begin{equation}
+E_{n+1}=E_n+\frac{h^2}{2}\sum_{i=0}^{N-1}\sum_{j=0}^{N-1}(u^{n+1}_{i,j}-u^n_{i,j})^2
+\label{eq:En2Dzent}
+\end{equation}
+\end{sa}
+\begin{proof}
+Wir werden ähnliche Schritte  durchführen, wie im Beweis von \fref{eq:Enaen}.
+\begin{align*}
+\intertext{In Indexform gilt:}
+u_{i,j}^{n+1}-u_{i,j}^n&+\frac{a\Delta t}{2h}(u_{i+1,j}^n-u_{i-1,j}^n)+\frac{b\Delta t}{2h	}(u_{i,j+1}^n-u_{i,j-1}^n)=0\\
+\Rightarrow u_{i,j}^n(u_{i,j}^{n+1}-u_{i,j}^n)&+\frac{a\Delta t}{2h}(u_{i+1,j}^nu_{i,j}^n-u_{i-1,j}^nu_{i,j}^n)+\frac{b\Delta t}{2h	}(u_{i,j+1}^nu_{i,j}^n-u_{i,j-1}^nu_{i,j}^n)=0\\
+\intertext{Wir definieren uns }
+H_{i+\frac{1}{2},j}&=a\frac{u_{i,j}^nu_{i+1,j}^n}{2} \text{ und }\tilde{H}_{i,j+\frac{1}{2}}=b\frac{u_{i,j}^nu_{i,j+1}^n}{2}\\
+\intertext{Damit ergibt sich }
+\Rightarrow u_{i,j}^n(u_{i,j}^{n+1}-u_{i,j}^n)&+\frac{\Delta t}{h}(H_{i+\frac{1}{2},j}-H_{i-\frac{1}{2},j})+\frac{\Delta t}{h}(\tilde{H}_{i,j+\frac{1}{2}}-\tilde{H}_{i,j-\frac{1}{2}})=0\\
+\intertext{Es gilt offensichtlich }
+d(c-d)&=\frac{c^2}{2}-\frac{d^2}{2}-\frac{1}{2}(c-d)^2\\
+\Rightarrow \frac{(u_{i,j}^{n+1})^2}{2}&=\frac{(u_{i,j}^n)^2}{2}+\frac{1}{2}(u_{i,j}^{n+1}-u_{i,j}^n)^2-\frac{\Delta t}{h}(H_{i+\frac{1}{2},j}-H_{i-\frac{1}{2},j})\\&-\frac{\Delta t}{h}(\tilde{H}_{i,j+\frac{1}{2}}-\tilde{H}_{i,j-\frac{1}{2}})\\
+\intertext{Diskrete Integration über $i$ und $j$ ergibt dann }
+E_{n+1}&=E_n+\frac{1}{2}h^2\sum_{i=0}^{N-1}\sum_{j=0}^{N-1}(u_{i,j}^{n+1}-u_{i,j}^n)^2\\
+&-\Delta t^2\sum_{j=0}^{N-1}\sum_{i=0}^{N-1}(H_{i+\frac{1}{2},j}-H_{i-\frac{1}{2},j})-\Delta t^2\sum_{i=0}^{N-1}\sum_{j=0}^{N-1}(\tilde{H}_{i,j+\frac{1}{2}}-\tilde{H}_{i,j-\frac{1}{2}})\\
+\end{align*}
+Man erkennt, dass die beiden inneren Summen über die $H$ bzw. $\tilde{H}$ Teleskopsummen sind. Da hier auch periodische Randbedingungen vorliegen, werden also die letzten beiden Terme jeweils zu $0$. Daraus folgt die Behauptung.
+\end{proof} Da Quadrate reeller Zahlen immer positiv sind, können wir folgern, dass die Energie in jedem Zeitschritt anwächst, unabhängig von der Diskretisierung. Da die Lösung dieses Verhalten nicht hat, zeigt dies insbesondere auch Instabilität.
+Jetzt betrachten wir das Zentrale Finite-Differenzen Verfahren mit dem impliziten \textsc{Euler}-Verfahren als Zeitintegrator. Dieses hat Stabilitätsbereich:
+\begin{equation}
+\Delta t\cdot\Re(\lambda)\le 0
+\end{equation}
+Hierbei bezeichnet $\Re(\lambda)$ den Realteil von $\lambda$. Es ist also A-stabil. Da die Eigenwerte unseres Operators diese Bedingung offensichtlich für alle $\Delta t$ und $h$ erfüllen, ist die Kombination überall stabil. Da sie auch offensichtlich konsistent ist, haben wir Konvergenz. 
+\subsubsection{Upwind Finite-Differenzen-Verfahren}
+Jetzt wollen wir uns näher mit dem Upwind Finite Differenzen Verfahren und seinen Stabilitätseigenschaften beschäftigen. Auch hier betrachten wir die Eigenwerte unseres Operators $R(u)$. Für diese Eigenschaften ist das Vorzeichen der Geschwindigkeit nicht relevant, deshalb beschränken wir uns in dieser Betrachtung auf $a,b>0$. Die zugehörige Darstellung mit $N=6$ ist in \Fref{fig:EigUp} zu sehen.
+\begin{figure}[t]
+\centering
+\includegraphics[scale=0.75]{EigenwerteUpwind.eps}
+\caption{Eigenwerte des Upwind-Verfahrens für $N=6$ und $a=b=1$}
+\label{fig:EigUp}
+\end{figure}
+Man erkennt, dass $\Re(\lambda)\le0~\forall \lambda$ gilt und für Realteil $=0$ nur der Eigenwert $0$ existiert. Daher ist möglich durch geeignete Skalierung zu garantieren, dass die Eigenwerte im Stabilitätsbereich liegen. Diese Skalierung wollen wir jetzt explizit bestimmen. Dafür muss das Upwind Finite Differenzen Verfahren in eine alternative Form gebracht werden. In dieser wird dann als Nebenprodukt auch noch der Zusammenhang zwischen dem Upwind und dem Zentralen Finite Differenzen Verfahren klar. Wenn wir uns \fref{eq:upwind1} bis \Fref{eq:upwind2} anschauen und zusätzlich
+\begin{align}
+a^+&=\max\{a,0\} &&b^+=\max\{b,0\}\\
+a^-&=\min\{a,0\} &&b^-=\min\{b,0\}
+\end{align} 
+definieren, dann ergibt sich:
+\begin{equation}
+\frac{u_{i,j}^{n+1}-u_{i,j}^n}{\Delta t}+a^+\frac{u_{i,j}^n-u_{i-1,j}^n}{h}+a^-\frac{u_{i+1,j}^n-u_{i,j}^n}{h}+b^+\frac{u_{i,j}^n-u_{i,j-1}^n}{h}+b^-\frac{u_{i,j+1}^n-u_{i,j}^n}{h}=0
+\end{equation}
+Dies können wir mit den Rechenregeln
+\begin{align*}
+a^++a^-&=a && b^++b^-=b\\
+a^+-a^-&=\abs{a}&& b^+-b^-=\abs{b}
+\end{align*}
+umschreiben zu:
+\begin{align*}
+&\frac{u_{i,j}^{n+1}-u_{i,j}^n}{\Delta t}+a\frac{u_{i+1,j}-u_{i-1,j}}{2h}+b\frac{u_{i,j+1}-u_{i,j-1}}{2h}\\&=\frac{\abs{a}h}{2}\frac{(u_{i+1,j}^n-2u_{i,j}^n+u_{i-1,j}^n)}{h^2}+\frac{\abs{b}h}{2}\frac{(u_{i,j+1}^n-2u_{i,j}^n+u_{i,j-1}^n)}{h^2}
+\end{align*}
+Man sieht also, dass das Upwind Finite Differenzen Verfahren eigentlich das Zentrale Finite Differenzen Verfahren mit Viskositätsterm ist. Wir benutzen jetzt das Konzept der Energie um eine Skalierungsabschätzung für die Eigenwerte zu erhalten. 
+\begin{sa}
+Das Upwind-Verfahren\footnote{Für den eindimensionalen Fall reduziert sich dieser Satz zu $\frac{\abs{a}\Delta t}{h}\le1$} ist stabil, wenn \begin{equation}
+\frac{(\abs{a}+\abs{b})\Delta t}{h}\le 1
+\label{eq:CFL}
+\end{equation}
+\end{sa}
+\begin{proof}
+Wir nehmen  $a,b>0$ an, da der andere Fall analog funktioniert. Das Upwind Finite Differenzen Verfahren ist gegeben durch:
+\begin{align*}
+&\frac{u_{i,j}^{n+1}-u_{i,j}^n}{\Delta t}+a\frac{u_{i+1,j}-u_{i-1,j}}{2h}+b\frac{u_{i,j+1}-u_{i,j-1}}{2h}\\&=\frac{\abs{a}}{2}\frac{(u_{i+1,j}^n-2u_{i,j}^n+u_{i-1,j}^n)}{h}+\frac{\abs{b}}{2}\frac{(u_{i,j+1}^n-2u_{i,j}^n+u_{i,j-1}^n)}{h}\\
+\intertext{Umstellen und Multiplikation mit $u_{i,j}^n$ ergibt:}
+u_{i,j}^n(u_{i,j}^{n+1}-u_{i,j}^n)&=-\frac{a\Delta t}{2h}(u_{i,j}^nu_{i+1,j}^n-u_{i,j}^nu_{i-1,j}^n)\\&+\frac{\abs{a}\Delta t}{2h}(u_{i,j}^n(u_{i+1,j}^n-u_{i,j}^n))+\frac{\abs{a}\Delta t}{2h}(u_{i,j}^n(u_{i-1,j}^n-u_{i,j}^n))\\
+&-\frac{b\Delta t}{2h}(u_{i,j}^nu_{i,j+1}^n-u_{i,j}^nu_{i,j-1}^n)\\&+\frac{\abs{b}\Delta t}{2h}(u_{i,j}^n(u_{i,j+1}^n-u_{i,j}^n))+\frac{\abs{b}\Delta t}{2h}(u_{i,j}^n(u_{i,j-1}^n-u_{i,j}^n))
+\intertext{Damit das Ganze etwas übersichtlich bleibt, setzen wir direkt }
+K_{i+\frac{1}{2},j}&=\frac{a}{2}(u_{i,j}^nu_{i+1,j}^n)-\frac{\abs{a}}{4}((u_{i+1,j}^n)^2-(u_{i,j}^n)^2) \\
+L_{i,j+\frac{1}{2}}&=\frac{b}{2}(u_{i,j}^nu_{i,j+1}^n)-\frac{\abs{b}}{4}((u_{i,j+1}^n)^2-(u_{i,j}^n)^2) \\
+\intertext{Dann ergibt sich mit dem Trick aus dem Beweis von Satz 9}
+\frac{(u_{i,j}^n)^2}{2}&=\frac{(u_{i,j}^n)^2}{2}+\frac{(u_{i,j}^{n+1}-u_{i,j}^n)^2}{2}-\frac{\Delta t}{h}(K_{i+\frac{1}{2},j}-K_{i-\frac{1}{2},j})\\&-\frac{\abs{a}\Delta t}{4h}(u_{i+1,j}^n-u_{i,j}^n)^2-\frac{\abs{a}\Delta t}{4h}(u_{i,j}^n-u_{i-1,j}^n)^2\\&-\frac{\Delta t}{h}(L_{i,j+\frac{1}{2}}-L_{i,j-\frac{1}{2}})-\frac{\abs{b}\Delta t}{4h}(u_{i,j+1}^n-u_{i,j}^n)^2-\frac{\abs{b}\Delta t}{4h}(u_{i,j}^n-u_{i,j-1}^n)^2\\
+\intertext{Jetzt integrieren wir wieder diskret und eleminieren dadurch die $K$ und $L$ wie im letzten Beweis }
+E_{n+1}&=E_n+\frac{h^2}{2}\sum_{i=0}^{N-1}\sum_{j=0}^{N-1}(u_{i,j}^{n+1}-u_{i,j}^n)^2-\frac{h\abs{a}\Delta t}{2} \sum_{i=0}^{N-1}\sum_{j=0}^{N-1}(u_{i,j}^n-u_{i-1,j}^n)^2\\
+&-\frac{h\abs{b}\Delta t}{2} \sum_{i=0}^{N-1}\sum_{j=0}^{N-1}(u_{i,j}^n-u_{i,j-1}^n)^2
+\intertext{Wenn wir jetzt unsere Formel für das Upwind Finite-Differenzen Verfahren einsetzen, ergibt sich}
+E_{n+1}&=E_n+\frac{h^2}{2}\sum_{i=0}^{N-1}\sum_{j=0}^{N-1}\left(-\frac{a\Delta t}{h}(u_{i,j}^n-u_{i-1,j}^n)-\frac{b\Delta t}{h}(u_{i,j}^n-u_{i,j-1}^n)\right)^2\\&-\frac{h\abs{a}\Delta t}{2} \sum_{i=0}^{N-1}\sum_{j=0}^{N-1}(u_{i,j}^n-u_{i-1,j}^n)^2-\frac{h\abs{b}\Delta t}{2} \sum_{i=0}^{N-1}\sum_{j=0}^{N-1}(u_{i,j}^n-u_{i,j-1}^n)^2\\
+\intertext{Nach Umstellen der Terme folgt}
+E_{n+1}&=E_n+\sum_{i=0}^{N-1}\sum_{j=0}^{N-1}ab\Delta t^2(u_{i,j}^n-u_{i-1,j}^n)(u_{i,j}^n-u_{i,j-1}^n)\\&+\left(\frac{a^2\Delta t^2}{2}-\frac{h\abs{a}\Delta t}{2}\right)\sum_{i=0}^{N-1}\sum_{j=0}^{N-1}(u_{i,j}^n-u_{i-1,j}^n)^2\\&+\left(\frac{b^2\Delta t^2}{2}-\frac{h\abs{b}\Delta t}{2}\right)\sum_{i=0}^{N-1}\sum_{j=0}^{N-1}(u_{i,j}^n-u_{i,j-1}^n)^2
+\intertext{Wir verwenden jetzt, dass nach binomischer Formel $x^2-2xy+y^2=(x-y)^2$ gilt. Hierbei sei $(u_{i,j}^n-u_{i-1,j}^n)=x$ und $(u_{i,j}^n-u_{i,j-1}^n)=y$}
+E_{n+1}&=E_n-\frac{ab\Delta t^2}{2}\sum_{i=0}^{N-1}\sum_{j=0}^{N-1}\left((u_{i,j}^n-u_{i-1,j}^n)-(u_{i,j}^n-u_{i,j-1}^n)\right)^2\\&+\left(\frac{a^2\Delta t^2}{2}-\frac{h\abs{a}\Delta t}{2}+\frac{ab\Delta t^2}{2}\right)\sum_{i=0}^{N-1}\sum_{j=0}^{N-1}(u_{i,j}^n-u_{i-1,j}^n)^2\\&+\left(\frac{b^2\Delta t^2}{2}-\frac{h\abs{b}\Delta t}{2}+\frac{ab\Delta t^2}{2}\right)\sum_{i=0}^{N-1}\sum_{j=0}^{N-1}(u_{i,j}^n-u_{i,j-1}^n)^2\\
+\end{align*}
+Weil wir $a,b>0$ gewählt haben, ist hier der erste Term negativ. Für eine konservative Abschätzung müssen wir jetzt sicherstellen, dass die beiden anderen Vorfaktoren $\le0$ sind.
+\begin{align*}
+&\frac{a^2\Delta t^2}{2}-\frac{h\abs{a}\Delta t}{2}+\frac{ab\Delta t^2}{2}\le 0\\
+\intertext{Daraus ergibt sich dann:}
+\Rightarrow&\frac{a^2\Delta t^2}{2}+\frac{ab\Delta t^2}{2}\le\frac{h\abs{a}\Delta t}{2}&\\
+\Rightarrow&\abs{a}\Delta t+\abs{b}\Delta t\le h\\
+\Rightarrow&\frac{\Delta t(\abs{a}+\abs{b})}{h}\le 1
+\end{align*}
+Machen wir dies auch direkt für den zweiten Vorfaktor.
+\begin{align*}
+&\frac{b^2\Delta t^2}{2}-\frac{h\abs{b}\Delta t}{2}+\frac{ab\Delta t^2}{2}\le 0\\
+\Rightarrow&\abs{b}\Delta t+\abs{a}\Delta t\le h\\
+\Rightarrow&\frac{\Delta t(\abs{a}+\abs{b})}{h}\le 1
+\end{align*}
+Wir erhalten also für beide Faktoren dieselbe Abschätzung! Daher ist es nicht zu einschränkend anzunehmen, dass beide Vorfaktoren $\le 0$ sind. 
+\end{proof}
+Mit dieser Abschätzung können wir jetzt den Zeitschritt in Abhängigkeit von $\Delta t$ angeben. Die Bedingung aus \fref{eq:CFL} heißt \emph{CFL-Bedingung}\footnote{Benannt nach \textsc{Courant, Friedrichs, Lewy}}. Dementsprechend wird der Quotient \emph{CFL} genannt. Dann ergibt sich eine direkte Formel für den Zeitschritt:
+\begin{equation}
+\Delta t\le\frac{h\cdot CFL}{\abs{a}+\abs{b}}
+\label{eq:CFLT}
+\end{equation}
+Da wir natürlich einen möglichst großen Zeitschritt für unsere Eingabe wählen wollen, wird aus dieser Ungleichung im Normalfall eine Gleichung.
+\par Wenn wir jetzt die Kombination aus Upwind Finite Differenzen Verfahren und implizitem \textsc{Euler}-Verfahren betrachten, sehen wir, dass auch in diesem Fall alle Eigenwerte negativen Realteil besitzen, die nicht schon gleich $0$ sind. Hier ist also die Kombination für alle Diskretisierungen stabil.
+\section{Implementierung}
+\label{ch:Impl}
+Nachdem wir uns jetzt ausführlich mit der Theorie beschäftigt haben, wollen wir auf ein paar Aspekte der Implementierung der Verfahren genauer eingehen. Zwar kann man die Vorschriften für die Verfahren theoretisch gut herleiten, aber diese dann in ein lauffähiges Programm zu übersetzen, bedarf noch ein paar Überlegungen. 
+\subsection{Die Verfahren im Pseudocode}
+Um für Überblick zu sorgen, werden die Verfahren erstmal im Pseudocode angegeben. Ab diesem Abschnitt werden wir für die Definition der Diskretisierungsmatrizen zusätzlich noch den Faktor $-a$ beziehungsweise $-b$ betrachten. So lässt sich die Matrix bereits vorab vollständig aufschreiben.
+\begin{algorithm}
+\caption{Eindimensionales Verfahren}
+\label{alg:1dV}
+\begin{algorithmic}
+\REQUIRE{Anfangsbedingung $u0$, CFL,Geschwindigkeit $a$, Endzeit $T$, Knotenanzahl $N$}
+\ENSURE{Lösung $u(x,T)$}
+\STATE Bestimme je nach gewünschtem Verfahren entsprechende Diskretisierungsmatrix $A$
+\STATE Zeitschritt $\Delta t$ über CFL-Bedingung bestimmen
+\STATE Anfangsbedingung $u=u0$ setzen
+\IF{Expliziter \textsc{Euler}}
+\WHILE{$t<T$}
+\STATE$u=u+\Delta tA\cdot u$
+\STATE $t=t+dt$
+\ENDWHILE
+\ELSIF{Impliziter \textsc{Euler}}
+\WHILE{$t<T$}
+\STATE Löse $u_{alt}=(I-\Delta tA)\cdot u_{neu}$ mit GMRES
+\STATE Setze $u_{alt}=u_{neu}$
+\STATE $t=t+dt$
+\ENDWHILE
+\ENDIF
+\end{algorithmic}
+\end{algorithm}
+Für den Eindimensionalen Fall (Algorithmus \ref{alg:1dV}) lässt sich dies also relativ gut und einfach implementieren. Man muss lediglich aufpassen, falls $T$ kein ganzzahliges Vielfaches von $\Delta t$ ist. Dann verkürzt man den letzten Zeitschritt entsprechend. \par Wenn wir uns jetzt allerdings den zweidimensionalen Fall (Algorithmus \ref{alg:2dV}) ansehen, werden wir feststellen, dass hier deutlich mehr Schwierigkeiten auftreten.
+\begin{algorithm}
+\caption{Zweidimensionales Verfahren}
+\label{alg:2dV}
+\begin{algorithmic}
+\REQUIRE{Anfangsbedingung $u0$, CFL,Geschwindigkeit in $x$-Richtung $a$, Geschwindigkeit in $y$-Richtung $b$, Endzeit $T$, Knotenanzahl pro Dimension $N$}
+\ENSURE{Lösung $u(x,T)$}
+\STATE Bestimme je nach gewünschtem Verfahren entsprechende Diskretisierungsmatrizen $A$ und $B$
+\STATE Zeitschritt $\Delta t$ über CFL-Bedingung bestimmen 
+\STATE Anfangsbedingung $u=u0$ setzen
+\IF{Expliziter \textsc{Euler}}
+\WHILE{$t<T$}
+\STATE$u=u+\Delta t\cdot u\cdot A^T+\Delta t\cdot B\cdot u$
+\STATE $t=t+dt$
+\ENDWHILE
+\ELSIF{Impliziter \textsc{Euler}}
+\WHILE{$t<T$}
+\STATE Löse $u_{alt}=u_{neu}-\Delta t\cdot u_{neu}\cdot A^T-\Delta t\cdot B\cdot u_{neu}$ mit GMRES
+\STATE Setze $u_{alt}=u_{neu}$
+\STATE $t=t+dt$
+\ENDWHILE
+\ENDIF
+\end{algorithmic}
+\end{algorithm}
+Doch wo genau stoßen wir hier auf Probleme? Als Erstes muss man feststellen, dass man als Lösung $u$ jetzt eine Matrix erhält, die für jeden Knoten den entsprechenden approximierten Wert enthält. Also lässt sich in dem Fall, wo wir das explizite \textsc{Euler}-Verfahren verwenden, alles weiterhin simpel implementieren. Doch wie genau lösen wir mit dem GMRES-Algorithmus (Algorithmus \ref{alg:2}) das nicht explizit gegebene Gleichungssystem? 
+\subsection{Konstruktion des Operators}
+Zur Beantwortung dieser Frage betrachten wir die rechte Seite des Gleichungssystems. Wir stellen fest, dass diese \emph{linear} in $u$ ist. Es muss also möglich sein, einen linearen Operator zu definieren, der dasselbe Ergebnis liefert. Wir suchen also $R(u)$, sodass $R(u_{neu})=D\cdot u_{neu}$ der rechten Seite des Gleichungssystems entspricht. Hierbei wollen wir jetzt $u\in\rr^{N^2}$ -also als Vektor der Länge $N^2$- interpretieren. Die gesuchte Matrix $D$ wird also in $\rr^{n^2\times n^2}$ liegen. Die Transformation von der Matrix $u$ in einen Vektor führen wir durch die in MATLAB übliche lineare Indizierung durch. Wir schreiben also:
+\begin{equation}
+\label{eq:Isom}
+\begin{pmatrix}
+u_{1,1}&u_{1,2}&\dots&u_{1,n}\\
+u_{2,1}&\dots&\dots&u_{2,n}\\
+\vdots&&&\vdots\\
+u_{n,1}&\dots&\dots&u_{n,n}
+\end{pmatrix}\rightarrow
+\begin{pmatrix}
+u_{1,1}\\
+u_{2,1}\\
+\vdots\\
+u_{n,1}\\
+u_{1,2}\\
+\vdots\\
+u_{n,2}\\
+\vdots\\
+u_{1,n}\\
+\vdots\\
+u_{n,n}
+\end{pmatrix}
+\end{equation}
+Die Indizes werden also spaltenweise durchlaufen. Die nachfolgenden Betrachtungen lassen sich aber mit beliebigen Isomorphismen von $\rr^{n\times n}\to\rr^{n^2}$ durchführen. Es wurde lediglich dieser gewählt, da er zu der in MATLAB angelegten Speicherroutine ideal passt. 
+\par Für die jetzt folgende Diskussion der Konstruktion des Operators $R$ werden wir zwar zwischen Upwind und Zentralem Finite Differenzen Verfahren unterscheiden, aber keine zusätzliche Unterscheidung der Geschwindigkeitsrichtungen durchführen, da diese vollkommen analog funktionieren.\par Die einzelnen Summanden des Gleichungssystem betrachten wir separat. Mit dem Distributivgesetz lassen sich diese dann einfach zusammensetzen. Genauer suchen wir also Matrizen $\tilde{I},\tilde{A},\tilde{B}$, sodass
+\begin{equation}
+D=\tilde{I}-\Delta t\cdot \tilde{A}-\Delta t\cdot \tilde{B}.
+\end{equation}
+Dann ergibt sich, dass wir äquivalent zum Gleichungssystem aus Algorithmus \ref{alg:2dV} auch $u_n=D\cdot u_{n+1}$ lösen können, wenn wir $u$ als Vektor interpretieren. Da der Transformation von $u$ ein Isomorphismus zu Grunde lag, lässt sich $u$ auch problemlos wieder in eine Matrix zurücküberführen.
+\subsubsection{Fall 1: Upwind Finite Differenzen}
+Betrachten wir also den ersten Summanden $u$. Die Identitätsabbildung von $\rr^{n^2}\to\rr^{n^2}$ ist durch die Einheitsmatrix der Größe $n^2\times n^2$ gegeben. Also $\tilde{I}=I\in\rr^{n^2\times n^2}$. Hier ist die Transformation also sehr simpel.\par Der zweite Summand $u\cdot A^T$ ist etwas schwieriger umzuschreiben. Daher einmal beispielhaft die Multiplikation im $\rr^{4\times 4}$:
+\begin{equation}
+\label{eq:zweitSum}
+u\cdot A^T=-\frac{a}{h}\begin{pmatrix}
+u_{1,1}-u_{1,4}&-u_{1,1}+u_{1,2}&-u_{1,2}+u_{1,3}&-u_{1,3}+u_{1,4}\\u_{2,1}-u_{2,4}&-u_{2,1}+u_{2,2}&-u_{2,2}+u_{2,3}&-u_{2,3}+u_{2,4}\\u_{3,1}-u_{3,4}&-u_{3,1}+u_{3,2}&-u_{3,2}+u_{3,3}&-u_{3,3}+u_{3,4}\\u_{4,1}-u_{4,4}&-u_{4,1}+u_{4,2}&-u_{4,2}+u_{4,3}&-u_{4,3}+u_{4,4}\\
+\end{pmatrix}
+\end{equation}
+Wenn wir jetzt $u$ wie in \fref{eq:Isom} wählen, können wir sehen, dass mit \setcounter{MaxMatrixCols}{20}
+\begin{equation}
+\tilde{A}=-\frac{a}{h}\begin{pmatrix}
+1&0&0&0&0&0&0&0&0&0&0&0&-1&0&0&0\\
+0&1&0&0&0&0&0&0&0&0&0&0&0&-1&0&0\\
+0&0&1&0&0&0&0&0&0&0&0&0&0&0&-1&0\\
+0&0&0&1&0&0&0&0&0&0&0&0&0&0&0&-1\\
+-1&0&0&0&1&0&0&0&0&0&0&0&0&0&0&0\\
+0&-1&0&0&0&1&0&0&0&0&0&0&0&0&0&0\\
+0&0&-1&0&0&0&1&0&0&0&0&0&0&0&0&0\\
+0&0&0&-1&0&0&0&1&0&0&0&0&0&0&0&0\\
+0&0&0&0&-1&0&0&0&1&0&0&0&0&0&0&0\\
+0&0&0&0&0&-1&0&0&0&1&0&0&0&0&0&0\\
+0&0&0&0&0&0&-1&0&0&0&1&0&0&0&0&0\\
+0&0&0&0&0&0&0&-1&0&0&0&1&0&0&0&0\\
+0&0&0&0&0&0&0&0&-1&0&0&0&1&0&0&0\\
+0&0&0&0&0&0&0&0&0&-1&0&0&0&1&0&0\\
+0&0&0&0&0&0&0&0&0&0&-1&0&0&0&1&0\\
+0&0&0&0&0&0&0&0&0&0&0&-1&0&0&0&1\\
+\end{pmatrix}
+\end{equation}
+dann \begin{equation}
+u_{\text{Mat}}\cdot A^T=\tilde{A}\cdot u_{\text{vek}}
+\end{equation}
+gilt. Wir beobachten, dass wir eine sehr dünnbesetzte Matrix erhalten. Dies macht es nun bei einer Implementierung sinnvoll, $\tilde{A}$ im sogenannten "`Sparse-Format"' zu speichern\footnote{Hierbei speichert man nur die Indizes und Werte der Nichtnullelemente}. Da für feinere Diskretisierungen die Matrix $\tilde{A}$ schnell an die Grenzen des Arbeitsspeichers stößt, ist diese Art der Implementierung unabdingbar. Wenn wir die Überlegungen noch an Beispielen anderer Größe durchrechnen, erkennt man, dass zwischen den beiden Diagonalen, die nicht mit Nullen befüllt sind, jeweils $N-1$ Nullen stehen. Außerdem erhält man eine negative Einheitsmatrix der Größe $N$, die sich als Block am Ende der ersten $N$ Zeilen befindet.\par
+Wenden wir uns jetzt dem dritten und letzten Summanden $B\cdot u$ zu. Schauen wir uns auch hier beispielhaft die Multiplikation im $\rr^{4\times 4}$ an. 
+\begin{equation}
+B\cdot u=-\frac{b}{h}\begin{pmatrix}
+u_{1,1}-u_{4,1}&u_{1,2}-u_{4,2}&u_{1,3}-u_{4,3}&u_{1,4}-u_{4,4}\\
+-u_{1,1}+u_{2,1}&-u_{1,2}+u_{2,2}&-u_{1,3}+u_{2,3}&-u_{1,4}+u_{2,4}\\
+-u_{2,1}+u_{3,1}&-u_{2,2}+u_{3,2}&-u_{2,3}-u_{3,3}&-u_{2,4}+u_{3,4}\\
+-u_{3,1}+u_{4,1}&-u_{3,2}+u_{4,2}&-u_{3,3}+u_{4,3}&-u_{3,4}+u_{4,4}\\
+\end{pmatrix}
+\end{equation}
+Auch hier finden wir eine äquivalente Formulierung. Mithilfe von 
+\begin{equation}
+\tilde{B}=-\frac{b}{h}\begin{pmatrix}
+1&0&0&-1&0&0&0&0&0&0&0&0&0&0&0&0\\
+-1&1&0&0&0&0&0&0&0&0&0&0&0&0&0&0\\
+0&-1&1&0&0&0&0&0&0&0&0&0&0&0&0&0\\
+0&0&-1&1&0&0&0&0&0&0&0&0&0&0&0&0\\
+0&0&0&0&1&0&0&-1&0&0&0&0&0&0&0&0\\
+0&0&0&0&-1&1&0&0&0&0&0&0&0&0&0&0\\
+0&0&0&0&0&-1&1&0&0&0&0&0&0&0&0&0\\
+0&0&0&0&0&0&-1&1&0&0&0&0&0&0&0&0\\
+0&0&0&0&0&0&0&0&1&0&0&-1&0&0&0&0\\
+0&0&0&0&0&0&0&0&-1&1&0&0&0&0&0&0\\
+0&0&0&0&0&0&0&0&0&-1&1&0&0&0&0&0\\
+0&0&0&0&0&0&0&0&0&0&-1&1&0&0&0&0\\
+0&0&0&0&0&0&0&0&0&0&0&0&1&0&0&-1\\
+0&0&0&0&0&0&0&0&0&0&0&0&-1&1&0&0\\
+0&0&0&0&0&0&0&0&0&0&0&0&0&-1&1&0\\
+0&0&0&0&0&0&0&0&0&0&0&0&0&0&-1&1\\
+\end{pmatrix}
+\end{equation}
+erhalten wir
+\begin{equation}
+B\cdot u_{\text{MAT}}=\tilde{B}\cdot u_{\text{VEK}}.
+\end{equation} Man erkennt, dass die Matrix $\tilde{B}$ eigentlich eine Blockmatrix ist:
+\begin{equation}
+\tilde{B}=\begin{pmatrix}
+B&0&0&0\\
+0&B&0&0\\
+0&0&B&0\\
+0&0&0&B\\
+\end{pmatrix}
+\end{equation}
+Wobei die Matrix $B$ genau $N$ mal auftaucht. Auch hier lässt sich also eine "`Sparse-Implementierung"' gut umsetzen.
+\subsubsection{Fall 2: Zentrale Finite Differenzen} 
+In diesem Abschnitt wird dargestellt, was passiert, wenn wir die Diskretisierungsmatrizen des zentralen Finite Differenzen Verfahrens nutzen. \par Offensichtlich erhält man dasselbe $\tilde{I}$ wie vorher, da hier keine Eigenschaften des Upwind Finite-Differenzen Verfahrens verwendet wurden. Ähnlich verhält es sich mit $\tilde{B}$, allerdings steht jetzt die Diskretisierungsmatrix $B$ des Zentralen Finite-Differenzen Verfahrens als Block auf der Hauptdiagonalen. Wir müssen also lediglich $\tilde{A}$ neu untersuchen. Wir erhalten wieder für beispielhafte $N=4$:
+\begin{equation}
+u\cdot A^T=-\frac{a}{h}\begin{pmatrix}
+u_{1,2}-u_{1,4}&-u_{1,1}+u_{1,3}&-u_{1,2}+u_{1,4}&u_{1,1}-u_{1,3}\\
+u_{2,2}-u_{2,4}&-u_{2,1}+u_{2,3}&-u_{2,2}+u_{2,4}&u_{2,1}-u_{2,3}\\
+u_{3,2}-u_{3,4}&-u_{3,1}+u_{3,3}&-u_{3,2}+u_{3,4}&u_{3,1}-u_{3,3}\\
+u_{4,2}-u_{4,4}&-u_{4,1}+u_{4,3}&-u_{4,2}+u_{4,4}&u_{4,1}-u_{4,3}\\
+\end{pmatrix}
+\end{equation}
+Hieraus ergibt sich Folgendes:
+\begin{equation}
+\tilde{A}=-\frac{a}{h}\begin{pmatrix}
+0&0&0&0&1&0&0&0&0&0&0&0&-1&0&0&0\\
+0&0&0&0&0&1&0&0&0&0&0&0&0&-1&0&0\\
+0&0&0&0&0&0&1&0&0&0&0&0&0&0&-1&0\\
+0&0&0&0&0&0&0&1&0&0&0&0&0&0&0&-1\\
+-1&0&0&0&0&0&0&0&1&0&0&0&0&0&0&0\\
+0&-1&0&0&0&0&0&0&0&1&0&0&0&0&0&0\\
+0&0&-1&0&0&0&0&0&0&0&1&0&0&0&0&0\\
+0&0&0&-1&0&0&0&0&0&0&0&1&0&0&0&0\\
+0&0&0&0&-1&0&0&0&0&0&0&0&1&0&0&0\\
+0&0&0&0&0&-1&0&0&0&0&0&0&0&1&0&0\\
+0&0&0&0&0&0&-1&0&0&0&0&0&0&0&1&0\\
+0&0&0&0&0&0&0&-1&0&0&0&0&0&0&0&1\\
+1&0&0&0&0&0&0&0&-1&0&0&0&0&0&0&0\\
+0&1&0&0&0&0&0&0&0&-1&0&0&0&0&0&0\\
+0&0&1&0&0&0&0&0&0&0&-1&0&0&0&0&0\\
+0&0&0&1&0&0&0&0&0&0&0&-1&0&0&0&0\\
+\end{pmatrix}
+\end{equation}
+\\[\medskipamount]
+Wenn man auch hier dies für mehrere $N$ wiederholt, stellt man fest, dass hier die Diagonale mit $1$ genau um $N$ nach rechts verschoben wurde. Die Diagonale mit $-1$ wurde  um $N$ nach links von der Hauptdiagonalen verschoben.  Eine negative Einheitsmatrix der Größe $N$ befindet sich immer am Ende als Block der ersten $N$ Zeilen. Eine Einheitsmatrix der Größe $N$ befindet sich als Block am Ende der ersten $N$ Spalten.
+\section{Numerische Ergebnisse}
+Jetzt wollen wir die Verfahren numerisch analysieren. Dabei werden wir sowohl Genauigkeit als auch die Laufzeit untersuchen. Wir werden hierbei zwischen dem eindimensionalen und dem zweidimensionalen Fall unterscheiden. Dafür wird, wenn nicht anders ausgewiesen, $u_0(x)=2+\sin(2\pi x)$ beziehungsweise $u_0(x,y)=2+\sin(2\pi x)+\cos(2\pi y)$ als Anfangsbedingung betrachtet.
+\subsection{Eindimensional}
+Wir werden uns als Erstes Konvergenztabellen ansehen.
+In \fref{tab:VergleichLoe} sind die Fehler $\varepsilon$ und die "`experimental order of convergence"' (EOC) für die einzelnen Verfahren aufgeführt. Die EOC gibt hierbei einen empirisch ermittelten Wert an, der die Konvergenzgeschwindigkeit beschreibt."`NaN"' steht hierbei für "`Not a number"' und deutet einen mathematischen Fehler an (Division durch $0$ oder wie hier Zahlen zu groß). 
+\begin{table}
+\caption{Vergleich der EOCs und Fehler für $CFL=0.9$ in 1D}
+\label{tab:VergleichLoe}
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|X|X|}
+\hline
+N & $\varepsilon$ expl. Upwind & $\varepsilon$ expl. Zentral & $\varepsilon$ impl. Zentral & $\varepsilon$ impl. Upwind & EOC expl. Upwind & EOC expl. Zentral & EOC impl. Upwind & EOC impl. Zentral\\\hline
+$21$&0.13034&44.024&0.83945&0.58487& -&-&-&-\\
+ $41$ &0.07486&8181.5&0.60401&0.36026&0.80004    &-7.5379&0.47487&0.6991 \\
+ $81$&0.04066&2e+09& 0.37413&0.20117&0.88049&-17.946&0.69104&0.84064 \\
+$161$&0.02139&1.8e+20&0.20961&0.10571& 0.92703&-36.374&0.83584&0.92831 \\
+$321$&0.01104&4.9e+42&0.11087& 0.05418& 0.9536&-74.481&0.91877&0.96428 \\ 
+$641$&0.00564&1e+88&0.05700&0.02744& 0.96983&-150.58 &0.95977&0.98165  \\
+$1281$&0.00286&2e+179&0.0289 &0.01380& 0.98002&-303.15&0.98003&0.99119 \\
+$2561$&0.00144&NaN&0.01455&0.00692&0.98659 & NaN &0.98999&0.99557\\\hline
+\end{tabularx}
+\end{table}
+Man erkennt, dass das explizite Upwind Finite Differenzen Verfahren sehr kleine Fehler erzielt, die um einiges besser sind, als bei allen anderen Verfahren aus dieser Liste (siehe \fref{fig:Fehl1D}). Dies liegt hier am Sonderfall für das Upwind Finite Differenzen Verfahren im Eindimensionalen: Dieses liefert bis auf Maschinengenauigkeit die exakte Lösung (die Energie bleibt erhalten für $CFL=1$ in diesem Fall). Die Instabilität des expliziten Zentralen Finite Differenzen Verfahrens konnten wir auch numerisch verifizieren. Daher werden wir es bei weiteren Visualisierungen außen vor lassen, um die Achsen besser anpassen zu können.  Erstaunlicherweise schneidet es aber in Kombination mit dem impliziten \textsc{Euler}-Verfahren gut ab. Es erzielt höhere Genauigkeit als das implizite Upwind Finite Differenzen Verfahren. \par Man sieht auch, dass wir für längere Simulationsdauer größere Fehler erhalten (siehe \fref{fig:Fehl1D1}).
+\par Die EOCs von explizitem Upwind und implizitem Zentralen Finite Differenzen Verfahren sind nahe beieinander. Die des impliziten Upwind Finite Differenzen Verfahren ist doch etwas schlechter. 
+\begin{figure}[h]
+\subfigure[$T=1$]{\label{fig:Fehl1D}\includegraphics[width=0.5\textwidth]{Fehler1D}}
+\subfigure[$T=3$]{\label{fig:Fehl1D1}\includegraphics[width=0.5\textwidth]{Fehler1D1}}
+\caption{Fehler der Verfahren für 1D}
+\end{figure}
+\par Für die Masse-, Energie- und Energieänderungsgrafiken wurde die unstetige Anfangslösung
+\begin{equation}
+u_0(x)=\begin{cases}
+1&,\text{für }x<\frac{1}{4}\lor x\ge\frac{3}{4}\\
+0&,\text{sonst}\end{cases}
+\end{equation} genutzt.
+\begin{figure}
+\subfigure[$CFL=0.9$]{\label{fig:EnZeit}\includegraphics[width=0.5\textwidth]{Energie1D1}}
+\subfigure[$CFL=0.2$]{\label{fig:EnZeit1}\includegraphics[width=0.5\textwidth]{Energie1D.eps}}
+\caption{Energie in der Zeit für 1D}
+\label{fig:Enplot}
+\end{figure}
+Man erkennt in \fref{fig:EnZeit}, dass alle Verfahren numerische Dissipation erkennen lassen. Am Deutlichsten zeigt dies das Upwind Finite Differenzen Verfahren mit implizitem \textsc{Euler}-Verfahren. Wenn wir dieses allerdings mit dem expliziten \textsc{Euler}-Verfahren kombinieren, erhalten wir für die Energie eine sehr gute Approximation. Diese verschlechtert sich allerdings, wenn wir $CFL$ verringern (siehe \fref{fig:EnZeit1}). Obwohl wir jetzt die Anzahl der Zeitschritte erhöhen, wird die Approximation des expliziten Upwind Finite Differenzen Verfahrens schlechter! Dies hängt wie schon erwähnt mit dem Phänomen zusammen, dass das explizite Upwind Finite Differenzen Verfahren die exakte Lösung im eindimensionalen Fall liefert. Die Approximationen der beiden anderen Verfahren werden besser und das implizite Zentrale Finite Differenzen Verfahren ist von allen am genauesten. Wir sehen, dass im Grenzwert $CFL\to 0$ die Dissipation beim impliziten zentralen Verfahren abnimmt!
+Man kann durch Experimente herausbekommen, dass bei $CFL=0.5$ beide Verfahren etwa dieselbe Approximation liefern.
+\par Wir wollen uns auch noch die "`Masse"' -also $\sum_{j=0}^{N-1}u_j$- in der Zeit ansehen. Diese ist in \fref{fig:Masse} dargestellt. Man erkennt, dass hier bis auf Rundungsfehler die Verfahren alle konstant sind. Das heißt also, die Verfahren sind alle masseerhaltend!
+\begin{figure}[t]
+\centering
+\includegraphics[scale=0.75]{Masse}
+\caption{Masse in der Zeit 1D}
+\label{fig:Masse}
+\end{figure}
+\par Wir können uns erinnern, dass wir in der semidiskreten Formulierung der Finite Differenzen Verfahren 
+\begin{equation}
+u_t=Au
+\end{equation} approximiert hatten. Wenn wir also die zeitliche Änderung der Energie betrachten möchten, können wir ausnutzen dass
+\begin{equation}
+\left(\frac{u^2}{2}\right)_t=\frac{1}{2}u_t\cdot u=\frac{1}{2}A\cdot u\cdot u
+\end{equation} gilt. Damit erhalten wir also \fref{fig:Enaen}. Das zeigt uns, dass tatsächlich, beim zentralen Finite Differenzen Verfahren die Energie eigentlich nicht ändert. Wir haben es also nur mit Fehlertermen der Zeitintegration zu tun, die es in \fref{fig:EnZeit} so wirken lassen, als würde sie abnehmen. Außerdem kann man nochmal die abnehmende Energie der Upwind Finite Differenzen Verfahren erkennen.
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.75]{AenderungEnergie}
+\caption{Änderung der Energie}
+\label{fig:Enaen}
+\end{figure}
+\subsection{Zweidimensional}
+Nun möchten wir diese Diskussionen auch für den zweidimensionalen Fall durchführen, da sich doch ein paar Unterschiede zum eindimensionalen Fall ergeben. Jetzt wollen wir uns analog die Tabelle der Fehler und EOCs ansehen (siehe Tabelle \ref{tab:Vergl2D} auf \pageref{tab:Vergl2D}). Da Energie-, Masse- und Energieänderungsgrafiken analog zum eindimensionalen Fall aussehen, werde ich sie hier nicht näher angeben.
+\begin{table}[h]
+\caption{Vergleich der EOCs und Fehler in 2D}
+\label{tab:Vergl2D}
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|X|X|}
+\hline
+N&$\varepsilon$ Expl. Upwind&$\varepsilon$ Expl. Zentral&$\varepsilon$ Impl. Upwind&$\varepsilon$ Impl. Zentral& EOC expl. Upwind&EOC expl. Zentral& EOC impl. Upwind& EOC impl. Zentral\\
+\hline
+21&0.93461&3.1221&1.4762&0.82725 &-&-&-&-\\ 
+41&0.5408&57.357&1.0046&0.44322&0.78927& -4.1994&0.55522&0.9003\\
+81& 0.29212&3.9e+06&0.59551&0.22969&0.88851& -16.058&0.75447&0.94831 \\ 
+161&0.15165&1.6e+29&0.32617&0.11706&0.94582& -75.103&0.86849&0.97245\\ 
+321&0.07711&7.9e+74 &0.17105&0.05912&0.97578& -151.82&  0.9312&0.98554  \\\hline
+\end{tabularx}
+\end{table}
+\par Wir sehen, dass das explizite Upwind Verfahren deutlich schlechter abschneidet als im Eindimensionalen. Überraschenderweise ist im Zweidimensionalen das implizite Zentrale Finite Differenzen Verfahren das genaueste für $h$ und $\Delta t$ fest. Bis auf das explizite Zentrale Finite Differenzen Verfahren sind alle Aufgeführten stabil, was wir erwartet hatten. Die Konvergenzordnungen streben bei den drei Konvergierenden gegen $1$ wie erwartet. Allerdings hat auch hier das implizite Upwind Finite Differenzen Verfahren die geringste EOC. Wir können uns die Fehler in \fref{fig:Fehler2D} genauer ansehen.
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.75]{Test_FDV2D_02}
+\caption{Fehler der Verfahren in 2D für $T=1$}
+\label{fig:Fehler2D}
+\end{figure}
+Man erkennt deutlich, dass die Fehler im zweidimensionalen Fall um Einiges schlechter sind, als im Eindimensionalem. Hier kann man auch nochmal den Unterschied zwischen expliziten Upwind Finite Differenzen Verfahren und implizitem Zentralen Verfahren, die nahezu gleichauf sind, und dem implizitem Upwind Verfahren, das doch einen signifikant schlechteren Fehler liefert, erkennen. Natürlich wird der Fehler mit höherer Simulationsdauer immer schlechter.
+\subsection{Performance-Vergleiche}
+In diesem Abschnitt wollen wir in unserer Analyse die Laufzeit mit betrachten, da wir diese bis hierhin außen vor gelassen hatten. Wir wollen diese hauptsächlich für den zweidimensionalen Fall diskutieren, da sie im Eindimensionalen erst bei sehr großen $N$ relevant wird. Es ergibt sich folgende \fref{tab:Laufzeit} für den zweidimensionalen Fall. Die Zeiten verstehen sich in Sekunden CPU-Zeit.
+\begin{table}[h]
+\caption{Laufzeit 2D-Fall}
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|}
+\hline
+  N& Impl. Upwind& Impl. Zentral& Expl. Upwind& Expl. Zentral\\
+\hline
+      21      &0.36     &  0.18    &    0     &     0   \\
+     41    &  0.63   &    0.62  &   0.01     &  0.01   \\
+     81   &    7.5  &     8.89 &    0.03   &    0.03   \\
+    161  &   38.97  &    43.94  &  0.43  &     0.43   \\
+    321   & 240.52   &  264.68  &   5.34    &   5.46   \\
+    \hline 
+\end{tabularx}
+\label{tab:Laufzeit}
+\end{table} 
+Wir erkennen deutlich, dass die impliziten Verfahren immer eine deutlich längere Laufzeit haben, als die Expliziten. Dies war allerdings zu erwarten, da eine Matrixmultiplikation deutlich schneller zu berechnen ist als die Lösung eines linearen Gleichungssystems. Das implizite Upwind Finite Differenzen Verfahren ist außerdem ab einer Schranke signifikant langsamer als das implizite zentrale Finite Differenzen Verfahren. Wie kann das sein? Wenn wir uns nochmal an den Abschnitt über das GMRES-Verfahren erinnern, stellen wir fest, dass das Spektrum der Matrix eine große Rolle spielt. Da bei zentralen Finiten Differenzen mit implizitem \textsc{Euler}-Verfahren die Eigenwerte der Systemmatrix alle gleichen Realteil gleich 1 haben, kommt GMRES hiermit besser zurecht.
+\section{Fazit}
+Wir haben in dieser Arbeit die Theorie für die Finite Differenzen-Verfahren diskutiert. Außerdem haben wir uns die Möglichkeiten einer Implementierung angesehen und verschiedene numerische Experimente durchgeführt. Doch welches der vier vorgestellten Verfahren ist zu bevorzugen? Für das implizite Upwind Verfahren sehe ich keine sinnvolle Verwendung, da es sowohl schlechtere Fehler als auch längere Laufzeit liefert als das implizite zentrale Finite Differenzen Verfahren. Das explizite zentrale Finite Differenzen Verfahren ist instabil und kann daher nicht sinnvoll verwendet werden. 
+\par Im eindimensionalen Fall lässt sich mit $CFL=1$ die exakte Lösung bis auf Maschinengenauigkeit mit dem expliziten Upwind Finite Differenzen Verfahren berechnen. Das wäre also hier meine erste Wahl. Außerdem ist allgemein für $CFL\ge 0.5$ die Genauigkeit bei diesem Verfahren besser. Wenn man allerdings eine lange Simulationsdauer hat, und Genauigkeit nicht ganz so relevant ist wie Rechenzeit, sind implizite Verfahren immer im Vorteil, da wir in unserem Fall beliebig große Zeitschritte wählen können.
+\par Im zweidimensionalen Fall ist das Ganze noch etwas diffiziler. Da hier das implizite zentrale Differenzen Verfahren zwar immer das Genaueste ist-zentraler Differenzenquotient ist räumliche Approximation zweiter Ordnung-, aber auch sehr langsam, muss man hier, ganz nach Aufgabenstellung sein passendes Verfahren wählen. Fragen die man sich also stellen muss sind: 
+\begin{itemize}
+\item Wie genau muss mein Ergebnis sein?
+\item Wie lange ist meine Simulationsdauer?
+\item Wie hoch muss die zeitliche Auflösung sein?
+\end{itemize}
+Anhand dieser Fragen lässt sich dann die Frage nach dem geeigneten Verfahren beantworten. 
+\par Wir haben in dieser Arbeit nur die lineare Advektionsgleichung diskutiert. Sobald partielle Differentialgleichungen nichtlinear werden, sind die Lösungen im Allgemeinen unstetig. Hier versagen die hier vorgestellten Verfahren, da Ihre Herleitung auf der Approximation der Ableitung basiert. Wenn diese aber nicht mehr definiert ist, kann das Verfahren auch kein sinnvolles Ergebnis mehr produzieren. Es ist also Vorsicht geboten. Für das hier vorgestellte gutmütige Problem funktionieren die Finite Differenzen Verfahren sehr gut. Für alle weiteren muss man genau überlegen, ob sie überhaupt anwendbar sind. Dies ist ihre größte Schwäche. 
+\par 
+Zusammenfassend kann man also sagen, dass im Eindimensionalen das explizite Upwind Finite Differenzen Verfahren fast unschlagbar ist -nur für lange Simulationsdauern muss hier abgewogen werden- und dass im Zweidimensionalen die Wahl zwischen implizitem Zentralen Finite Differenzen Verfahren und explizitem Upwind Finite Differenzen Verfahren stark von der Aufgabenstellung abhängt.
+\appendix
+\nocite{*}
+\newpage
+\section{Programmcode}
+Hier befindet sich der Programmcode für den GMRES und die zweidimensionalen Finite Differenzen Verfahren. Alle Dateien (also auch inklusive Testskripte) befinden sich auf der CD.
+\subsection{GMRES}
+\label{Gmrescode}
+\lstinputlisting{GMRES_self.m}
+\subsection{Zweidimensionale Finite Differenzen}
+\label{FDV2Dcode}
+\lstinputlisting{FDV2D.m}
+\newpage
+\addcontentsline{toc}{section}{Abbildungsverzeichnis}
+\setcounter{lofdepth}{2}
+\listoffigures
+\newpage
+\addcontentsline{toc}{section}{Literatur}
+\bibliographystyle{amsplain}
+\bibliography{Literatur}
+\newpage
+\section*{Eigenständigkeitserklärung}
+Hiermit versichere ich, Nils Dornbusch, an Eides statt, dass ich die vorliegende Arbeit selbstständig und ohne die Benutzung anderer als der angegebenen Hilfsmittel angefertigt habe. Alle Stellen, die wörtlich oder sinngemäß aus veröffentlichten und nicht veröffentlichten Schriften entnommen wurden, sind als solche kenntlich gemacht. Die Arbeit ist in gleicher oder ähnlicher Form oder auszugsweise im Rahmen einer anderen Prüfung noch nicht vorgelegt worden. Ich versichere, dass die eingereichte elektronische Fassung der eingereichten Druckfassung vollständig entspricht.
+\\[\bigskipamount]
+Köln, \today
+\\[2\bigskipamount]
+Nils Dornbusch
+\end{document}
