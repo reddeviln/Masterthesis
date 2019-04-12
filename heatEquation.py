@@ -21,6 +21,6 @@ def boundary(x, on_boundary):
 heatEquation.boundary_condition('Dirichlet', Constant(0), heatEquation.V[0], boundary)
 heatEquation.impose_initial_condition(Expression('exp(-a*pow(x[0], 2) - a*pow(x[1], 2))',degree=2, a=5), 0)
 
-heatEquation.form_variational_problem()
+heatEquation.form_variational_problem_heat()
 
 heatEquation.run_simulation(2,10, "output/heatequation/solution.pvd")
