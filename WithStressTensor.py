@@ -22,8 +22,8 @@ WithStressTensorSim.boundary_condition('Dirichlet', Constant((0,0,1,0)), WithStr
 WithStressTensorSim.impose_initial_condition(Constant((0,0,1,0)),0)
 
 #variationalform
-WithStressTensorSim.form_variational_problem_full(2)
+WithStressTensorSim.form_variational_problem_onebyone(2)
 
 #run
-WithStressTensorSim.run_simulation(2,10,"output/withstress/solution.pvd")
+WithStressTensorSim.run_simulation_onebyone(2,10,"output/withstress/solution.pvd",1.0E-5,25)
 
