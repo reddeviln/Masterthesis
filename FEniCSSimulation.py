@@ -59,33 +59,41 @@ class FEniCSSimulation:
     def form_variational_problem_heat(self):
         """define the variational problem for the heat equation with additions"""
         dt = 0.1
+
         sigma_int = interpolate(self.sigma, self.V[1])
         F = self.u[0]*self.v[0]*dx+self.mu*dt*dot(grad(self.u[0]),grad(self.v[0]))*dx-(self.u_n*self.v[0])*dx\
             +dt*(self.gradP*self.v[0])*dx+ dt*dot(sigma_int,grad(self.v[0]))*dx
         self.a = lhs(F)
         self.L = rhs(F)
 
-    def getSigma(self, C, dim):
+    def getSigma(self, C1, C2, C3, Lambda):
         """get sigma from C"""
-        return C-Constant((1,1,1))
+
+        return 0.5/Lambda*as_vector([C1-1, C2-1, C3-1])
 
 
 
     def form_variational_problem_onebyone(self,Lambda):
         """define the variational problem for the equations with stress tensor"""
-        dt = Constant(0)
+        dt = Constant(0.1)
         Lambda = Constant(Lambda)
-        self.C, self.u1 = TrialFunctions(self.V[0])
-        self.CV, self.v1 = TestFunctions(self.V[0])
+        C1, C2, C3, u = TrialFunctions(self.V[0])
+        CV1, CV2, CV3, v = TestFunctions(self.V[0])
         self.F = [0 for x in range(4)]
+        self.u_k = Function(self.V[0])
+        un1, un2, un3, un4 = split(self.u_n)
+        uk1, uk2, uk3, uk4 = split(self.u_k)
 
-        self.F[0] = self.u1 * self.v1 * dx-self.u_n[3] * self.v1* dx + dt*(self.gradP * self.v1 * dx\
-             + dot(self.getSigma(self.C, 3), grad(self.v1)) * dx)\
-             + Constant(self.mu) * dot(grad(self.u1), grad(self.v1)) * dx
-        ones = interpolate(Constant((1,1,1,1)), self.V[0])
-        self.F[1] = (self.C[0] - self.u_n.vector()[0] + 1 / Lambda *(self.C[0])- Constant(1)) * self.CV[0] * dx + dt / Lambda * self.u1 * self.CV[0].dx(1) * dx
-        self.F[2] = (self.C[1] - self.u_n[1] + 1 / Lambda * (self.C[1] - 1)) * self.CV[1] * dx + dt / Lambda * self.u1 * self.CV[1].dx(2) * dx
-        self.F[3] = (self.C[2] - self.u_n[2] + 1 / Lambda * (self.C[2] - 1)) * self.CV[2] * dx - 2 * dt * (self.u1.dx(0)*self.C[0] + self.u1.dx(1)*self.C[1]) * self.CV[2] * dx
+        self.F[0] = u * v * dx - un4 * v * dx + dt*(self.gradP * v * dx\
+             + dot(self.getSigma(uk1, uk2, uk3,  Lambda), grad(v)) * dx)\
+             + Constant(self.mu) * dot(grad(u), grad(v)) * dx \
+             + (C1 - un1 + 1 / Lambda * (C1 - 1)) * CV1 * dx\
+             + (C2 - un2 + 1 / Lambda * (C2 - 1)) * CV2 * dx \
+             + (C3 - un3 + 1 / Lambda * (C3 - 1)) * CV3 * dx \
+             - dt *(1/Lambda*u.dx(0) * CV1 * dx \
+             + 1 / Lambda * u.dx(1) * CV2 * dx + 2 * (u.dx(0) * C1 + u.dx(1) * C2) * CV3 * dx)
+
+
 
     def run_simulation(self, T_end, num_steps,filename):
         """runs the actual simulation"""
@@ -111,42 +119,45 @@ class FEniCSSimulation:
         dt = T_end / num_steps
         vtkfile = File(filename)
         U = Function(self.V[0])
-        u_k = self.u_n[3]
+        self.u_k = self.u_n
         t = 0
         tol = tolerance
-        eps = 1
+        eps = 1.0
         iter = 0
         for n in range(num_steps):
             t += dt
 
             while eps > tol and iter < maxiter:
 
-                solve(self.F[1] == 0, U, self.bc)
-                C, u = split(U)
-                solve(self.F[2], U.vector())
-                C, u = split(U)
-                #self.a[3].u = u
-                A3 = assemble(self.a[3])
-                b3 = assemble(self.L[3])
-                [bcu.apply(A3) for bcu in self.bc]
-                [bcu.apply(b3) for bcu in self.bc]
-                solve(A3, U.vector(), b3)
-                C, u = split(U)
-                #self.a[0].u = u
-               # self.a[0].C = C
-                A0 = assemble(self.a[0])
-                b0 = assemble(self.L[0])
-                [bcu.apply(A0) for bcu in self.bc]
-                [bcu.apply(b0) for bcu in self.bc]
-                solve(A0, U.vector(), b0)
-                C, u = split(U)
-                diff = u.vector().array()- u_k.vector().array()
-                eps = np.linalg.norm(diff, ord=np.Inf)
+                #A = assemble(lhs(self.F[0]))
+                #b = assemble(rhs(self.F[0]))
+                #[bcu.apply(A) for bcu in self.bc]
+                #[bcu.apply(b) for bcu in self.bc]
+                solve(self.F[0] == 0, U, self.bc)
+                diff = np.abs((U.vector() - self.u_k.vector()).max())
+                eps = diff
+                self.u_k.assign(U)
                 print('iter=%d: norm=%g' % (iter, eps))
-                u_k.assign(u)
+                solve(lhs(self.F[1]) == rhs(self.F[1]), U, self.bc)
+                diff = np.abs((U.sub(0).vector().get_local() - self.u_k.sub(0).vector().get_local()))
+                eps = diff
+                print('iter=%d: norm=%g' % (iter, eps))
+                self.u_k.assign(U)
+                solve(lhs(self.F[2]) == rhs(self.F[2]), U, self.bc)
+                self.CFunction, self.UFunction = split(U)
+                diff = np.abs((U.vector() - self.u_k.vector()).max())
+                eps = diff
+                print('iter=%d: norm=%g' % (iter, eps))
+                solve(lhs(self.F[3]) == rhs(self.F[3]), U, self.bc)
+                self.u_k.assign(U)
+                diff = np.abs((U.vector() - self.u_k.vector()).max())
+                eps = diff
+                print('iter=%d: norm=%g' % (iter, eps))
+
+                self.u_k.assign(U)
                 iter += 1
 
-            vtkfile << (u, t)
+            vtkfile << (U.sub(0), t)
             self.u_n.assign(U)
 
 
