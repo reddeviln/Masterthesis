@@ -77,21 +77,21 @@ class FEniCSSimulation:
         """define the variational problem for the equations with stress tensor"""
         dt = Constant(0.1)
         Lambda = Constant(Lambda)
-        C1, C2, C3, u = TrialFunctions(self.V[0])
+        self.U = Function(self.V[0])
+        C1, C2, C3, u = split(self.U)
         CV1, CV2, CV3, v = TestFunctions(self.V[0])
-        self.F = [0 for x in range(4)]
         self.u_k = Function(self.V[0])
         un1, un2, un3, un4 = split(self.u_n)
         uk1, uk2, uk3, uk4 = split(self.u_k)
 
-        self.F[0] = u * v * dx - un4 * v * dx + dt*(self.gradP * v * dx\
-             + dot(self.getSigma(uk1, uk2, uk3,  Lambda), grad(v)) * dx)\
-             + Constant(self.mu) * dot(grad(u), grad(v)) * dx \
-             + (C1 - un1 + 1 / Lambda * (C1 - 1)) * CV1 * dx\
-             + (C2 - un2 + 1 / Lambda * (C2 - 1)) * CV2 * dx \
-             + (C3 - un3 + 1 / Lambda * (C3 - 1)) * CV3 * dx \
-             - dt *(1/Lambda*u.dx(0) * CV1 * dx \
-             + 1 / Lambda * u.dx(1) * CV2 * dx + 2 * (u.dx(0) * C1 + u.dx(1) * C2) * CV3 * dx)
+        self.F = u * v * dx - un4 * v * dx + dt*(self.gradP * v * dx\
+            + dot(self.getSigma(uk1, uk2, uk3,  Lambda), grad(v)) * dx)\
+            + Constant(self.mu) * dot(grad(u), grad(v)) * dx \
+            + (C1 - un1 + 1 / Lambda * (C1 - 1)) * CV1 * dx\
+            + (C2 - un2 + 1 / Lambda * (C2 - 1)) * CV2 * dx \
+            + (C3 - un3 + 1 / Lambda * (C3 - 1)) * CV3 * dx \
+            - dt *(1/Lambda*u.dx(0) * CV1 * dx \
+            + 1 / Lambda * u.dx(1) * CV2 * dx + 2 * (u.dx(0) * C1 + u.dx(1) * C2) * CV3 * dx)
 
 
 
@@ -118,7 +118,6 @@ class FEniCSSimulation:
 
         dt = T_end / num_steps
         vtkfile = File(filename)
-        U = Function(self.V[0])
         self.u_k = self.u_n
         t = 0
         tol = tolerance
@@ -133,32 +132,14 @@ class FEniCSSimulation:
                 #b = assemble(rhs(self.F[0]))
                 #[bcu.apply(A) for bcu in self.bc]
                 #[bcu.apply(b) for bcu in self.bc]
-                solve(self.F[0] == 0, U, self.bc)
-                diff = np.abs((U.vector() - self.u_k.vector()).max())
-                eps = diff
-                self.u_k.assign(U)
-                print('iter=%d: norm=%g' % (iter, eps))
-                solve(lhs(self.F[1]) == rhs(self.F[1]), U, self.bc)
-                diff = np.abs((U.sub(0).vector().get_local() - self.u_k.sub(0).vector().get_local()))
+                solve(self.F == 0, self.U, self.bc)
+                diff = np.abs((self.U.vector() - self.u_k.vector()).max())
                 eps = diff
                 print('iter=%d: norm=%g' % (iter, eps))
-                self.u_k.assign(U)
-                solve(lhs(self.F[2]) == rhs(self.F[2]), U, self.bc)
-                self.CFunction, self.UFunction = split(U)
-                diff = np.abs((U.vector() - self.u_k.vector()).max())
-                eps = diff
-                print('iter=%d: norm=%g' % (iter, eps))
-                solve(lhs(self.F[3]) == rhs(self.F[3]), U, self.bc)
-                self.u_k.assign(U)
-                diff = np.abs((U.vector() - self.u_k.vector()).max())
-                eps = diff
-                print('iter=%d: norm=%g' % (iter, eps))
-
-                self.u_k.assign(U)
                 iter += 1
 
-            vtkfile << (U.sub(0), t)
-            self.u_n.assign(U)
+            vtkfile << (self.U.sub(3), t)
+            self.u_n.assign(self.U)
 
 
 
