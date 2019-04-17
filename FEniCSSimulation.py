@@ -66,34 +66,50 @@ class FEniCSSimulation:
         self.a = lhs(F)
         self.L = rhs(F)
 
-    def getSigma(self, C1, C2, C3, Lambda):
+    def  getSigma3D(self, C1, C2, C3, Lambda):
         """get sigma from C"""
 
         return 0.5/Lambda*as_vector([C1-1, C2-1, C3-1])
 
+    def  getSigma2D(self, C1, C2, Lambda):
+        """get sigma from C"""
 
+        return 0.8*as_vector([C1-1, C2-1])
 
-    def form_variational_problem_onebyone(self,Lambda):
+    def form_variational_problem_full3D(self,Lambda):
         """define the variational problem for the equations with stress tensor"""
         dt = Constant(0.1)
         Lambda = Constant(Lambda)
         self.U = Function(self.V[0])
         C1, C2, C3, u = split(self.U)
         CV1, CV2, CV3, v = TestFunctions(self.V[0])
-        self.u_k = Function(self.V[0])
         un1, un2, un3, un4 = split(self.u_n)
-        uk1, uk2, uk3, uk4 = split(self.u_k)
 
         self.F = u * v * dx - un4 * v * dx + dt*(self.gradP * v * dx\
-            + dot(self.getSigma(uk1, uk2, uk3,  Lambda), grad(v)) * dx)\
-            + Constant(self.mu) * dot(grad(u), grad(v)) * dx \
-            + (C1 - un1 + 1 / Lambda * (C1 - 1)) * CV1 * dx\
-            + (C2 - un2 + 1 / Lambda * (C2 - 1)) * CV2 * dx \
-            + (C3 - un3 + 1 / Lambda * (C3 - 1)) * CV3 * dx \
+            + dot(self.getSigma3D(un1, un2, un3,  Lambda), grad(v)) * dx\
+            + Constant(self.mu) * dot(grad(u), grad(v)) * dx) \
+            + (C1 - un1 + dt / Lambda * (C1 - 1)) * CV1 * dx\
+            + (C2 - un2 + dt / Lambda * (C2 - 1)) * CV2 * dx \
+            + (C3 - un3 + dt / Lambda * (C3 - 1)) * CV3 * dx \
             - dt *(1/Lambda*u.dx(0) * CV1 * dx \
             + 1 / Lambda * u.dx(1) * CV2 * dx + 2 * (u.dx(0) * C1 + u.dx(1) * C2) * CV3 * dx)
 
+    def form_variational_problem_full2D(self,Lambda):
+        """define the variational problem for the equations with stress tensor"""
+        dt = Constant(0.1)
+        Lambda = Constant(Lambda)
+        self.U = Function(self.V[0])
+        C1, C2, u = split(self.U)
+        CV1, CV2, v = TestFunctions(self.V[0])
+        un1, un2, un3 = split(self.u_n)
 
+        self.F = u * v * dx - un3 * v * dx + dt*(self.gradP * v * dx\
+            + dot(self.getSigma2D(un1, un2, Lambda), grad(v)) * dx\
+            + Constant(self.mu) * dot(grad(u), grad(v)) * dx) \
+            + (C1 - un1 + dt / Lambda * (C1 - 1)) * CV1 * dx\
+            + (C2 - un2 + dt / Lambda * (C2 - 1)) * CV2 * dx \
+            - dt *(1 / Lambda * u.dx(0) * CV1 * dx \
+            + 1 / Lambda * u.dx(1) * CV2 * dx)
 
     def run_simulation(self, T_end, num_steps,filename):
         """runs the actual simulation"""
@@ -113,12 +129,11 @@ class FEniCSSimulation:
             vtkfile << (u,t)
             self.u_n.assign(u)
 
-    def run_simulation_onebyone(self, T_end, num_steps,filename, tolerance, maxiter):
-        """run the actual simulation for with fixpoint iteration"""
+    def run_simulation_full(self, T_end, num_steps,filename, tolerance, maxiter):
+        """run the actual simulation for with newton iteration"""
 
         dt = T_end / num_steps
         vtkfile = File(filename)
-        self.u_k = self.u_n
         t = 0
         tol = tolerance
         eps = 1.0
@@ -126,19 +141,9 @@ class FEniCSSimulation:
         for n in range(num_steps):
             t += dt
 
-            while eps > tol and iter < maxiter:
-
-                #A = assemble(lhs(self.F[0]))
-                #b = assemble(rhs(self.F[0]))
-                #[bcu.apply(A) for bcu in self.bc]
-                #[bcu.apply(b) for bcu in self.bc]
-                solve(self.F == 0, self.U, self.bc)
-                diff = np.abs((self.U.vector() - self.u_k.vector()).max())
-                eps = diff
-                print('iter=%d: norm=%g' % (iter, eps))
-                iter += 1
-            iter = 0
-            vtkfile << (self.U.sub(3), t)
+            solve(self.F == 0, self.U, self.bc, solver_parameters={"newton_solver": {"absolute_tolerance": tol, "relative_tolerance": 1e-16}})
+            print("time: ",t)
+            vtkfile << (self.U.sub(2), t)
             self.u_n.assign(self.U)
 
 
