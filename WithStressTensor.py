@@ -18,7 +18,7 @@ WithStressTensorSim.V.append(FunctionSpace(WithStressTensorSim.mesh, element))
 
 
 def boundary(x, on_boundary):
-    return on_boundary and not (near(x[0],0) or near(x[0],2))
+    return on_boundary and not (near(x[1],0) or near(x[1],2))
 
 
 # boundary conditions
