@@ -137,7 +137,7 @@ class FEniCSSimulation:
                 eps = diff
                 print('iter=%d: norm=%g' % (iter, eps))
                 iter += 1
-
+            iter = 0
             vtkfile << (self.U.sub(3), t)
             self.u_n.assign(self.U)
 
