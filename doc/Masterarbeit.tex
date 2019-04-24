@@ -10,6 +10,7 @@
 %\usepackage[ngerman]{babel}% deutsches Sprachpaket wird geladen
 \usepackage[english]{babel}% englisches Sprachpaket wird geladen
 \usepackage{tabularx}
+%\usepackage{lmodern}% Für die Schrift
 \usepackage[T1]{fontenc} % westeuropäische Codierung wird verlangt
 \usepackage[utf8]{inputenc}% Umlaute werden erlaubt
 \usepackage[usenames]{color} % Erlaubt die Benutzung der namen im Farbpaket und deren Änderung
@@ -30,7 +31,6 @@
 \usepackage{subfigure} % mehrere Bilder können in einer figure-Umgebung verwendet werden
 \usepackage{longtable} % Diese Umgebung ist ähnlich definiert wie die tabular-Umgebung, erlaubt jedoch mehrseitige Tabellen.
 \usepackage{paralist} % Modifikation der bereits bestehenden Listenumgebungen
-\usepackage{lmodern}% Für die Schrift
 \usepackage{amsthm} % erlaubt die Benutzung von eigenen Theoremen
 \usepackage{hyperref} % Links und Verweise werden innerhalb von PDF Dokumenten erzeugt
 \usepackage{wrapfig} % Das Paket ermöglicht es von Schrift umflossene Bilder und Tabellen einzufügen.
@@ -57,6 +57,7 @@
 \DeclareMathOperator*{\esssup}{ess\,sup} % essentiellen Supremums
 \DeclareMathOperator{\spn}{span} % Span
 \DeclareMathOperator{\supp}{supp} % Träger
+\DeclareMathOperator{\ddiv}{div} % divergenz
 \newcommand{\abs}[1]{\left\vert #1\right\vert}
 \newcommand{\rr}{\mathbb{R}}
 \newcommand{\g}{~\textgreater ~}
@@ -72,6 +73,14 @@
 \newcommand{\sii}{\sum_{k=1}^{\infty}}
 \newcommand{\de}{\mathrm{d}}
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\bfu}{\mathbf{u}}
+\newcommand{\bff}{\mathbf{f}}
+\newcommand{\bfB}{\mathbf{B}}
+\newcommand{\bfb}{\mathbf{b}}
+\newcommand{\bfs}{\mathbf{s}}
+\newcommand{\bfC}{\mathbf{C}}
+\newcommand{\bfx}{\mathbf{x}}
+\newcommand{\D}{\mathop{}\!\mathrm{d}}
 \floatname{algorithm}{Algorithmus}
 \renewcommand{\thesubfigure}{\thefigure.\arabic{subfigure}}
 \lstset{language=Matlab,
@@ -147,10 +156,139 @@ We will take the following steps to study said equations:
     \item challenges in the implementation
     \item some application with different complexity 
 \end{itemize}
-For the sake of simplicity we will use well known framework FEniCS \cite{Alnaes2012a}\cite{AlnaesBlechta2015a}\cite{AlnaesEtAl2012}\cite{AlnaesLoggEtAl2012a} which uses the underlying DOLFIN library \footnote{citation needed} and we will make assumptions that reduce the complexity of the problem \par 
+For the sake of simplicity we will use the well known framework FEniCS \cite{Alnaes2012a}\cite{AlnaesBlechta2015a}\cite{AlnaesEtAl2012}\cite{AlnaesLoggEtAl2012a} which uses the underlying DOLFIN library \footnote{citation needed} and we will make assumptions that reduce the complexity of the problem. \par 
 At the end of this work we would like to answer the question: \enquote{Is this numerical method worth to try with the full system in 5-dimensions (3 spatial + 1 time  + 1 age dimension) in exa-scale systems?}\par 
 So without further ado let us dive into the matter!
 \newpage
+\section{Mathematical basics}
+In this chapter various typical definitions and theorems are presented which will be used extensively throughout this work.
+\subsection{Functional analysis}
+\subsection{The finite element method}
+\subsection{\textsc{Laplace} transform}
+\section{Modeling}
+\subsection{\textsc{Navier-Stokes} Equation}
+\subsection{\textsc{Maxwell/Oldroyd-B} model}
+\subsection{Dimension reduction}
+After we now discussed a bit of physics we will now focus on making these equations handier. We start from the well-known \textsc{Navier-Stokes}-equations
+\begin{align}
+\label{eq:NS3Dbegin}
+    \frac{\partial \bfu}{\partial t}+(\bfu\cdot \nabla)\bfu &= \bff +\nabla\cdot\sigma +\mu_s\Delta\bfu-\nabla p\\
+    \ddiv(\bfu)&= 0\\
+    \bfu &= \bfu_b \text{ on }\partial\Omega\\
+    \bfu(t=0) &=\bfu_0
+\end{align}
+with  
+\begin{itemize}
+    \item $t$ the time
+    \item $\hat\Omega\subset\rr^3$ our domain
+    \item $\hat{\mathbf{x}}\in\hat\Omega$ 
+    \item $\bfu(t,\hat\bfx)\colon\rr^+\times\hat\Omega\to\rr^3$ the velocity vector
+    \item $\bff(t,\hat\bfx)\colon\rr^+\times\hat\Omega\to \rr^3$ a generic right hand side (sink or source term)
+    \item $\sigma(t,\hat\bfx)\colon\rr^+\times\hat\Omega\to\rr^{3\times 3}$ the stress tensor
+    \item $\mu_s\in\rr$ the solvent viscosity 
+    \item $p(t,\\hatbfx)\colon\rr^+\times\hat\Omega\to\rr$ the pressure
+\end{itemize}
+To provide better readability we will omit the arguments where it is obvious. The difference between newtonian and non-newtonian fluids lies in the definition of $\sigma$. In the UCM or \textsc{Oldroyd-B}-model the stress tensor is given by:
+\begin{equation}
+    \sigma(t,\hat\bfx) = \int_{-\infty}^t-\partial_{t'}\bfB(t,t',\hat\bfx)G(t,t')\D t'
+    \label{eq:generalsig}
+\end{equation}
+where $G$ is a weight function which decays fast in $t'$. In both physical models which we discussed in \footnote{reference paragraph} $G$ is given by:
+\begin{equation}
+    G(t,t')=\mu_p\cdot e^{-(t-t')/\lambda}
+    \label{eq:G}
+\end{equation} 
+where $\mu_p$ is the polymer viscosity and $\lambda$ the relaxation time. Both are fluid dependent parameters. However $G$ can get as complex as one wishes. But if $G$ becomes space dependent this introduces many new problems which is why we will stick to \eqref{eq:G} for now.
+\par 
+The $\bfB$ in \eqref{eq:generalsig} is called \emph{Finger-Tensor} and obeys
+\begin{equation}
+\label{eq:Bfull}
+    \partial_t \bfB + (\bfu\cdot\nabla)\bfB-(\nabla \bfu)\bfB-\bfB(\nabla\bfu)^T = \mathbf{0}
+\end{equation}
+We introduce the following initial and boundary conditions
+\begin{align}
+    \bfB(t',t', \hat\bfx) &\equiv\mathbf{1}\\
+    \bfB(0,t',\hat\bfx) &\equiv\mathbf{1}
+\end{align}
+the last condition implies the assumption that we start the computation stress free. \par
+The variable $t'$ which appeared in the last equations is called \enquote{history-variable} we will discuss the impact of this later on.
+\par 
+Now we will assume that $\bfu, \nabla p $ and $\bff$ are only non-zero in one direction
+\begin{equation}
+    \bfu=(0, 0, u)^T,\,\nabla p= (0,0,\partial_3 p),\, \bff=(0,0,f)
+\end{equation}
+Because $\ddiv(\bfu)=0$ we immediately get $\partial_3 u=0$ which leads to
+\begin{equation}
+    [(\bfu\cdot\nabla)\bfu]_3 = u_1\partial_1 u_3+u_2\partial_2 u_3+u_3\partial_3 u_3 = 0
+\end{equation}
+and the other components of this term become obviously zero as well. So we loose the advection term in the \textsc{Navier-Stokes}-equations.\\
+We will now examine the \textsc{Laplace}-operator term
+\begin{equation}
+    \Delta \bfu=\begin{pmatrix}
+    \Delta u_1\\\Delta u_2\\\Delta u
+    \end{pmatrix}=\begin{pmatrix}
+    0\\0\\ \partial_1^2u+\partial_2^2u+\partial_3^3u
+    \end{pmatrix}=\begin{pmatrix}
+    0\\0\\ \partial_1^2u+\partial_2^2 u
+    \end{pmatrix}
+\end{equation}
+If we take a close look at \eqref{eq:NS3Dbegin} we can see that in order for the equations for $u_1$ and $u_2$ to be fulfilled ($0=(\nabla\cdot\sigma)_l,\quad l\in\{1,2\}$), the block with indexes $(i,j):i,j\in\{1,2\}$ of $\sigma$ has to be constant in space. The last row and column are the same because of symmetry. We have to make sure that they are constant in the third spatial direction which is obviously given by our assumptions. 
+\par After we treaded the \textsc{Navier-Stokes}-equations in the last paragraph we will now focus on the governing equation for the Finger-Tensor. We already saw that only the last row and last column are of interest for us. Let's look at \eqref{eq:Bfull} in index notation
+\begin{equation}
+\label{eq:Bindex}
+    \partial_t \mathbf{B}_{i,j}+\sum_{k=1}^3\mathbf{u}_k\partial_k \mathbf{B}_{i,j}-\sum_{k=1}^3\partial_k\mathbf{u}_i\mathbf{B}_{k,j}-\sum_{k=1}^3\mathbf{B}_{i,k}\partial_k\mathbf{u}_j=0
+\end{equation}
+We can now put our assumptions for $\bfu$ into it. Another thing to note is that $\partial_3\bfB_{3,j}$ should be $0$. We will just focus on the last row for now. This leads to
+\begin{equation}
+    \partial_t \mathbf{B}_{3,j} -\sum_{k=1}^2\partial_ku\mathbf{B}_{k,j}-\left.\begin{cases}
+    0 &, j=1,2\\ \sum_{k=1}^2 \mathbf{B}_{3,k}\partial_ku &, j=3
+    \end{cases}\right\} =0
+\end{equation}
+If we revisit \eqref{eq:Bindex}, we observe that
+\begin{equation}
+     \partial_t \mathbf{B}_{i,j}=-u(\partial_3 \mathbf{B}_{i,j})~\forall(i,j)\in\{1,2\}^2
+\end{equation}
+This shows that if we choose this block constant in the beginning as dictated by our assumptions it will not change over time. In our case we will choose the identity matrix for this. These observations also justify that we only care about the last row and ignore the other ones. If define $\bfb_j:=\bfB_{3,j}$ we obtain a nicer equation
+\begin{equation}
+   \partial_t \mathbf{b}=\begin{pmatrix}
+   \partial_1u\\ \partial_2 u \\ 2\left((\partial_1 u)\mathbf{b}_1+(\partial_2 u)\mathbf{b}_2\right)
+   \end{pmatrix}
+\end{equation}
+But let's take a step back. We have stated above that $\partial_3\bfb_3=0$ . This directly leads to $\partial_3\sigma_{3,3}=0$. But if we take a good look at \eqref{eq:NS3Dbegin} we see that $\sigma_{3,3}$ only contributes with its third spatial derivative. So it disappears from the equations completely. We redefine
+\begin{equation}
+\partial_t\bfb=
+    \begin{pmatrix}
+    \partial_1 u\\\partial_2 u
+    \end{pmatrix}
+\end{equation}
+It makes sense to define $\bfs:=\sigma_{3,j}$ so with the governing equation
+\begin{equation}
+    \bfs(t,\hat\bfx) =\int_{-\infty}^t-\partial_{t'}\bfb(t,t',\hat\bfx)G(t,t')\D t'
+\end{equation}
+We can define now our new system of equations
+\begin{align}
+\partial_t u &= -\nabla p + f +\nabla\cdot \bfs+\mu_s\Delta u\\
+\bfs &=\int_{-\infty}^t-\partial_{t'}\bfb(t,t',\bfx)G(t,t')\D t'\\
+\partial_t\bfb&=
+\begin{pmatrix}
+\partial_1 u\\\partial_2 u
+\end{pmatrix}
+\end{align}
+with
+\begin{itemize}
+    \item $\Omega\subset\rr^2$ our domain
+    \item $\bfx\in\rr^2$
+    \item $u(t,\bfx)\colon\rr^+\times\rr^2\to\rr$ the third component of the velocity
+    \item $p(t,\bfx)\colon\rr^+\times\rr^2\to\rr$ the pressure
+    \item $f(t,\bfx)\colon\rr^+\times\rr^2\to\rr$ the generic source/sink term 
+    \item $\Delta$ the two-dimensional \textsc{Laplace}-operator
+    \item $\bfs(t,\bfx)\colon\rr^+\times\rr^2\to\rr^2$ the stress tensor in 2D
+    \item $\bfb(t,\bfx)\colon\rr^+\times\rr^2\to\rr^2$ the Finger tensor in 2D
+\end{itemize}
+By using our assumptions we now deducted a true 2D problem. This can be interpreted as a slice orthogonally to the fluids velocity. During this deduction we silently eliminated the nonlinearity in $\bfb_3$ because it is not relevant for the equations anymore. This makes work much easier as we will see later on.
+\section{Numerical results}
+\section{Conclusion}
+
 \addcontentsline{toc}{section}{List of figures}
 \setcounter{lofdepth}{2}
 \listoffigures
