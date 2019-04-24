@@ -74,7 +74,7 @@ class FEniCSSimulation:
     def  getSigma2D(self, C1, C2, Lambda):
         """get sigma from C"""
 
-        return 0.8*as_vector([C1-1, C2-1])
+        return 8*as_vector([C1-1, C2-1])
 
     def form_variational_problem_full3D(self,Lambda):
         """define the variational problem for the equations with stress tensor"""
@@ -98,7 +98,7 @@ class FEniCSSimulation:
         """define the variational problem for the equations with stress tensor"""
         dt = Constant(0.1)
         Lambda = Constant(Lambda)
-        self.U = Function(self.V[0])
+        self.U = TrialFunction(self.V[0])
         C1, C2, u = split(self.U)
         CV1, CV2, v = TestFunctions(self.V[0])
         un1, un2, un3 = split(self.u_n)
@@ -138,13 +138,15 @@ class FEniCSSimulation:
         tol = tolerance
         eps = 1.0
         iter = 0
+        U = Function(self.V[0])
         for n in range(num_steps):
             t += dt
 
-            solve(self.F == 0, self.U, self.bc, solver_parameters={"newton_solver": {"absolute_tolerance": tol, "relative_tolerance": 1e-16}})
+            #solve(self.F == 0, self.U, self.bc, solver_parameters={"newton_solver": {"absolute_tolerance": tol, "relative_tolerance": 1e-16}})
+            solve(lhs(self.F) == rhs(self.F), U, self.bc)
             print("time: ",t)
-            vtkfile << (self.U.sub(2), t)
-            self.u_n.assign(self.U)
+            vtkfile << (U.sub(2), t)
+            self.u_n.assign(U)
 
 
 
