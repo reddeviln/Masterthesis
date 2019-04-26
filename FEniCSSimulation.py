@@ -94,7 +94,7 @@ class FEniCSSimulation:
             - dt *(1/Lambda*u.dx(0) * CV1 * dx \
             + 1 / Lambda * u.dx(1) * CV2 * dx + 2 * (u.dx(0) * C1 + u.dx(1) * C2) * CV3 * dx)
 
-    def form_variational_problem_full2D(self,Lambda):
+    def form_variational_problem_full2D(self, Lambda):
         """define the variational problem for the equations with stress tensor"""
         dt = Constant(0.1)
         Lambda = Constant(Lambda)
@@ -110,6 +110,42 @@ class FEniCSSimulation:
             + (C2 - un2 + dt / Lambda * (C2 - 1)) * CV2 * dx \
             - dt *(1 / Lambda * u.dx(0) * CV1 * dx \
             + 1 / Lambda * u.dx(1) * CV2 * dx)
+
+    def llf_flux(self, Lambda):
+        """local lax friedrich flux"""
+
+        F = 1 / 2 * dot(jump(self.C1, self.n), jump(self.v, self.n)) * dS\
+            + 1 / 2 * 1 / Lambda * dot(jump(self.u, self.n),  jump(self.CV1, self.n)) * dS\
+            + 1 / 2 * 1 / sqrt(Lambda) * jump(self.C1) * jump(self.CV1) * dS\
+            + 1 / 2 * 1 / sqrt(Lambda) * jump(self.C2) * jump(self.CV2) * dS\
+            + 1 / 2 * 1 / sqrt(Lambda) * jump(self.u) * jump(self.v) * dS
+
+        G = 1 / 2 * dot(jump(self.C2, self.n), jump(self.v, self.n)) * dS \
+            + 1 / 2 * 1 / Lambda * dot(jump(self.u, self.n), jump(self.CV2, self.n)) * dS \
+            - 1 / 2 * 1 / sqrt(Lambda) * jump(self.C1) * jump(self.CV1) * dS \
+            - 1 / 2 * 1 / sqrt(Lambda) * jump(self.C2) * jump(self.CV2) * dS \
+            - 1 / 2 * 1 / sqrt(Lambda) * jump(self.u) * jump(self.v) * dS
+
+        return F+G
+
+    def form_variational_problem_UCM_DG(self, Lambda):
+        """define the variational problem for UCM with DG for stability"""
+
+        dt= Constant(0.1)
+        self.n =FacetNormal(self.mesh)
+        self.U =TrialFunction(self.V[0])
+        self.C1, self.C2, self.u = split(self.U)
+        self.CV1, self.CV2, self.v = TestFunctions(self.V[0])
+        un1, un2 , un3 = split(self.u_n)
+
+        self.F = self.u * self.v * dx - un3 * self.v * dx\
+                 + self.C1 * self.CV1 * dx - un1 * self.CV1 * dx\
+                 + self.C2 * self.CV2 * dx - un2 * self.CV2 * dx\
+                 - dt * (self.llf_flux(Lambda) \
+                 - self.C1 * self.v.dx(0) * dx - 1 / Lambda * self.u * self.CV1.dx(0) * dx \
+                 - self.C2 * self.v.dx(1) * dx - 1 / Lambda * self.u * self.CV2.dx(1) * dx\
+                 + self.gradP * self.v * dx + 1 / Lambda * (self.C1 - 1) * self.CV1 * dx\
+                 + 1 / Lambda * (self.C2 - 1) * self.CV2 * dx)
 
     def run_simulation(self, T_end, num_steps,filename):
         """runs the actual simulation"""
@@ -139,11 +175,13 @@ class FEniCSSimulation:
         eps = 1.0
         iter = 0
         U = Function(self.V[0])
+        a = lhs(self.F)
+        L = rhs(self.F)
         for n in range(num_steps):
             t += dt
 
             #solve(self.F == 0, self.U, self.bc, solver_parameters={"newton_solver": {"absolute_tolerance": tol, "relative_tolerance": 1e-16}})
-            solve(lhs(self.F) == rhs(self.F), U, self.bc)
+            solve(a == L, U, self.bc)
             print("time: ",t)
             vtkfile << (U.sub(2), t)
             self.u_n.assign(U)
