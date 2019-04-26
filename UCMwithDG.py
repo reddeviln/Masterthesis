@@ -33,5 +33,5 @@ WithStressTensorSim.impose_initial_condition(Constant((0,0,0)),0)
 WithStressTensorSim.form_variational_problem_UCM_DG(1)
 
 # run
-WithStressTensorSim.run_simulation_full(5,1000,"output/withstressDG/solution.pvd",1.0E-10,25)
+WithStressTensorSim.run_simulation_full(1,1000,"output/withstressDG/solution.pvd",1.0E-10,25)
 

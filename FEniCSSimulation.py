@@ -116,9 +116,9 @@ class FEniCSSimulation:
 
         F = 1 / 2 * dot(jump(self.C1, self.n), jump(self.v, self.n)) * dS\
             + 1 / 2 * 1 / Lambda * dot(jump(self.u, self.n),  jump(self.CV1, self.n)) * dS\
-            + 1 / 2 * 1 / sqrt(Lambda) * jump(self.C1) * jump(self.CV1) * dS\
-            + 1 / 2 * 1 / sqrt(Lambda) * jump(self.C2) * jump(self.CV2) * dS\
-            + 1 / 2 * 1 / sqrt(Lambda) * jump(self.u) * jump(self.v) * dS
+            - 1 / 2 * 1 / sqrt(Lambda) * jump(self.C1) * jump(self.CV1) * dS\
+            - 1 / 2 * 1 / sqrt(Lambda) * jump(self.C2) * jump(self.CV2) * dS\
+            - 1 / 2 * 1 / sqrt(Lambda) * jump(self.u) * jump(self.v) * dS
 
         G = 1 / 2 * dot(jump(self.C2, self.n), jump(self.v, self.n)) * dS \
             + 1 / 2 * 1 / Lambda * dot(jump(self.u, self.n), jump(self.CV2, self.n)) * dS \
