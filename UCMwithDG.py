@@ -11,7 +11,7 @@ domain=mshr.Rectangle(Point(0,-sqrt(9)),Point(2*sqrt(9),sqrt(9)))
 mesh = mshr.generate_mesh(domain, nCells)
 WithStressTensorSim.mesh = mesh
 # dofs
-StressTensorElement1 = FiniteElement('DG', triangle , 0)
+StressTensorElement1 = FiniteElement('DG', triangle, 0)
 StressTensorElement2 = FiniteElement('DG', triangle, 0)
 VelocityElements = FiniteElement('DG', triangle, 0)
 element = MixedElement(StressTensorElement1, StressTensorElement2, VelocityElements)

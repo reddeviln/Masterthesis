@@ -114,17 +114,13 @@ class FEniCSSimulation:
     def llf_flux(self, Lambda):
         """local lax friedrich flux"""
 
-        F = 1 / 2 * dot(jump(self.C1, self.n), jump(self.v, self.n)) * dS\
-            + 1 / 2 * 1 / Lambda * dot(jump(self.u, self.n),  jump(self.CV1, self.n)) * dS\
-            - 1 / 2 * 1 / sqrt(Lambda) * jump(self.C1) * jump(self.CV1) * dS\
-            - 1 / 2 * 1 / sqrt(Lambda) * jump(self.C2) * jump(self.CV2) * dS\
-            - 1 / 2 * 1 / sqrt(Lambda) * jump(self.u) * jump(self.v) * dS
+        F = avg(self.C1 - 1) * jump(self.v) * dS - 1 / sqrt (Lambda) * jump(self.u) * jump(self.v) * dS\
+          + 1 / Lambda * avg(self.u) * jump(self.CV1) * dS - 1 / sqrt (Lambda) * jump(self.C1) * jump(self.CV1) * dS\
+          - 1 / 2 * 1 / sqrt(Lambda) * jump(self.C2) * jump(self.CV2) * dS
 
-        G = 1 / 2 * dot(jump(self.C2, self.n), jump(self.v, self.n)) * dS \
-            + 1 / 2 * 1 / Lambda * dot(jump(self.u, self.n), jump(self.CV2, self.n)) * dS \
-            - 1 / 2 * 1 / sqrt(Lambda) * jump(self.C1) * jump(self.CV1) * dS \
-            - 1 / 2 * 1 / sqrt(Lambda) * jump(self.C2) * jump(self.CV2) * dS \
-            - 1 / 2 * 1 / sqrt(Lambda) * jump(self.u) * jump(self.v) * dS
+        G = avg(self.C2 - 1) * jump(self.v) * dS - 1 / sqrt (Lambda) * jump(self.u) * jump(self.v) * dS\
+          + 1 / Lambda * avg(self.u) * jump(self.CV2) * dS - 1 / sqrt (Lambda) * jump(self.C2) * jump(self.CV2) * dS\
+          - 1 / 2 * 1 / sqrt(Lambda) * jump(self.C1) * jump(self.CV1) * dS
 
         return F+G
 
@@ -141,9 +137,9 @@ class FEniCSSimulation:
         self.F = self.u * self.v * dx - un3 * self.v * dx\
                  + self.C1 * self.CV1 * dx - un1 * self.CV1 * dx\
                  + self.C2 * self.CV2 * dx - un2 * self.CV2 * dx\
-                 - dt * (self.llf_flux(Lambda) \
-                 - self.C1 * self.v.dx(0) * dx - 1 / Lambda * self.u * self.CV1.dx(0) * dx \
-                 - self.C2 * self.v.dx(1) * dx - 1 / Lambda * self.u * self.CV2.dx(1) * dx\
+                 - dt * (self.llf_flux(Lambda)\
+                 - (self.C1 - 1) * self.v.dx(0) * dx - 1 / Lambda * self.u * self.CV1.dx(0) * dx \
+                 - (self.C2 - 1) * self.v.dx(1) * dx - 1 / Lambda * self.u * self.CV2.dx(1) * dx\
                  + self.gradP * self.v * dx + 1 / Lambda * (self.C1 - 1) * self.CV1 * dx\
                  + 1 / Lambda * (self.C2 - 1) * self.CV2 * dx)
 
