@@ -114,15 +114,24 @@ class FEniCSSimulation:
     def llf_flux(self, Lambda):
         """local lax friedrich flux"""
 
-        F = avg(self.C1 - 1) * jump(self.v) * dS - 1 / sqrt (Lambda) * jump(self.u) * jump(self.v) * dS\
-          + 1 / Lambda * avg(self.u) * jump(self.CV1) * dS - 1 / sqrt (Lambda) * jump(self.C1) * jump(self.CV1) * dS\
-          - 1 / 2 * 1 / sqrt(Lambda) * jump(self.C2) * jump(self.CV2) * dS
+        Fnum1int = avg(self.C1-1) - 1 / (2 * sqrt(Lambda)) * jump(self.u)
+        Fnum1ext = self.C1 - 1 - 1 / (2 * sqrt(Lambda)) * self.u
+        Fnum2int = 1 / Lambda * avg(self.u) - 1 / (2 * sqrt(Lambda)) * jump(self.C1)
+        Fnum2ext = 1 / Lambda * self.u - 1 / (2 * sqrt(Lambda)) * self.C1
+        Fnum3int = - 1 / (2 * sqrt(Lambda)) * jump(self.C2)
+        Fnum3ext = - 1 / (2 * sqrt(Lambda)) * self.C2
+        Gnum1int = avg(self.C2-1) - 1 / (2 * sqrt(Lambda)) * jump(self.u)
+        Gnum1ext = self.C2 - 1 - 1 / (2 * sqrt(Lambda)) * self.u
+        Gnum2int = - 1 / (2 * sqrt(Lambda)) * jump(self.C1)
+        Gnum2ext = - 1 / (2 * sqrt(Lambda)) * self.C1
+        Gnum3int = 1 / Lambda * avg(self.u) - 1 / (2 * sqrt(Lambda)) * jump(self.C2)
+        Gnum3ext = 1 / Lambda * self.u - 1 / (2 * sqrt(Lambda)) * self.C2
 
-        G = avg(self.C2 - 1) * jump(self.v) * dS - 1 / sqrt (Lambda) * jump(self.u) * jump(self.v) * dS\
-          + 1 / Lambda * avg(self.u) * jump(self.CV2) * dS - 1 / sqrt (Lambda) * jump(self.C2) * jump(self.CV2) * dS\
-          - 1 / 2 * 1 / sqrt(Lambda) * jump(self.C1) * jump(self.CV1) * dS
+        F = dot(as_vector([Fnum1int, Gnum1int]), jump(self.v, self.n)) * dS + dot(as_vector([Fnum1ext, Gnum1ext]), self.v * self.n) * ds\
+            + dot(as_vector([Fnum2int, Gnum2int]), jump(self.CV1, self.n)) * dS + dot(as_vector([Fnum2ext, Gnum2ext]), self.CV1 * self.n) * ds\
+            + dot(as_vector([Fnum3int, Gnum3int]), jump(self.CV2, self.n)) * dS + dot(as_vector([Fnum3ext, Gnum3ext]), self.CV2 * self.n) * ds\
 
-        return F+G
+        return F
 
     def form_variational_problem_UCM_DG(self, Lambda):
         """define the variational problem for UCM with DG for stability"""
@@ -131,7 +140,8 @@ class FEniCSSimulation:
         self.n =FacetNormal(self.mesh)
         self.U =TrialFunction(self.V[0])
         self.C1, self.C2, self.u = split(self.U)
-        self.CV1, self.CV2, self.v = TestFunctions(self.V[0])
+        self.testf = TestFunction(self.V[0])
+        self.CV1, self.CV2, self.v = split(self.testf)
         un1, un2 , un3 = split(self.u_n)
 
         self.F = self.u * self.v * dx - un3 * self.v * dx\
