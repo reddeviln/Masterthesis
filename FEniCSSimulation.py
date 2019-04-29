@@ -147,7 +147,7 @@ class FEniCSSimulation:
         self.F = self.u * self.v * dx - un3 * self.v * dx\
                  + self.C1 * self.CV1 * dx - un1 * self.CV1 * dx\
                  + self.C2 * self.CV2 * dx - un2 * self.CV2 * dx\
-                 - dt * (self.llf_flux(Lambda)\
+                 + dt * (-1 * self.llf_flux(Lambda)\
                  - (self.C1 - 1) * self.v.dx(0) * dx - 1 / Lambda * self.u * self.CV1.dx(0) * dx \
                  - (self.C2 - 1) * self.v.dx(1) * dx - 1 / Lambda * self.u * self.CV2.dx(1) * dx\
                  + self.gradP * self.v * dx + 1 / Lambda * (self.C1 - 1) * self.CV1 * dx\
