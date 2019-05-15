@@ -4,7 +4,7 @@ import numpy as np
 class FEniCSSimulation:
     """Lowlevelclass for using Non-Newtonian Fluids with Navier-Stokes"""
 
-    def __init__(self, gradP_in, sigma_in, mu_in):
+    def __init__(self, gradP_in, sigma_in, mu_in, mup_in):
         """Constructor"""
 
         self.gradP = gradP_in
@@ -16,6 +16,7 @@ class FEniCSSimulation:
         self.v = []
         self.mesh = None
         self.a =[]
+        self.mup = mup_in
 
     def make_mesh(self, KindOfMesh, nCellsX, nCellsY):
         """generates the mesh  and returns it"""
@@ -52,9 +53,9 @@ class FEniCSSimulation:
         if TypeOfBoundary == 'Dirichlet':
             self.bc.append(DirichletBC(space, expression, boundary))
 
-    def impose_initial_condition(self, expression, whichSpace):
+    def impose_initial_condition(self, expression):
         """impose the initial condition for the problem"""
-        self.u_n = interpolate(expression, self.V[whichSpace])
+        self.u_n = interpolate(expression, self.V[0])
 
     def form_variational_problem_heat(self):
         """define the variational problem for the heat equation with additions"""
@@ -66,92 +67,71 @@ class FEniCSSimulation:
         self.a = lhs(F)
         self.L = rhs(F)
 
-    def  getSigma3D(self, C1, C2, C3, Lambda):
-        """get sigma from C"""
+    def residual(self, t, Lambda, CV1, CV2, v):
+        """defines the residual for UCM"""
 
-        return 0.5/Lambda*as_vector([C1-1, C2-1, C3-1])
+        x = SpatialCoordinate(self.mesh)
+        arg1 = 2 * pi * (x[0] - t)
+        arg2 = 2 * pi * (x[1] - t)
+        resU = 2 * pi * (-cos(arg1) + sin(arg2)) + 2 * self.mup * pi * (cos(arg1) - sin(arg2))
+        resC1 = 2 * pi * (cos(arg1) - sin(arg2)) - 1 / Lambda * (sin(arg1) + cos(arg2) + 4 * pi**2 * sin(arg1) - 4 * pi**2 * self.mup * sin(arg1))
+        resC2 = 2 * pi * (cos(arg1) - sin(arg2)) - 1 / Lambda * (sin(arg1) + cos(arg2) + 4 * pi**2 * cos(arg2) - 4 * pi**2 * self.mup * cos(arg2))
 
-    def  getSigma2D(self, C1, C2, Lambda):
-        """get sigma from C"""
+        result = (resU ) * v * dx + resC1 * CV1 * dx + resC2 * CV2 * dx
+        return result
 
-        return 8*as_vector([C1-1, C2-1])
 
-    def form_variational_problem_full3D(self,Lambda):
+    def form_variational_problem_full2D(self, Lambda, residualon):
         """define the variational problem for the equations with stress tensor"""
         dt = Constant(0.1)
-        Lambda = Constant(Lambda)
-        self.U = Function(self.V[0])
-        C1, C2, C3, u = split(self.U)
-        CV1, CV2, CV3, v = TestFunctions(self.V[0])
-        un1, un2, un3, un4 = split(self.u_n)
-
-        self.F = u * v * dx - un4 * v * dx + dt*(self.gradP * v * dx\
-            + dot(self.getSigma3D(un1, un2, un3,  Lambda), grad(v)) * dx\
-            + Constant(self.mu) * dot(grad(u), grad(v)) * dx) \
-            + (C1 - un1 + dt / Lambda * (C1 - 1)) * CV1 * dx\
-            + (C2 - un2 + dt / Lambda * (C2 - 1)) * CV2 * dx \
-            + (C3 - un3 + dt / Lambda * (C3 - 1)) * CV3 * dx \
-            - dt *(1/Lambda*u.dx(0) * CV1 * dx \
-            + 1 / Lambda * u.dx(1) * CV2 * dx + 2 * (u.dx(0) * C1 + u.dx(1) * C2) * CV3 * dx)
-
-    def form_variational_problem_full2D(self, Lambda):
-        """define the variational problem for the equations with stress tensor"""
-        dt = Constant(0.1)
+        t = 0
         Lambda = Constant(Lambda)
         self.U = TrialFunction(self.V[0])
         C1, C2, u = split(self.U)
         CV1, CV2, v = TestFunctions(self.V[0])
         un1, un2, un3 = split(self.u_n)
 
-        self.F = u * v * dx - un3 * v * dx + dt*(self.gradP * v * dx\
-            + dot(self.getSigma2D(un1, un2, Lambda), grad(v)) * dx\
-            + Constant(self.mu) * dot(grad(u), grad(v)) * dx) \
-            + (C1 - un1 + dt / Lambda * (C1 - 1)) * CV1 * dx\
-            + (C2 - un2 + dt / Lambda * (C2 - 1)) * CV2 * dx \
-            - dt *(1 / Lambda * u.dx(0) * CV1 * dx \
-            + 1 / Lambda * u.dx(1) * CV2 * dx)
+        if residualon == 1:
+            self.F = u * v * dx - un3 * v * dx + dt*(self.gradP * v * dx\
+                + dot(self.mup*as_vector([C1, C2]), grad(v)) * dx\
+                + Constant(self.mu) * dot(grad(u), grad(v)) * dx) \
+                + (C1 - un1 + dt / Lambda * C1) * CV1 * dx\
+                + (C2 - un2 + dt / Lambda * C2) * CV2 * dx \
+                - dt *(1 / Lambda * u.dx(0) * CV1 * dx \
+                + 1 / Lambda * u.dx(1) * CV2 * dx + self.residual(t, Lambda, CV1, CV2, v))
+        elif residualon == 0:
+            self.F = u * v * dx - un3 * v * dx + dt * (self.gradP * v * dx \
+                     + dot(self.mup * as_vector([C1, C2]), grad(v)) * dx \
+                     + Constant(self.mu) * dot(grad(u), grad(v)) * dx) \
+                     + (C1 - un1 + dt / Lambda * C1) * CV1 * dx \
+                     + (C2 - un2 + dt / Lambda * C2) * CV2 * dx \
+                     - dt * (1 / Lambda * u.dx(0) * CV1 * dx \
+                     + 1 / Lambda * u.dx(1) * CV2 * dx)
+        else:
+            raise ValueError('residualon needs to be 0 or 1 but it was ', residualon)
 
-    def llf_flux(self, Lambda):
-        """local lax friedrich flux"""
 
-        Fnum1int = avg(self.C1-1) - 1 / (2 * sqrt(Lambda)) * jump(self.u)
-        Fnum1ext = self.C1 - 1 - 1 / (2 * sqrt(Lambda)) * self.u
-        Fnum2int = 1 / Lambda * avg(self.u) - 1 / (2 * sqrt(Lambda)) * jump(self.C1)
-        Fnum2ext = 1 / Lambda * self.u - 1 / (2 * sqrt(Lambda)) * self.C1
-        Fnum3int = - 1 / (2 * sqrt(Lambda)) * jump(self.C2)
-        Fnum3ext = - 1 / (2 * sqrt(Lambda)) * self.C2
-        Gnum1int = avg(self.C2-1) - 1 / (2 * sqrt(Lambda)) * jump(self.u)
-        Gnum1ext = self.C2 - 1 - 1 / (2 * sqrt(Lambda)) * self.u
-        Gnum2int = - 1 / (2 * sqrt(Lambda)) * jump(self.C1)
-        Gnum2ext = - 1 / (2 * sqrt(Lambda)) * self.C1
-        Gnum3int = 1 / Lambda * avg(self.u) - 1 / (2 * sqrt(Lambda)) * jump(self.C2)
-        Gnum3ext = 1 / Lambda * self.u - 1 / (2 * sqrt(Lambda)) * self.C2
-
-        F = dot(as_vector([Fnum1int, Gnum1int]), jump(self.v, self.n)) * dS + dot(as_vector([Fnum1ext, Gnum1ext]), self.v * self.n) * ds\
-            + dot(as_vector([Fnum2int, Gnum2int]), jump(self.CV1, self.n)) * dS + dot(as_vector([Fnum2ext, Gnum2ext]), self.CV1 * self.n) * ds\
-            + dot(as_vector([Fnum3int, Gnum3int]), jump(self.CV2, self.n)) * dS + dot(as_vector([Fnum3ext, Gnum3ext]), self.CV2 * self.n) * ds\
-
-        return F
 
     def form_variational_problem_UCM_DG(self, Lambda):
         """define the variational problem for UCM with DG for stability"""
 
-        dt= Constant(0.1)
+        dt = Constant(0.1)
         self.n =FacetNormal(self.mesh)
         self.U =TrialFunction(self.V[0])
         self.C1, self.C2, self.u = split(self.U)
-        self.testf = TestFunction(self.V[0])
-        self.CV1, self.CV2, self.v = split(self.testf)
+        self.phi = TestFunction(self.V[0])
+        self.CV1, self.CV2, self.v = split(self.phi)
         un1, un2 , un3 = split(self.u_n)
-
-        self.F = self.u * self.v * dx - un3 * self.v * dx\
-                 + self.C1 * self.CV1 * dx - un1 * self.CV1 * dx\
-                 + self.C2 * self.CV2 * dx - un2 * self.CV2 * dx\
-                 + dt * (-1 * self.llf_flux(Lambda)\
-                 - (self.C1 - 1) * self.v.dx(0) * dx - 1 / Lambda * self.u * self.CV1.dx(0) * dx \
-                 - (self.C2 - 1) * self.v.dx(1) * dx - 1 / Lambda * self.u * self.CV2.dx(1) * dx\
-                 + self.gradP * self.v * dx + 1 / Lambda * (self.C1 - 1) * self.CV1 * dx\
-                 + 1 / Lambda * (self.C2 - 1) * self.CV2 * dx)
+        Flux = as_tensor([[- self.mup * self.C1, -self.mup * self.C2], [-1/Lambda * self.u, 0], [0, -1/Lambda * self.u]])
+        jumpu = as_tensor([jump(self.U), jump(self.U)])
+        ubnd  = as_tensor([self.U, self.U])
+        numFlux = avg(Flux) - sqrt(self.mup) / ( 2 * sqrt(Lambda)) * jumpu.T
+        numFluxbnd = Flux - sqrt(self.mup) / (2 * sqrt(Lambda)) * ubnd.T
+        self.F = dot(self.U, self.phi) * dx - dot(self.u_n, self.phi) * dx + dt * (-inner(Flux, grad(self.phi)) * dx
+                + (self.gradP * self.v + 1 / Lambda * (self.C1) * self.CV1 + 1 / Lambda * (self.C2) * self.CV2) * dx
+                + dot(numFlux[0,:], jump(self.v, self.n)) * dS +  dot(numFlux[1,:], jump(self.CV1, self.n)) * dS
+                + dot(numFlux[2,:], jump(self.CV2, self.n)) * dS + dot(numFluxbnd[0,:], self.v * self.n) * ds
+                + dot(numFluxbnd[1,:], self.CV1 * self.n) * ds + dot(numFluxbnd[2,:], self.CV2 * self.n) * ds)
 
     def run_simulation(self, T_end, num_steps,filename):
         """runs the actual simulation"""
@@ -171,26 +151,47 @@ class FEniCSSimulation:
             vtkfile << (u,t)
             self.u_n.assign(u)
 
-    def run_simulation_full(self, T_end, num_steps,filename, tolerance, maxiter):
+    def run_simulation_full(self, T_end, num_steps,filename, u_D):
         """run the actual simulation for with newton iteration"""
 
         dt = T_end / num_steps
         vtkfile = File(filename)
         t = 0
-        tol = tolerance
-        eps = 1.0
-        iter = 0
         U = Function(self.V[0])
         a = lhs(self.F)
         L = rhs(self.F)
         for n in range(num_steps):
             t += dt
-
-            #solve(self.F == 0, self.U, self.bc, solver_parameters={"newton_solver": {"absolute_tolerance": tol, "relative_tolerance": 1e-16}})
+            u_D.t = t
             solve(a == L, U, self.bc)
+
             print("time: ",t)
             vtkfile << (U.sub(2), t)
             self.u_n.assign(U)
+        self.result = U
+
+
+def run_postprocessing(u_D, listofSolutions, listNumElem, Spaces):
+    """run error and convergence analysis"""
+
+    error = []
+    rate = []
+
+    for i in range(0, len(listofSolutions)):
+        u_D.t = 1
+        u_e = interpolate(u_D, Spaces[i])
+        error.append(norm(u_e.vector()-listofSolutions[i].vector(),norm_type='linf'))
+    n = len(error)
+    from math import log as ln
+    rate.append(0)
+    for i in range(1, n):
+        rate.append(ln(error[i]/error[i-1])/ln(listNumElem[i]/listNumElem[i-1]))
+
+    return error, rate
+
+
+
+
 
 
 
