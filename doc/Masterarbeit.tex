@@ -43,6 +43,7 @@
 \usepackage{color} % Farbpaket wird geladen
 \usepackage{stmaryrd} % St Mary Road Symbole werden geladen
 \usepackage{csquotes}
+\usepackage{bm}
 
 % Hier werden neue Theorems erstellt.
 \theoremstyle{definition}
@@ -73,13 +74,13 @@
 \newcommand{\sii}{\sum_{k=1}^{\infty}}
 \newcommand{\de}{\mathrm{d}}
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
-\newcommand{\bfu}{\mathbf{u}}
-\newcommand{\bff}{\mathbf{f}}
-\newcommand{\bfB}{\mathbf{B}}
-\newcommand{\bfb}{\mathbf{b}}
-\newcommand{\bfs}{\mathbf{s}}
-\newcommand{\bfC}{\mathbf{C}}
-\newcommand{\bfx}{\mathbf{x}}
+\newcommand{\bfu}{\bm{u}}
+\newcommand{\bff}{\bm{f}}
+\newcommand{\bfB}{\bm{B}}
+\newcommand{\bfb}{\bm{b}}
+\newcommand{\bfs}{\bm{s}}
+\newcommand{\bfC}{\bm{C}}
+\newcommand{\bfx}{\bm{x}}
 \newcommand{\D}{\mathop{}\!\mathrm{d}}
 \floatname{algorithm}{Algorithmus}
 \renewcommand{\thesubfigure}{\thefigure.\arabic{subfigure}}
@@ -169,60 +170,51 @@ In this chapter various typical definitions and theorems are presented which wil
 \subsection{\textsc{Navier-Stokes} Equation}
 \subsection{\textsc{Maxwell/Oldroyd-B} model}
 \subsection{Dimension reduction}
-After we now discussed a bit of physics we will now focus on making these equations handier. We start from the well-known \textsc{Navier-Stokes}-equations
+After we have discussed a bit of physics in the previous sections, we will now focus on making these equations easier to handle. To provide better readability we will omit the arguments where it is obvious. We start from the well-known \textsc{Navier-Stokes} equations
 \begin{align}
 \label{eq:NS3Dbegin}
-    \frac{\partial \bfu}{\partial t}+(\bfu\cdot \nabla)\bfu &= \bff +\nabla\cdot\sigma +\mu_s\Delta\bfu-\nabla p\\
-    \ddiv(\bfu)&= 0\\
-    \bfu &= \bfu_b \text{ on }\partial\Omega\\
-    \bfu(t=0) &=\bfu_0
+    \frac{\partial \bfu}{\partial t}+(\bfu\cdot \nabla)\bfu &= \bff +\nabla\cdot\sigma +\mu_s\Delta\bfu-\nabla p,\\
+    \ddiv(\bfu)&= 0,\label{eq:div0}\\
+    \bfu &= \bfu_b \text{ on }\partial\hat\Omega,\\
+    \bfu(t=0) &=\bfu_0,
 \end{align}
-with  
-\begin{itemize}
-    \item $t$ the time
-    \item $\hat\Omega\subset\rr^3$ our domain
-    \item $\hat{\mathbf{x}}\in\hat\Omega$ 
-    \item $\bfu(t,\hat\bfx)\colon\rr^+\times\hat\Omega\to\rr^3$ the velocity vector
-    \item $\bff(t,\hat\bfx)\colon\rr^+\times\hat\Omega\to \rr^3$ a generic right hand side (sink or source term)
-    \item $\sigma(t,\hat\bfx)\colon\rr^+\times\hat\Omega\to\rr^{3\times 3}$ the stress tensor
-    \item $\mu_s\in\rr$ the solvent viscosity 
-    \item $p(t,\\hatbfx)\colon\rr^+\times\hat\Omega\to\rr$ the pressure
-\end{itemize}
-To provide better readability we will omit the arguments where it is obvious. The difference between newtonian and non-newtonian fluids lies in the definition of $\sigma$. In the UCM or \textsc{Oldroyd-B}-model the stress tensor is given by:
+where $t\in[0,T]$ is the current time and $T$ the end time of our simulation. We set a domain $\hat\Omega\subset\rr^3$ and an element $\hat\bfx\in\hat\Omega$. We also have $\bfu(t,\hat\bfx)\colon \rr^+\times\hat\Omega\to\rr^3$ as the velocity vector, $\bff(t,\hat\bfx)\colon\rr^+\times\hat\Omega\to\rr^3$ a generic source or sink term and $\sigma(t,\hat\bfx)\colon\rr^+\times\hat\Omega\to\rr^{3\times 3}$ the stress tensor. As usual $\mu_s\in\rr^+$ denotes the solvent viscosity. We will use $p(t,\hat\bfx)\colon\rr^+\times\hat\Omega\to\rr$ as the pressure. Our boundary condition for $\bfu$ is denoted by $\bfu_b$.
+The difference between Newtonian and non-Newtonian fluids lies in the definition of $\sigma$. In the UCM or \textsc{Oldroyd-B} model the stress tensor is given by:
 \begin{equation}
-    \sigma(t,\hat\bfx) = \int_{-\infty}^t-\partial_{t'}\bfB(t,t',\hat\bfx)G(t,t')\D t'
+    \sigma(t,\hat\bfx) = \int_{-\infty}^t-\partial_{t'}\bfB(t,t',\hat\bfx)G(t,t')\D t',
     \label{eq:generalsig}
 \end{equation}
-where $G$ is a weight function which decays fast in $t'$. In both physical models which we discussed in \footnote{reference paragraph} $G$ is given by:
+where $G\colon\rr^+\times\rr^+\to\rr^+$ is a weight function which decays fast in $t'$. In both physical models which we have discussed in \footnote{reference paragraph} $G$ is given by:
 \begin{equation}
     G(t,t')=\mu_p\cdot e^{-(t-t')/\lambda}
     \label{eq:G}
 \end{equation} 
-where $\mu_p$ is the polymer viscosity and $\lambda$ the relaxation time. Both are fluid dependent parameters. However $G$ can get as complex as one wishes. But if $G$ becomes space dependent this introduces many new problems which is why we will stick to \eqref{eq:G} for now.
+where $\mu_p\in\rr^+$ is the polymer viscosity and $\lambda\in\rr$ the relaxation time. Both are fluid- dependent parameters. However, $G$ can be more complex. For example, if $G$ becomes space-dependent, this introduces many new problems. This is why we will stick to \eqref{eq:G} for now.
 \par 
-The $\bfB$ in \eqref{eq:generalsig} is called \emph{Finger-Tensor} and obeys
+The term $\bfB\colon\rr^+\times\rr^+\times\hat\Omega\to\rr^{3\times 3}$ in \eqref{eq:generalsig} is called \emph{Finger tensor} and obeys the differential equation
 \begin{equation}
 \label{eq:Bfull}
-    \partial_t \bfB + (\bfu\cdot\nabla)\bfB-(\nabla \bfu)\bfB-\bfB(\nabla\bfu)^T = \mathbf{0}
+    \partial_t \bfB + (\bfu\cdot\nabla)\bfB-(\nabla \bfu)\bfB-\bfB(\nabla\bfu)^T = \bm{0}.
 \end{equation}
 We introduce the following initial and boundary conditions
 \begin{align}
-    \bfB(t',t', \hat\bfx) &\equiv\mathbf{1}\\
-    \bfB(0,t',\hat\bfx) &\equiv\mathbf{1}
+    \bfB(t',t', \hat\bfx) &\equiv\bm{1}\\
+    \bfB(0,t',\hat\bfx) &\equiv\bm{1}
 \end{align}
-the last condition implies the assumption that we start the computation stress free. \par
-The variable $t'$ which appeared in the last equations is called \enquote{history-variable} we will discuss the impact of this later on.
+where the last condition implies the assumption that we start the computation stress free. \par
+The variable $t'$ which appeared in the last equations is called \enquote{history variable}. We will discuss the impact of this later on.
 \par 
-Now we will assume that $\bfu, \nabla p $ and $\bff$ are only non-zero in one direction
+Now we will assume that $\bfu, \nabla p $ and $\bff$ are only non-zero in one direction, that is,
 \begin{equation}
-    \bfu=(0, 0, u)^T,\,\nabla p= (0,0,\partial_3 p),\, \bff=(0,0,f)
+    \bfu=(0, 0, u)^T,\quad\nabla p= (0,0,\partial_3 p),\quad \bff=(0,0,f)
 \end{equation}
-Because $\ddiv(\bfu)=0$ we immediately get $\partial_3 u=0$ which leads to
+Where $u,f,p\colon\rr^+\times\hat\Omega\to\rr$
+Because $\ddiv(\bfu)=0$ (see \eqref{eq:div0}) we immediately obtain $\partial_3 u=0$, which leads to
 \begin{equation}
     [(\bfu\cdot\nabla)\bfu]_3 = u_1\partial_1 u_3+u_2\partial_2 u_3+u_3\partial_3 u_3 = 0
 \end{equation}
-and the other components of this term become obviously zero as well. So we loose the advection term in the \textsc{Navier-Stokes}-equations.\\
-We will now examine the \textsc{Laplace}-operator term
+and obviously the other components of this term become zero as well. Therefore, we loose the advection term in the \textsc{Navier-Stokes} equations.\\
+We will now examine the diffusion term
 \begin{equation}
     \Delta \bfu=\begin{pmatrix}
     \Delta u_1\\\Delta u_2\\\Delta u
@@ -232,60 +224,184 @@ We will now examine the \textsc{Laplace}-operator term
     0\\0\\ \partial_1^2u+\partial_2^2 u
     \end{pmatrix}
 \end{equation}
-If we take a close look at \eqref{eq:NS3Dbegin} we can see that in order for the equations for $u_1$ and $u_2$ to be fulfilled ($0=(\nabla\cdot\sigma)_l,\quad l\in\{1,2\}$), the block with indexes $(i,j):i,j\in\{1,2\}$ of $\sigma$ has to be constant in space. The last row and column are the same because of symmetry. We have to make sure that they are constant in the third spatial direction which is obviously given by our assumptions. 
-\par After we treaded the \textsc{Navier-Stokes}-equations in the last paragraph we will now focus on the governing equation for the Finger-Tensor. We already saw that only the last row and last column are of interest for us. Let's look at \eqref{eq:Bfull} in index notation
+If we take a close look at \eqref{eq:NS3Dbegin} we can see that in order to fulfill the equations for $u_1$ and $u_2$ ($0=(\nabla\cdot\sigma)_l,\quad l\in\{1,2\}$), the block with indexes $(i,j):i,j\in\{1,2\}$ of $\sigma$ has to be constant in space. The last row and last column are the same because of symmetry of the tensor. We have to make sure that they are constant in the third spatial direction which is obviously given by our assumptions. 
+\par After we treated the \textsc{Navier-Stokes} equations in the last paragraph we will now focus on the governing equation for the Finger tensor. We already saw that only the last row and last column are of interest for us. Let's look at \eqref{eq:Bfull} in index notation, which reads
 \begin{equation}
 \label{eq:Bindex}
-    \partial_t \mathbf{B}_{i,j}+\sum_{k=1}^3\mathbf{u}_k\partial_k \mathbf{B}_{i,j}-\sum_{k=1}^3\partial_k\mathbf{u}_i\mathbf{B}_{k,j}-\sum_{k=1}^3\mathbf{B}_{i,k}\partial_k\mathbf{u}_j=0
+    \partial_t \bm{B}_{i,j}+\sum_{k=1}^3\bm{u}_k\partial_k \bm{B}_{i,j}-\sum_{k=1}^3\partial_k\bm{u}_i\bm{B}_{k,j}-\sum_{k=1}^3\bm{B}_{i,k}\partial_k\bm{u}_j=0
 \end{equation}
-We can now put our assumptions for $\bfu$ into it. Another thing to note is that $\partial_3\bfB_{3,j}$ should be $0$. We will just focus on the last row for now. This leads to
+We can now put our assumptions for $\bfu$ into it. Additionally $\partial_3\bfB_{3,j}$ should be $0$. We will just focus on the last row for now. This leads to
 \begin{equation}
-    \partial_t \mathbf{B}_{3,j} -\sum_{k=1}^2\partial_ku\mathbf{B}_{k,j}-\left.\begin{cases}
-    0 &, j=1,2\\ \sum_{k=1}^2 \mathbf{B}_{3,k}\partial_ku &, j=3
-    \end{cases}\right\} =0
+    \partial_t \bm{B}_{3,j} -\sum_{k=1}^2\partial_ku\bm{B}_{k,j}-\left.\begin{cases}
+    0 &, j=1,2\\ \sum_{k=1}^2 \bm{B}_{3,k}\partial_ku &, j=3
+    \end{cases}\right\} =0.
 \end{equation}
 If we revisit \eqref{eq:Bindex}, we observe that
 \begin{equation}
-     \partial_t \mathbf{B}_{i,j}=-u(\partial_3 \mathbf{B}_{i,j})~\forall(i,j)\in\{1,2\}^2
+     \partial_t \bm{B}_{i,j}=-u(\partial_3 \bm{B}_{i,j})~\forall(i,j)\in\{1,2\}^2
 \end{equation}
-This shows that if we choose this block constant in the beginning as dictated by our assumptions it will not change over time. In our case we will choose the identity matrix for this. These observations also justify that we only care about the last row and ignore the other ones. If define $\bfb_j:=\bfB_{3,j}$ we obtain a nicer equation
+This shows that if we choose this block constant in the beginning as required by our assumptions it will not change over time. In our case we will choose the identity matrix for this. These observations also justify that we only care about the last row and ignore the other ones. If we define $\bfb_j:=\bfB_{3,j}$ we obtain the equation
 \begin{equation}
-   \partial_t \mathbf{b}=\begin{pmatrix}
-   \partial_1u\\ \partial_2 u \\ 2\left((\partial_1 u)\mathbf{b}_1+(\partial_2 u)\mathbf{b}_2\right)
-   \end{pmatrix}
+   \partial_t \bm{b}=\begin{pmatrix}
+   \partial_1u\\ \partial_2 u \\ 2\left((\partial_1 u)\bm{b}_1+(\partial_2 u)\bm{b}_2\right)
+   \end{pmatrix}.
 \end{equation}
-But let's take a step back. We have stated above that $\partial_3\bfb_3=0$ . This directly leads to $\partial_3\sigma_{3,3}=0$. But if we take a good look at \eqref{eq:NS3Dbegin} we see that $\sigma_{3,3}$ only contributes with its third spatial derivative. So it disappears from the equations completely. We redefine
+We have stated above that $\partial_3\bfb_3=0$ . This directly leads to $\partial_3\sigma_{3,3}=0$. Now, taking a good look at \eqref{eq:NS3Dbegin}, we see that $\sigma_{3,3}$ only contributes with its third spatial derivative. So it vanishes from the equations completely. We redefine
 \begin{equation}
 \partial_t\bfb=
     \begin{pmatrix}
     \partial_1 u\\\partial_2 u
     \end{pmatrix}
 \end{equation}
-It makes sense to define $\bfs:=\sigma_{3,j}$ so with the governing equation
+Furthermore, we define $\bfs:=\sigma_{3,j}$. Consequentially, we obtain the governing equation
 \begin{equation}
-    \bfs(t,\hat\bfx) =\int_{-\infty}^t-\partial_{t'}\bfb(t,t',\hat\bfx)G(t,t')\D t'
+    \bfs(t,\hat\bfx) =\int_{-\infty}^t-\partial_{t'}\bfb(t,t',\hat\bfx)G(t,t')\D t'.
 \end{equation}
-We can define now our new system of equations
+We can now define our new system of equations
 \begin{align}
-\partial_t u &= -\nabla p + f +\nabla\cdot \bfs+\mu_s\Delta u\\
-\bfs &=\int_{-\infty}^t-\partial_{t'}\bfb(t,t',\bfx)G(t,t')\D t'\\
-\partial_t\bfb&=
+\partial_t u(t,\bfx) &= -\nabla p + f +\nabla\cdot \bfs+\mu_s\Delta u,\\
+\bfs(t,\bfx) &=\int_{-\infty}^t-\partial_{t'}\bfb(t,t',\bfx)G(t,t')\D t',\label{eq:s2D}\\
+\partial_t\bfb(t,t',\bfx)&=
 \begin{pmatrix}
-\partial_1 u\\\partial_2 u
-\end{pmatrix}
+\partial_1 u(t,\bfx)\\\partial_2 u(t,\bfx)
+\end{pmatrix},
 \end{align}
-with
-\begin{itemize}
-    \item $\Omega\subset\rr^2$ our domain
-    \item $\bfx\in\rr^2$
-    \item $u(t,\bfx)\colon\rr^+\times\rr^2\to\rr$ the third component of the velocity
-    \item $p(t,\bfx)\colon\rr^+\times\rr^2\to\rr$ the pressure
-    \item $f(t,\bfx)\colon\rr^+\times\rr^2\to\rr$ the generic source/sink term 
-    \item $\Delta$ the two-dimensional \textsc{Laplace}-operator
-    \item $\bfs(t,\bfx)\colon\rr^+\times\rr^2\to\rr^2$ the stress tensor in 2D
-    \item $\bfb(t,\bfx)\colon\rr^+\times\rr^2\to\rr^2$ the Finger tensor in 2D
-\end{itemize}
-By using our assumptions we now deducted a true 2D problem. This can be interpreted as a slice orthogonally to the fluids velocity. During this deduction we silently eliminated the nonlinearity in $\bfb_3$ because it is not relevant for the equations anymore. This makes work much easier as we will see later on.
+where $\Omega\subset\rr^2$ is our domain with an element $\bfx$. We let $u(t,\bfx), p(t,\bfx), f(t,\bfx)\colon\rr^+\times\rr^2\to\rr$ denote the third component of the velocity, th pressure and a generic source/sink term respectively. $\Delta$ now stands for the two-dimensional \textsc{Laplace}-operator. To define the stress and finger tensor we use $\bfs(t,\bfx)$ and  $\bfb(t,\bfx)\colon\rr^+\times\rr^2\to\rr^2$ respectively.
+
+By using our assumptions we now deducted a true two-dimensional problem. This can be interpreted as a slice orthogonally to the fluid's flowing direction. During this deduction we silently eliminated the nonlinearity in $\bfb_3$ because it is not relevant for the equations anymore. This makes work much easier as we will see later on.
+\subsection{\textsc{Laplace} transformation}
+The next step that is usually taken is the introduction of an \enquote{age} variable $\tau=t-t'$. This is sensible because if we take a look at \eqref{eq:s2D}, we see that only the times $t'$ close to $t$ are relevant (recall that $G$ is exponentially declining the larger the difference between $t$ and $t'$). The further back in history $t'$ gets, the less contribution it makes. By putting this transformation into our equations we obtain
+\begin{equation}
+    \bfs(t,\bfx)=\int_0^\infty\partial_\tau\bfb(t,t-\tau,\bfx)G(t,t-\tau)\D\tau.\label{eq:sage}
+\end{equation}
+Using the chain rule the governing equation for the Finger tensor transforms to  
+\begin{equation}
+    \partial_t \bfb +\partial_\tau\bfb = \begin{pmatrix}
+    \partial_1 u(t,\bfx)\\\partial_2 u(t,\bfx)
+    \end{pmatrix},
+\end{equation}
+with the corresponding boundary and initial conditions
+\begin{align}
+    \bfb(t,t) &= \bm{0}\\
+    \bfb(t,0) &= \bm{0}
+\end{align}
+On first glance this appears to have made our situation worse because we now have two time derivatives in the equation. Luckily there is a tool that can help us with that: the \textsc{Laplace} transformation. We define
+\begin{equation}
+L_{\bfb}(t,\bfx,s) := \mathcal{L}\{\bfb\}(t,\bfx,s) \int_0^\infty\bfb(t,t-\tau,\bfx)e^{-s\tau}\D\tau
+\end{equation}
+as the \textsc{Laplace} transform of $\bfb$, where $s\in\cc$ is a transformation parameter. 
+Because the integral and the differential operator are linear we observe that this results in
+\begin{equation}
+    \partial_tL_{\bfb}(t,\bfx,s) + L_{\partial_\tau\bfb}(t,\bfx,s) = \begin{pmatrix}
+    \partial_1 u(t,\bfx)\\\partial_2 u(t,\bfx)
+    \end{pmatrix}.
+\end{equation}
+However, because $\partial_\tau$ is not independent of $\tau$, we have use integration by parts to transform it to
+\begin{align}
+    L_{\partial_\tau\bfb}(t,\bfx,s) &= \int_0^\infty\partial_\tau\bfb(t,t-\tau,\bfx)e^{-s\tau}\D\tau\\ &=\lim_{r\to\infty}\bfb(t,t-r,\bfx)e^{-sr}-\bfb(t,t,\bfx)e^{-s\cdot 0}+s\int_0^\infty\bfb(t,t-\tau)e^{-s\tau}\D\tau\\
+    \intertext{the first term vanishes because $e$ is dominant so it remains that}
+    &= -\bfb(t,t,\bfx) +sL_{\bfb}(t,\bfx, s)\\
+    &= sL_{\bfb}(t,\bfx,s).
+\end{align}
+We have successfully eliminated the time derivative in $\tau$ direction. The governing equation for the \textsc{Laplace} transform of the finger tensor is given by
+\begin{equation}
+(\partial_t +s)L_{\bfb}(t,\bfx,s) = \begin{pmatrix}
+\partial_1 u(t,\bfx)\\\partial_2 u(t,\bfx)
+\end{pmatrix}.
+\end{equation}
+The corresponding initial condition is 
+\begin{equation}
+    L_{\bfb}(0,\bfx,s) = \bm{0}
+\end{equation} 
+As a next step we will introduce the conformation tensor, which non-dimensionalizes $L_{\bfb}$ . It is defined as 
+\begin{equation}
+    \bfC_s(t,\bfx) := sL_{\bfb}(t,\bfx,s)
+\end{equation}
+and has the governing equation
+\begin{equation}
+    \partial_t\bfC_s(t,\bfx)+s\bfC_s(t,\bfx) =\begin{pmatrix}
+    s\partial_1u\\s\partial_2 u
+    \end{pmatrix}.
+\end{equation}
+This transformation worked very well and eliminated many problems but the question remains: How do we retrieve $\bfs$?
+Let's recall \eqref{eq:sage}.
+Because we only have a finite history and start stress free we can cut the integral off at $t$
+\begin{equation}
+    \bfs(t,\bfx)=\int_0^t\partial_\tau\bfb(t,t-\tau,\bfx)G(t,t-\tau)\D\tau.\label{eq:sagered}
+\end{equation}
+If we assume that the \textsc{Laplace} transform of $G$ is well-defined and allow that $G$ is space dependent we can set
+\begin{equation}
+    g(\bfx,t,s) =\int_0^\infty G(t,t',\bfx)e^{-st'}\D t'.
+\end{equation}
+Then $\bfs$ is simply given by an inverse Laplace transform so specifically
+\begin{equation}
+    \bfs(t,\bfx) =\mathcal{L}^{-1}\{\bfC_s(t,\bfx)g(t,\bfx,s)\}(t,\bfx)
+\end{equation}
+At first glance one may we tempted to be satisfied with this. However, numerically it is unclear how this would work. One of the nice properties of this approach is that if we choose 
+\begin{equation}
+    G(t,t-\tau)= \mu_p e^{-\tau/\lambda},\quad s=\frac{1}{\lambda},
+\end{equation}
+where $\lambda$ is the material specific relaxation time, we can retrieve the \textsc{Maxwell} / \textsc{Oldroyd}-B model as follows
+\begin{align}
+    \bfs(t,\bfx)&=\mu_p\int_0^t\partial_\tau\bfb(t,t-\tau,\bfx)e^{-\tau/\lambda}\D\tau\\
+    \intertext{using integration by parts again}
+    &=\mu_p\bfb(t,0)e^{-t/\lambda}-\mu_p\bfb(t,t)e^{-0/\lambda}+\frac{\mu_p}{\lambda}\int_0^t\bfb(t,t-\tau)e^{-\tau/\lambda}\D\tau\\
+    \intertext{if we use the boundary and initial conditions and extend the integral to $\infty$ we get}
+    &=\frac{\mu_p}{\lambda}\int_0^\infty\bfb(t,t-\tau)e^{-\tau/\lambda}\D\tau\\
+    &=\frac{\mu_p}{\lambda}L_{\bfb}(t,\bfx,1/\lambda) = \mu_p\bfC_{1/\lambda}
+\end{align}
+So using this assumptions we removed the integral term completely! In this example the stress tensor is just the scaled conformation tensor. 
+\section{Discretization and building the numerical scheme}
+The next step will be to build a numerical scheme to solve these equations. For this we firstly need the weak formulation then we will discuss the discretizations in space and time. Our equations are now given by 
+\begin{align}
+    \label{eq:transfeq1}
+    \partial_t u(t,\bfx) &= -\nabla p + f +\nabla\cdot \bfs+\mu_s\Delta u,\\
+    \label{eq:transfeq2}
+    \bfs(t,\bfx)&=\mu_p\bfC_{1/\lambda},\\
+    \partial_t\bfC_{1/\lambda}(t,\bfx) &= -\frac{1}{\lambda}\bfC_{1/\lambda}(t,\bfx)+\begin{pmatrix}
+    \frac{1}{\lambda}\partial_1u\\\frac{1}{\lambda}\partial_2 u
+    \end{pmatrix}.
+    \label{eq:transfeq3}
+\end{align}
+\subsection{Weak formulation}
+To get the weak formulation for equations \eqref{eq:transfeq1} to \eqref{eq:transfeq3} we will use the standard approach. So let $\varphi = (\varphi_1,\varphi_2)\in C^\infty(\Omega\times\rr,\rr^2)$ and $\psi\in C^\infty(\Omega\times\rr,\rr)$ be testfunctions of compact support. By integrating in space we can transform \eqref{eq:transfeq3} to 
+\begin{equation}
+    \int_\Omega(\partial_t\bfC_{1/\lambda}+\frac{1}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
+    \begin{pmatrix}
+    \frac{1}{\lambda}\int_\Omega\partial_1 u\varphi_1\D\Omega\\\frac{1}{\lambda}\int_\Omega\partial_2 u\varphi_2\D\Omega\\
+    \end{pmatrix}.
+\end{equation}
+We will not modify this equation further, as we do not have any knowledge about the boundary values of $\bfC$. The spatial derivatives of $u$ however, is not a problem during the simulation. Equation \eqref{eq:transfeq2} does not need to be handled obviously, so what remains is equation \eqref{eq:transfeq1}, which also is the most complicated one. Integration over $\Omega$ and multiplication with the respective testfunction yields
+\begin{equation}
+    \int_\Omega(\partial_t u + \nabla p -\nabla\cdot \bfs -\mu_s\Delta u)\psi\D\Omega = 0.
+\end{equation}
+Using the linearity of the integral we get
+\begin{equation}
+    \int_\Omega(\partial_t u)\psi\D\Omega +\int_\Omega\nabla p\psi\D\Omega -\int_\Omega(\nabla\cdot \bfs)\psi\D\Omega -\mu_s\int_\Omega\psi\Delta u\D\Omega=0.
+\end{equation}
+The first two terms do not need additional work. So we will focus on the last two. The last term is easily rewritten using well-known Green's Theorem. So we obtain
+\begin{equation}
+    \int_\Omega \psi\Delta u = \int_\Omega\nabla u\cdot \nabla\psi\D\Omega.
+\end{equation}
+Applying basic calculus and integration by parts lets us transform the remaining term
+\begin{equation}
+    \int_\Omega \psi(\nabla\cdot\bfs) =\int_{\partial\Omega}\psi\bfs\D\partial\Omega -\int_\Omega\bfs\cdot\nabla\psi\D\Omega.
+\end{equation}
+Because we chose $u = 0$ on $\partial\Omega$, the boundary integral becomes $0$. Putting both transformations back in the original equation yields
+\begin{equation}
+    \int_\Omega(\partial_t u)\psi\D\Omega +\int_\Omega\nabla p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega+\mu_s\int_\Omega\nabla u\cdot\nabla\psi\D\Omega = 0.
+\end{equation}
+If we recap this section we can give the following system of weak formulations for our governing equations
+\begin{align}
+     \int_\Omega(\partial_t u)\psi\D\Omega +\int_\Omega\nabla p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega+\mu_s\int_\Omega\nabla u\cdot\nabla\psi\D\Omega = 0,\\
+     \bfs =\mu_p\bfC_{1/\lambda},\\
+      \int_\Omega(\partial_t\bfC_{1/\lambda}+\frac{1}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
+     \begin{pmatrix}
+     \frac{1}{\lambda}\int_\Omega\partial_1 u\varphi_1\D\Omega\\\frac{1}{\lambda}\int_\Omega\partial_2 u\varphi_2\D\Omega\\
+     \end{pmatrix}.
+\end{align}
+\subsection{Spatial discretization}
+\subsection{Time discretization}
 \section{Numerical results}
 \section{Conclusion}
 
