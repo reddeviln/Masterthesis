@@ -1,6 +1,6 @@
 from FEniCSSimulation import *
 import mshr
-import matplotlib.pyplot as plt
+
 
 
 

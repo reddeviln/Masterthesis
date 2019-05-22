@@ -1,6 +1,6 @@
 from fenics import *
 import mshr
-import numpy as np
+import matplotlib.pyplot as plt
 class FEniCSSimulation:
     """Lowlevelclass for using Non-Newtonian Fluids with Navier-Stokes"""
 
@@ -71,13 +71,9 @@ class FEniCSSimulation:
         """defines the residual for UCM"""
 
         x = SpatialCoordinate(self.mesh)
-        arg1 = 2 * pi * (x[0] - t)
-        arg2 = 2 * pi * (x[1] - t)
-        resU = 2 * pi * (-cos(arg1) + sin(arg2)) + 2 * self.mup * pi * (cos(arg1) - sin(arg2))
-        resC1 = 2 * pi * (cos(arg1) - sin(arg2)) - 1 / Lambda * (sin(arg1) + cos(arg2) + 4 * pi**2 * sin(arg1) - 4 * pi**2 * self.mup * sin(arg1))
-        resC2 = 2 * pi * (cos(arg1) - sin(arg2)) - 1 / Lambda * (sin(arg1) + cos(arg2) + 4 * pi**2 * cos(arg2) - 4 * pi**2 * self.mup * cos(arg2))
-
-        result = (resU ) * v * dx + resC1 * CV1 * dx + resC2 * CV2 * dx
+        exy = exp(-(x[0]**2 + x[1]**2))
+        resU = 4 * self.mup * exy * (x[0]**2 + x[1]**2 - 1)
+        result = resU * v * dx
         return result
 
 
@@ -92,13 +88,13 @@ class FEniCSSimulation:
         un1, un2, un3 = split(self.u_n)
 
         if residualon == 1:
-            self.F = u * v * dx - un3 * v * dx + dt*(self.gradP * v * dx\
+            self.F = u * v * dx - un3 * v * dx + dt*( self.residual(t, Lambda, CV1, CV2, v) \
                 + dot(self.mup*as_vector([C1, C2]), grad(v)) * dx\
                 + Constant(self.mu) * dot(grad(u), grad(v)) * dx) \
                 + (C1 - un1 + dt / Lambda * C1) * CV1 * dx\
                 + (C2 - un2 + dt / Lambda * C2) * CV2 * dx \
                 - dt *(1 / Lambda * u.dx(0) * CV1 * dx \
-                + 1 / Lambda * u.dx(1) * CV2 * dx + self.residual(t, Lambda, CV1, CV2, v))
+                + 1 / Lambda * u.dx(1) * CV2 * dx)
         elif residualon == 0:
             self.F = u * v * dx - un3 * v * dx + dt * (self.gradP * v * dx \
                      + dot(self.mup * as_vector([C1, C2]), grad(v)) * dx \
@@ -151,7 +147,7 @@ class FEniCSSimulation:
             vtkfile << (u,t)
             self.u_n.assign(u)
 
-    def run_simulation_full(self, T_end, num_steps,filename, u_D):
+    def run_simulation_full(self, T_end, num_steps,filename):
         """run the actual simulation for with newton iteration"""
 
         dt = T_end / num_steps
@@ -160,11 +156,10 @@ class FEniCSSimulation:
         U = Function(self.V[0])
         a = lhs(self.F)
         L = rhs(self.F)
+
         for n in range(num_steps):
             t += dt
-            u_D.t = t
             solve(a == L, U, self.bc)
-
             print("time: ",t)
             vtkfile << (U.sub(2), t)
             self.u_n.assign(U)
@@ -180,12 +175,14 @@ def run_postprocessing(u_D, listofSolutions, listNumElem, Spaces):
     for i in range(0, len(listofSolutions)):
         u_D.t = 1
         u_e = interpolate(u_D, Spaces[i])
-        error.append(norm(u_e.vector()-listofSolutions[i].vector(),norm_type='linf'))
+        error.append(errornorm(u_e.sub(2), listofSolutions[i].sub(2), degree_rise=5))
     n = len(error)
+    vtkexact = File("output/withstressRes/exact.pvd")
+    vtkexact << u_e.sub(2)
     from math import log as ln
     rate.append(0)
     for i in range(1, n):
-        rate.append(ln(error[i]/error[i-1])/ln(listNumElem[i]/listNumElem[i-1]))
+        rate.append(-ln(error[i]/error[i-1])/ln(listNumElem[i]/listNumElem[i-1]))
 
     return error, rate
 
