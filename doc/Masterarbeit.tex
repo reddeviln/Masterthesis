@@ -352,8 +352,54 @@ where $\lambda$ is the material specific relaxation time, we can retrieve the \t
 \end{align}
 So using this assumptions we removed the integral term completely! In this example the stress tensor is just the scaled conformation tensor. 
 \section{Discretization and building the numerical scheme}
-The next step will be to build a numerical scheme to solve these equations. For this we firstly need the weak formulation then we will discuss the discretizations in space and time.
+The next step will be to build a numerical scheme to solve these equations. For this we firstly need the weak formulation then we will discuss the discretizations in space and time. Our equations are now given by 
+\begin{align}
+    \label{eq:transfeq1}
+    \partial_t u(t,\bfx) &= -\nabla p + f +\nabla\cdot \bfs+\mu_s\Delta u,\\
+    \label{eq:transfeq2}
+    \bfs(t,\bfx)&=\mu_p\bfC_{1/\lambda},\\
+    \partial_t\bfC_{1/\lambda}(t,\bfx) &= -\frac{1}{\lambda}\bfC_{1/\lambda}(t,\bfx)+\begin{pmatrix}
+    \frac{1}{\lambda}\partial_1u\\\frac{1}{\lambda}\partial_2 u
+    \end{pmatrix}.
+    \label{eq:transfeq3}
+\end{align}
 \subsection{Weak formulation}
+To get the weak formulation for equations \eqref{eq:transfeq1} to \eqref{eq:transfeq3} we will use the standard approach. So let $\varphi = (\varphi_1,\varphi_2)\in C^\infty(\Omega\times\rr,\rr^2)$ and $\psi\in C^\infty(\Omega\times\rr,\rr)$ be testfunctions of compact support. By integrating in space we can transform \eqref{eq:transfeq3} to 
+\begin{equation}
+    \int_\Omega(\partial_t\bfC_{1/\lambda}+\frac{1}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
+    \begin{pmatrix}
+    \frac{1}{\lambda}\int_\Omega\partial_1 u\varphi_1\D\Omega\\\frac{1}{\lambda}\int_\Omega\partial_2 u\varphi_2\D\Omega\\
+    \end{pmatrix}.
+\end{equation}
+We will not modify this equation further, as we do not have any knowledge about the boundary values of $\bfC$. The spatial derivatives of $u$ however, is not a problem during the simulation. Equation \eqref{eq:transfeq2} does not need to be handled obviously, so what remains is equation \eqref{eq:transfeq1}, which also is the most complicated one. Integration over $\Omega$ and multiplication with the respective testfunction yields
+\begin{equation}
+    \int_\Omega(\partial_t u + \nabla p -\nabla\cdot \bfs -\mu_s\Delta u)\psi\D\Omega = 0.
+\end{equation}
+Using the linearity of the integral we get
+\begin{equation}
+    \int_\Omega(\partial_t u)\psi\D\Omega +\int_\Omega\nabla p\psi\D\Omega -\int_\Omega(\nabla\cdot \bfs)\psi\D\Omega -\mu_s\int_\Omega\psi\Delta u\D\Omega=0.
+\end{equation}
+The first two terms do not need additional work. So we will focus on the last two. The last term is easily rewritten using well-known Green's Theorem. So we obtain
+\begin{equation}
+    \int_\Omega \psi\Delta u = \int_\Omega\nabla u\cdot \nabla\psi\D\Omega.
+\end{equation}
+Applying basic calculus and integration by parts lets us transform the remaining term
+\begin{equation}
+    \int_\Omega \psi(\nabla\cdot\bfs) =\int_{\partial\Omega}\psi\bfs\D\partial\Omega -\int_\Omega\bfs\cdot\nabla\psi\D\Omega.
+\end{equation}
+Because we chose $u = 0$ on $\partial\Omega$, the boundary integral becomes $0$. Putting both transformations back in the original equation yields
+\begin{equation}
+    \int_\Omega(\partial_t u)\psi\D\Omega +\int_\Omega\nabla p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega+\mu_s\int_\Omega\nabla u\cdot\nabla\psi\D\Omega = 0.
+\end{equation}
+If we recap this section we can give the following system of weak formulations for our governing equations
+\begin{align}
+     \int_\Omega(\partial_t u)\psi\D\Omega +\int_\Omega\nabla p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega+\mu_s\int_\Omega\nabla u\cdot\nabla\psi\D\Omega = 0,\\
+     \bfs =\mu_p\bfC_{1/\lambda},\\
+      \int_\Omega(\partial_t\bfC_{1/\lambda}+\frac{1}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
+     \begin{pmatrix}
+     \frac{1}{\lambda}\int_\Omega\partial_1 u\varphi_1\D\Omega\\\frac{1}{\lambda}\int_\Omega\partial_2 u\varphi_2\D\Omega\\
+     \end{pmatrix}.
+\end{align}
 \subsection{Spatial discretization}
 \subsection{Time discretization}
 \section{Numerical results}
