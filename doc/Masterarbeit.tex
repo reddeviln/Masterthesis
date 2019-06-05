@@ -48,24 +48,30 @@
 % Hier werden neue Theorems erstellt.
 \theoremstyle{definition}
 \newtheorem{auf}{Aufgabe}
-\newtheorem{rem}[auf]{Bemerkung}
+\newtheorem{rem}[auf]{Remark}
 \newtheorem{defn}[auf]{Definition}
-\newtheorem{bsp}[auf]{Beispiel}
+\newtheorem{bsp}[auf]{Example}
+\newtheorem{notation}[auf]{Notation}
 \theoremstyle{plain}
-\newtheorem{kor}[auf]{Korollar}
-\newtheorem{sa}[auf]{Satz}
-\newtheorem{alg}[auf]{Algorithmus}
+\newtheorem{kor}[auf]{Corollary}
+\newtheorem{sa}[auf]{Theorem}
+\newtheorem{lem}[auf]{Lemma}
+\newtheorem{alg}[auf]{Algorithm}
 \DeclareMathOperator*{\esssup}{ess\,sup} % essentiellen Supremums
 \DeclareMathOperator{\spn}{span} % Span
 \DeclareMathOperator{\supp}{supp} % Träger
 \DeclareMathOperator{\ddiv}{div} % divergenz
 \newcommand{\abs}[1]{\left\vert #1\right\vert}
+\newcommand{\dotp}[2]{\left\langle #1,#2\right\rangle}
 \newcommand{\rr}{\mathbb{R}}
 \newcommand{\g}{~\textgreater ~}
 \newcommand{\ls}{~\textless ~}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 \newcommand{\cc}{\mathbb{C}}
+\newcommand{\kk}{\mathbb{K}}
+\newcommand{\nn}{\mathbb{N}}
+\newcommand{\qq}{\mathbb{Q}}
 \newcommand{\e}{\varepsilon\g 0~}
 \newcommand{\fe}{\forall \e}
 \newcommand{\so}{\sum_{k=0}^{n}}
@@ -146,26 +152,308 @@ Nils Dornbusch
 \tableofcontents
 \newpage
 \section{Introduction}
-This work aims to provides an analysis of the Integro-Differential-equations which occur when modeling the behaviour of non-Newtonian fluids. The motivation arises in Physics when studying for example liquid glass or granule. This is often needed in space applications. I will reference the relevant physical phenomena which the interested reader can follow to learn more about as this is not the main focus of this work.\\
-The main focus will actually lie in the numerical challenges, which the equations present. We will also touch upon issues regarding the implementation.
-\par 
-The biggest problem when trying to implement these equation lies in the Integral over older timesteps and the appearence of another time dimension, which we call the \enquote{age dimension}. But more on that later on.\\
-We will take the following steps to study said equations:
-\begin{itemize}
-    \item theoretical derivation of the Navier-Stokes-Equations for the non-Newtonian stress tensor
-    \item discussion of different spatial and time discretization methods
-    \item challenges in the implementation
-    \item some application with different complexity 
-\end{itemize}
-For the sake of simplicity we will use the well known framework FEniCS \cite{Alnaes2012a}\cite{AlnaesBlechta2015a}\cite{AlnaesEtAl2012}\cite{AlnaesLoggEtAl2012a} which uses the underlying DOLFIN library \footnote{citation needed} and we will make assumptions that reduce the complexity of the problem. \par 
-At the end of this work we would like to answer the question: \enquote{Is this numerical method worth to try with the full system in 5-dimensions (3 spatial + 1 time  + 1 age dimension) in exa-scale systems?}\par 
-So without further ado let us dive into the matter!
+Lorem ipsum
+%This work aims to provides an analysis of the Integro-Differential-equations which occur when modeling the behaviour of non-Newtonian fluids. The motivation arises in Physics when studying for example liquid glass or granule. This is often needed in space applications. I will reference the relevant physical phenomena which the interested reader can follow to learn more about as this is not the main focus of this work.\\
+%The main focus will actually lie in the numerical challenges, which the equations present. We will also touch upon issues regarding the implementation.
+%\par 
+%The biggest problem when trying to implement these equation lies in the Integral over older timesteps and the appearence of another time dimension, which we call the \enquote{age dimension}. But more on that later on.\\
+%We will take the following steps to study said equations:
+%\begin{itemize}
+%    \item theoretical derivation of the Navier-Stokes-Equations for the non-Newtonian stress tensor
+%    \item discussion of different spatial and time discretization methods
+%    \item challenges in the implementation
+%    \item some application with different complexity 
+%\end{itemize}
+%For the sake of simplicity we will use the well known framework FEniCS \cite{Alnaes2012a}\cite{AlnaesBlechta2015a}\cite{AlnaesEtAl2012}\cite{AlnaesLoggEtAl2012a} which uses the underlying DOLFIN library \footnote{citation needed} and we will make assumptions that reduce the complexity of the problem. \par 
+%At the end of this work we would like to answer the question: \enquote{Is this numerical method worth to try with the full system in 5-dimensions (3 spatial + 1 time  + 1 age dimension) in exa-scale systems?}\par 
+%So without further ado let us dive into the matter!
 \newpage
 \section{Mathematical basics}
-In this chapter various typical definitions and theorems are presented which will be used extensively throughout this work.
+In this chapter, various typical definitions and theorems are presented, which will be used extensively throughout this work. Most of them are just a recap of well known theorems and are therefore presented without proof. The interested reader may follow the literature referenced in the beginning of each section.
+\subsection{Basics and notation}
+In the beginning, we will quickly state basic mathematical facts and introduce some notation, which we will use throughout this work. Most of this should be self explanatory.
+\begin{notation}
+    We will use $\nn$ as the natural numbers, starting from 1, and $\rr,\cc,\qq$ as per standard notation. With $\kk$ we denote a field, which can be $\rr$ or $\cc$.
+\end{notation} 
 \subsection{Functional analysis}
+\label{sec:funcana}
+Here, we cover basics of functional analysis as necessary for this work and the finite element method especially. We will follow \cite{Ganesan2017} for this.
+\begin{defn}[Norm]
+    Let $X$ be a $\kk$ vector space. A mapping $\norm{\cdot}\colon X\to\rr$ is called a \emph{norm} on $X$ if 
+    \begin{enumerate}
+        \item $\norm{x}=0 \Leftrightarrow x=0\quad \forall x\in X$ (positive definite),
+        \item $\norm{\lambda x}=\abs{\lambda}\norm{x}\quad \forall x\in X,\lambda\in\kk$ (homogeneous),
+        \item $\norm{x+y}\le\norm{x}+\norm{y}\quad\forall x,y\in X$ (triangle inequality).
+    \end{enumerate}
+    We call the pair $(X,\norm{\cdot})$ a \emph{normed space}.
+\end{defn}
+\begin{rem}
+    It follows directly from the definition that $\norm{x}\ge 0 \quad\forall x\in X$.
+\end{rem}
+\begin{defn}[\textsc{Cauchy} sequence]
+    A sequence $(x_n)_{n\in\nn}$ is called \emph{\textsc{Cauchy} sequence} if
+    \begin{equation}
+         \forall\varepsilon>0 \exists n_0(\varepsilon)\in\nn\colon \forall m,n>n_0\text{ it holds that }\norm{x_m-x_n}<\varepsilon.
+    \end{equation}
+\end{defn}
+\begin{defn}[Convergence]
+    A sequence $(x_n)_{n\in\nn}$ converges to $x\in X$ if 
+    \begin{equation}
+        \forall\varepsilon>0 \exists n_0(\varepsilon)\colon \forall n>n_0 \text{ it holds that } \norm{x_n -x}<\varepsilon.
+    \end{equation}
+\end{defn}
+As one might know, a \textsc{Cauchy} sequence does not converge in general. The class of spaces, for which this is true, is given in the following definition.
+\begin{defn}
+    A normed space $(X, \norm{\cdot})$ is called \emph{complete} if every \textsc{Cauchy} sequence in $X$ converges in $X$. A complete normed space is also called \textsc{Banach} \emph{space}.
+\end{defn}
+\begin{bsp}
+    For an open and bounded domain $\Omega$, we introduce the $L^p(\Omega)$ spaces
+    \begin{equation}
+        L^p(\Omega):=\left\{f\colon\Omega\to\rr\colon\int_\Omega \abs{f}^p\D\Omega <\infty\right\} \quad\forall 1\le p<\infty.
+    \end{equation}
+    A natural extension is 
+    \begin{equation}
+        L^\infty(\Omega):=\left\{f\colon\Omega\to\rr\colon \esssup\{\abs{f(x)}\colon x\in\Omega\}<\infty\right\}.
+    \end{equation}
+    Obviously, these are vector spaces for $p\in[1,\infty]$ if we identify functions, which only differ on sets of measure zero. If we would not identify these functions, we would get problems defining a norm. With the identification, one can see that 
+    \begin{equation}
+        \norm{f}_{p}:=\left(\int_\Omega\abs{f}^p\D\Omega\right)^{1/p}
+    \end{equation}
+    and 
+    \begin{equation}
+        \norm{f}_{\infty}:=\esssup\{\abs{f(x)}\colon x\in\Omega\}
+    \end{equation}
+    are norms on $L^p$ and $L^\infty$ respectively. Everything but the triangle inequality is trivial.
+\end{bsp}
+\begin{lem}[\textsc{Minkowski}'s inequality]
+    For $f,g\in L^p(\Omega)$ and $p\in[1,\infty]$, we have
+    \begin{equation}
+        \norm{f+g}_p\le\norm{f}_p+\norm{g}_p
+    \end{equation}
+\end{lem}
+\begin{sa}
+    $L^p(\Omega)$, $p\in[1,\infty]$ is a \textsc{Banach} space.
+\end{sa}
+\begin{defn}
+    Let $V$ be a vector space. A mapping $\dotp{\cdot}{\cdot}\colon V\times V\to\rr$ is called an \emph{inner product} or \emph{dot product} if 
+    \begin{enumerate}
+        \item $\dotp{u}{u} \ge 0 \quad \forall u\in V$ (positive definite),
+        \item $\dotp{u}{u} = 0 \Leftrightarrow u=0 $  (strictly positive),
+        \item $\dotp{u}{v} = \overline{\dotp{v}{u}}   \quad\forall u,v\in V$ (conjugate symmetric),
+        \item $\dotp{u}{\lambda v} = \lambda\dotp{u}{v} \quad\forall u,v\in V$ (homogeneous in second argument),
+        \item $\dotp{u}{v+w} =\dotp{u}{v}+\dotp{u}{w} \quad\forall u,v\in V$ (linear in second argument).
+    \end{enumerate}
+\end{defn}
+\begin{rem}
+    In the case that $V$ is a real-valued vector space, the first argument is trivially linear and homogeneous. Even in the complex case, we get these properties, but with conjugation.
+\end{rem}
+\begin{sa}
+    Let $V$ be a vector space and $\dotp{\cdot}{\cdot}$ an inner product. By setting $\norm{v}:=\sqrt{\dotp{v}{v}}$, we obtain a norm. So every vector space with an inner product is a normed space.
+\end{sa}
+\begin{defn}
+    A complete vector space with an inner product is called \emph{\textsc{Hilbert} space}.
+\end{defn}
+\begin{sa}[\textsc{Schwarz} inequality]
+    Let $V$ be a vector space. Then 
+    \begin{equation}
+        \abs{\dotp{u}{v}}\le\norm{u}_V\norm{v}_V\quad \forall u,v\in V.
+    \end{equation}
+\end{sa}
+\begin{bsp}
+    $V=L^2(\Omega)$, $\Omega\subset\rr^n$ with the inner product
+    \begin{equation}
+       \dotp{f}{g}:=\int_\Omega f(x)g(x)\D x
+    \end{equation}
+    is a \textsc{Hilbert} space.
+\end{bsp}
+\begin{notation}
+    We write $C^n(\Omega)$, $n\in\nn\cup\{\infty\}$ for the space of $n$ times differentiable functions on $\Omega$. $C^0(\Omega)$ shall be the space of continuous functions on $\Omega$.
+\end{notation}
+\begin{defn}
+    The \emph{support} of a function $f\colon \Omega\to\rr$ is defined by 
+    \begin{equation}
+        \supp f = \overline{\{x\in\Omega\colon f(x)\neq 0\}}.
+    \end{equation}
+\end{defn}
+\begin{notation}
+    In the following sections and chapters we will often use functions with compact support, so we will introduce the convention
+    \begin{equation}
+        C^n_0(\Omega)=\{f\in C^n(\Omega)\colon \supp f \text{ is compact} \},
+    \end{equation}
+    where we mean \enquote{compact} in the topological sense, so in our cases bounded and closed.
+\end{notation}
+\begin{rem}
+    Interestingly, one can proof that if $f\in C^n_0$, then $f$ approaches zero on the boundary $\partial\Omega$. This motivates the notation.
+\end{rem}
+\begin{defn}
+    We define 
+    \begin{equation}
+        L^1_{loc}(\Omega):=\{f\colon\Omega\to\rr\colon f\in L^1(A) \text{ for all compact} A\subset\Omega \},
+    \end{equation}
+    as the space of \emph{locally integrable functions}.
+\end{defn}
+\begin{bsp}
+    $L^1_{loc}$ is a true extension of $L^1$. Consider $f=\frac{1}{x}$. $f$ belongs to $L^1_{loc}$, but not to $L^1$. 
+\end{bsp}
+\begin{defn}
+    Let $\alpha$ be a multi index. A function $f\in L^1_{loc}$ has a \emph{weak derivative} $\nu=D^\alpha f\in L^1_{loc}$ if $\forall \varphi\in C_0^\infty$
+    \begin{equation}
+        \int_\Omega\nu\varphi\D\Omega = (-1)^{\abs{\alpha}}\int_\Omega fD^\alpha\varphi \D\Omega,
+    \end{equation}
+    where 
+    \begin{equation}
+        D^\alpha\varphi=\frac{\partial^{\abs{\alpha}}\varphi}{\partial x_1^{\alpha_1}\dotsb\partial x_n^{\alpha_n}}.
+    \end{equation}
+\end{defn}
+\begin{rem}
+    This definition is motivated by the integration by parts method. So one could say that if a function is weak differentiable, then one can do integration by parts under the right circumstances. It is also important to note that the weak derivative of a function, if it exists, is unique if we identify functions, which only differ on sets with zero measure.
+\end{rem}
+\begin{defn}
+    We denote by $W^{m,p}(\Omega)$, for $p\in[1,\infty]$ and $m\ge 0$, the set of all functions $f\in L^p(\Omega)$ with weak derivatives in $L^p(\Omega)$ up to the order $\abs{\alpha}\le m$. These sets are called \textsc{Sobolev} \emph{spaces}. We denote $H^m(\Omega):=W^{m,2}(\Omega)$ because these are special, as one can see in the following theorem.
+\end{defn}
+\begin{sa}
+    The \textsc{Sobolev} space $W^{m,p}(\Omega)$ with the norm
+    \begin{equation}
+        \norm{f}_{W^{m,p}}:=\left(\int_\Omega\sum_{\abs{\alpha}\le m}\abs{D^{\alpha} f(x)}^p\D\Omega\right)^{1/p},
+    \end{equation}
+    for $p\in[1,\infty)$, and 
+    \begin{equation}
+        \norm{f}_{W^{m,p}}:=\max_{\abs{\alpha}\le m}\left(\esssup_{x\in\Omega}\abs{D^{\alpha}f(x)}\right)
+    \end{equation}
+    if $p=\infty$, is a \textsc{Banach} space. $H^m(\Omega)$ with the inner product
+    \begin{equation}
+        \dotp{u}{v}_{H^m}:=\sum_{\abs{\alpha}\le m}\dotp{D^{\alpha}u}{D^{\alpha}v}=\sum_{\abs{\alpha}\le m}\int_\Omega D^\alpha u D^\alpha v\D\Omega \quad \forall u,v\in H^m(\Omega)
+    \end{equation}
+    is a \textsc{Hilbert} space.
+\end{sa}
+\begin{rem}
+    The $H^m$ spaces are very important for all numerical methods because of their property that they are \textsc{Hilbert} spaces. The whole theory, which follows hereafter, relies heavily on this assumption.
+\end{rem}
+
 \subsection{The finite element method}
+\label{sec:fem}
+This section covers the basics of the finite element method (FEM). This is a standard approach, which is used in almost every book about this topic. We still use \cite{Ganesan2017} for reference.
+Let us start by introducing the concept of \emph{weak solutions}. Consider the \textsc{Poisson} problem
+\begin{equation}
+    -\Delta u = f \quad \text{in }\Omega
+\end{equation}
+and $u=0$ on the boundary, where $u,f\colon \Omega\to\rr$. This formulation requires $u\in C^2(\Omega)$, which is a very strong assumption. It often excludes the correct solution, so we want to reduce the required regularity. For this, we integrate both sides over $\Omega$ and multiply with a testfunction $\varphi\in C^\infty_0(\Omega)$. So we get
+\begin{equation}
+    -\int_\Omega \Delta u\varphi\D\Omega =\int_\Omega f\varphi\D\Omega.
+\end{equation}
+If we now use \textsc{Green}'s theorem on the left side, we get
+\begin{equation}
+    \int_\Omega \nabla u\cdot\nabla \varphi\D\Omega = \int_\Omega f\varphi\D\Omega \quad\forall\varphi\in C^\infty_0(\Omega)\label{eq:laplace}.
+\end{equation}
+The boundary term has vanished because $\varphi$ is assumed to be 0 on the boundary.
+We can observe that we can use \textsc{Green} here because we assume $u\in H^1(\Omega)$. But this imposes much fewer regularity requirements then the classical formulation. 
+
+\begin{defn}
+    Let $V$ be a \textsc{Hilbert} space. A bilinear form (e.g. inner product) $a\colon V\times V\to\rr$ is said to be \emph{continuous} if there exists a constant $\beta>0$ such that
+    \begin{equation}
+        \abs{a(u,v)}\le\beta\norm{u}\norm{v}\quad \forall u,v\in V,
+    \end{equation}
+    and \emph{coercive} if 
+    \begin{equation}
+        \exists\alpha>0\colon \quad a(u,u)\ge \alpha\norm{u}^2\quad\forall u\in V.
+    \end{equation}
+\end{defn}
+\begin{rem}
+    We see that if $a$ is the inner product of $V$ and induces the norm, then both properties are satisfied. The first is simply the \textsc{Schwarz} inequality and the second by definition. In this case $\sqrt{a(v,v)}$ is called \emph{energy norm}, which is the natural norm for error analysis of this problem.
+\end{rem}
+\begin{sa}[\textsc{Lax-Milgram}]
+    Let $V$ be a \textsc{Hilbert} space, $a(\cdot,\cdot)$ be a continuous coercive bilinear form and $F$ a continuous linear functional. Then there exists a unique $u\in V$ such that
+    \begin{equation}
+        a(u,v)=F(v)\quad \forall v\in V.
+    \end{equation}
+\end{sa}
+\begin{rem}
+    Why is this relevant to us? On first glance it is not obvious what this has to do with numerical approximations. It turns out that any linear partial differential equation (linear PDE) in weak formulation can be written in this form, where $u$ are the unknowns and $v$ is a testfunction.
+\end{rem}
+\begin{bsp}
+    Let us revisit \eqref{eq:laplace}. We can see that we can rewrite it in terms of $a$ and $F$. 
+    \begin{equation}
+        a(u,v):=\int_\Omega \nabla u\cdot \nabla v\D\Omega
+    \end{equation}
+    and $F=f$ remains the same. Note, that $a$ is not an inner product in the strict sense here. Consider $u\equiv c$ for $c\in\rr$ constant. Then $a(u,u)=0$ but $u$ is not necessarily zero. So we get a so called \emph{seminorm} if we use $p(u):=\sqrt{a(u,u)}$. All properties are the same, as a normal norm would have, but the zero uniqueness. However, \textsc{Lax-Milgram} does not require a true inner product, so we can still deduce that this problem has a unique solution for a given set of boundary conditions.
+\end{bsp}
+\paragraph*{Standard \textsc{Galerkin} method}
+So far we only covered the theory behind PDEs. It seems like we have answered all questions. We know in which space our solution lives, and we can now try all linear combinations for a given basis and are finished. Unfortunately it is not that easy. Recall that $u\in H^1(\Omega)$ in our example earlier. The problem is that $H^1(\Omega)$ is a space of infinite dimension. Because no computer can handle infinitly many cases, we have to reduce the problem somehow. So we use finite dimensional subspaces of the solution space and calculate the best approximation in this subspace. How this spaces are constructed exactly, will be explained later on. 
+\par 
+Let $V$ a \textsc{Hilbert} space and our solution space. Furthermore let $V_h\subset V$ be finite dimensional subspace with a discretization parameter $h$. We want that our discrete solution converges to the continuous one, when $h\to 0$. Because the properties of $a$ and $F$ also apply in $V_h$, \textsc{Lax-Milgram} still guarantees existence and uniqueness of the solution. Our new problem is given by
+\begin{equation}
+    a(u_h,v_h) = F(v_h) \quad \forall v_h\in V_h \label{eq:galerkindiscrete}
+\end{equation}
+for our discrete solution $u_h\in V_h$.
+We still do not know how this would be of practical use, so we will rewrite \eqref{eq:galerkindiscrete} as a linear system of equations. By $\{\varphi_i\}$ for $i=1,\dotsc,n$, we denote a basis of $V_h$. Obviously, there exists coefficients $(U_j)_1^n\subset\rr$ so that
+\begin{equation}
+    u_h(x)=\sum_{j=1}^{n}U_j\varphi_j(x),\quad \nabla u_h(x)=\sum_{j=1}^{n}U_j\nabla\varphi_j(x).
+\end{equation}
+The coefficients $U_j$ are also called degrees of freedom or unknowns. Because we have a basis for $V_h$, we can rewrite \eqref{eq:galerkindiscrete} as 
+\begin{equation}
+    a\left(\sum_{j=1}^{n}U_j\varphi_j(x),\varphi_i\right)= F(\varphi_i)\quad \forall i=1,\dotsc,n.
+\end{equation}
+If we recall that $a$ is a bilinear form, we can also write
+\begin{equation}
+    \sum_{j=1}^{n}U_ja(\varphi_j,\varphi_i)=F(\varphi_i) \quad\forall i=1,\dotsc,n.
+\end{equation}
+This already looks like a matrix vector multiplication. So let us define $a_{i,j}=a(\varphi_j,\varphi_i)$ and $b_i=F(\varphi_i)$. We get the following linear problem
+\begin{equation}
+    AU=b,
+\end{equation} which can be solved by any of the many known linear solvers. The matrix $A$ is often called \emph{stiffness matrix} and $b$ the load vector.
+\begin{rem}
+    What happens if the problem is not linear? One would then still use a weak formulation. This would then we interpreted as a problem of the form
+    \begin{equation}
+        F(u,v) = 0 \quad\forall v \in V.
+    \end{equation}
+    This would then be treated with basis functions of $V_h$ as above, but one would have to take care choosing a right basis $\varphi$. It can then be rewritten as 
+    \begin{equation}
+        F(u_h, \varphi_i) = 0 \quad \forall i=1,\dotsc,n.
+    \end{equation}
+    This would then be plugged into a non-linear solver. However, existence or even uniqueness cannot be guaranteed and must be assessed on a case-by-case basis. This is an open research topic.
+\end{rem}
+\paragraph*{Finite element spaces}
+For now, we handled the problem with an arbitrary subspace $V_h$. But how would we choose such space and its basis functions?
 \subsection{\textsc{Laplace} transform}
+\label{sec:laplacetransform}
+In this section we will introduce the \textsc{Laplace} transform and some basic properties of it. We will loosely follow \cite{Widder1945} for this.
+\begin{defn}
+    For a function $f\colon\Omega\times\rr^+_0\to\rr$, we call
+    \begin{equation}
+        L_f(x,s):=\mathcal{L}\{f\}(s):=\int_0^\infty f(x,t)e^{-st}\D t\label{eq:laplacetrafo}
+    \end{equation}
+    the \emph{\textsc{Laplace} transform} of $f$, where $s\in\cc$ is the frequency parameter. 
+\end{defn}
+Typically $t$ will be the time variable. In this case this is a transformation of $f$ from the time domain to the frequency domain. Of course this definition only makes sense if \eqref{eq:laplacetrafo} converges for some $s$. From function theory we know that if it converges for some $s_c=a_c+ib_c$, it converges in $A_c:=\{s\in\cc\colon a>a_c\}$. Note, that $a_c$ may be $\pm\infty$.
+\begin{defn}
+    If $a_c$ is minimal so that the integral diverges in $A_d:=\{s\in\cc\colon a<a_c\}$ we call $a_c$ the \emph{abscissa of convergence}. 
+\end{defn}
+\begin{rem}
+    If we replace the lower limit of the integral in \eqref{eq:laplacetrafo} with $-\infty$, we get the \emph{bilateral \textsc{Laplace} transform}.
+\end{rem}
+\begin{bsp}
+    An important example for this is the well-known Gamma function
+    \begin{equation}
+        \Gamma(s)=\int_0^\infty x^{s-1}e^{-x}\D x=\int_{-\infty}^\infty e^{-st}e^{-e^{-t}}\D t.
+    \end{equation}
+    This transformation is obtained by setting $x:=e^{-t}$, which is valid because $x$ should be positive. The substitution for differentials has been considered. 
+\end{bsp}
+We can give a relationship between the \textsc{Laplace} and \textsc{Fourier} transforms.
+
+\begin{rem}
+    Consider a bilateral \textsc{Laplace} transform with $s:=ib$. We then get
+    \begin{equation}
+        g(x,b)=L_f(x,ib)=\int_{-\infty}^\infty e^{-ibt}f(x,t)\D t,
+    \end{equation}
+    which is essentially the \textsc{Fourier} transform of $f$ into $g$.
+\end{rem}
+\begin{sa}
+    If $L_f(x,s) $ is the \textsc{Laplace} transform as defined, we can get $f$ via an inverse transform
+    \begin{equation}
+        f(x,t) = \frac{1}{2\pi i}\oint_{\gamma-i\infty}^{\gamma +i\infty}L_f(x,s)e^{st}\D s,
+    \end{equation}
+    where $\gamma$ is a real number so that the path of integration is inside the convergence of the \textsc{Laplace} transform.
+\end{sa}
 \section{Modeling}
 \subsection{\textsc{Navier-Stokes} Equation}
 \subsection{\textsc{Maxwell/Oldroyd-B} model}
@@ -184,9 +472,9 @@ The difference between Newtonian and non-Newtonian fluids lies in the definition
     \sigma(t,\hat\bfx) = \int_{-\infty}^t-\partial_{t'}\bfB(t,t',\hat\bfx)G(t,t')\D t',
     \label{eq:generalsig}
 \end{equation}
-where $G\colon\rr^+\times\rr^+\to\rr^+$ is a weight function which decays fast in $t'$. In both physical models which we have discussed in \footnote{reference paragraph} $G$ is given by:
+where $G\colon\rr^+\times\rr^+\to\rr^+$ is a weight function which decays fast in $t'$. In both physical models, which we have discussed in \footnote{reference paragraph}, $G$ is given by:
 \begin{equation}
-    G(t,t')=\mu_p\cdot e^{-(t-t')/\lambda}
+    G(t,t')=\mu_p\cdot e^{-(t-t')/\lambda},
     \label{eq:G}
 \end{equation} 
 where $\mu_p\in\rr^+$ is the polymer viscosity and $\lambda\in\rr$ the relaxation time. Both are fluid- dependent parameters. However, $G$ can be more complex. For example, if $G$ becomes space-dependent, this introduces many new problems. This is why we will stick to \eqref{eq:G} for now.
@@ -198,18 +486,18 @@ The term $\bfB\colon\rr^+\times\rr^+\times\hat\Omega\to\rr^{3\times 3}$ in \eqre
 \end{equation}
 We introduce the following initial and boundary conditions
 \begin{align}
-    \bfB(t',t', \hat\bfx) &\equiv\bm{1}\\
-    \bfB(0,t',\hat\bfx) &\equiv\bm{1}
+    \bfB(t',t', \hat\bfx) &\equiv\bm{1},\\
+    \bfB(0,t',\hat\bfx) &\equiv\bm{1},
 \end{align}
 where the last condition implies the assumption that we start the computation stress free. \par
-The variable $t'$ which appeared in the last equations is called \enquote{history variable}. We will discuss the impact of this later on.
+The variable $t'$, which appeared in the last equation,s is called \enquote{history variable}. We will discuss the impact of this later on.
 \par 
-Now we will assume that $\bfu, \nabla p $ and $\bff$ are only non-zero in one direction, that is,
+Now, we will assume that $\bfu, \nabla p $ and $\bff$ are only non-zero in one direction, that is,
 \begin{equation}
-    \bfu=(0, 0, u)^T,\quad\nabla p= (0,0,\partial_3 p),\quad \bff=(0,0,f)
+    \bfu=(0, 0, u)^T,\quad\nabla p= (0,0,\partial_3 p),\quad \bff=(0,0,f),
 \end{equation}
-Where $u,f,p\colon\rr^+\times\hat\Omega\to\rr$
-Because $\ddiv(\bfu)=0$ (see \eqref{eq:div0}) we immediately obtain $\partial_3 u=0$, which leads to
+where $u,f,p\colon\rr^+\times\hat\Omega\to\rr$.
+Because $\ddiv(\bfu)=0$ (see \eqref{eq:div0}), we immediately obtain $\partial_3 u=0$, which leads to
 \begin{equation}
     [(\bfu\cdot\nabla)\bfu]_3 = u_1\partial_1 u_3+u_2\partial_2 u_3+u_3\partial_3 u_3 = 0
 \end{equation}
@@ -222,15 +510,15 @@ We will now examine the diffusion term
     0\\0\\ \partial_1^2u+\partial_2^2u+\partial_3^3u
     \end{pmatrix}=\begin{pmatrix}
     0\\0\\ \partial_1^2u+\partial_2^2 u
-    \end{pmatrix}
+    \end{pmatrix}.
 \end{equation}
-If we take a close look at \eqref{eq:NS3Dbegin} we can see that in order to fulfill the equations for $u_1$ and $u_2$ ($0=(\nabla\cdot\sigma)_l,\quad l\in\{1,2\}$), the block with indexes $(i,j):i,j\in\{1,2\}$ of $\sigma$ has to be constant in space. The last row and last column are the same because of symmetry of the tensor. We have to make sure that they are constant in the third spatial direction which is obviously given by our assumptions. 
-\par After we treated the \textsc{Navier-Stokes} equations in the last paragraph we will now focus on the governing equation for the Finger tensor. We already saw that only the last row and last column are of interest for us. Let's look at \eqref{eq:Bfull} in index notation, which reads
+If we take a close look at \eqref{eq:NS3Dbegin}, we can see that in order to fulfill the equations for $u_1$ and $u_2$ ($0=(\nabla\cdot\sigma)_l,\quad l\in\{1,2\}$), the block with indexes $(i,j):i,j\in\{1,2\}$ of $\sigma$ has to be constant in space. The last row and last column are the same because of symmetry of the tensor. We have to make sure that they are constant in the third spatial direction, which is obviously given by our assumptions. 
+\par After we treated the \textsc{Navier-Stokes} equations in the last paragraph, we will now focus on the governing equation for the Finger tensor. We already saw that only the last row and last column are of interest for us. Let us look at \eqref{eq:Bfull} in index notation, which reads
 \begin{equation}
 \label{eq:Bindex}
     \partial_t \bm{B}_{i,j}+\sum_{k=1}^3\bm{u}_k\partial_k \bm{B}_{i,j}-\sum_{k=1}^3\partial_k\bm{u}_i\bm{B}_{k,j}-\sum_{k=1}^3\bm{B}_{i,k}\partial_k\bm{u}_j=0
 \end{equation}
-We can now put our assumptions for $\bfu$ into it. Additionally $\partial_3\bfB_{3,j}$ should be $0$. We will just focus on the last row for now. This leads to
+We can now put our assumptions for $\bfu$ into it. Additionally, $\partial_3\bfB_{3,j}$ should be $0$. We will just focus on the last row for now. This leads to
 \begin{equation}
     \partial_t \bm{B}_{3,j} -\sum_{k=1}^2\partial_ku\bm{B}_{k,j}-\left.\begin{cases}
     0 &, j=1,2\\ \sum_{k=1}^2 \bm{B}_{3,k}\partial_ku &, j=3
@@ -240,7 +528,7 @@ If we revisit \eqref{eq:Bindex}, we observe that
 \begin{equation}
      \partial_t \bm{B}_{i,j}=-u(\partial_3 \bm{B}_{i,j})~\forall(i,j)\in\{1,2\}^2
 \end{equation}
-This shows that if we choose this block constant in the beginning as required by our assumptions it will not change over time. In our case we will choose the identity matrix for this. These observations also justify that we only care about the last row and ignore the other ones. If we define $\bfb_j:=\bfB_{3,j}$ we obtain the equation
+This shows that if we choose this block constant in the beginning, as required by our assumptions, it will not change over time. In our case we will choose the identity matrix for this. These observations also justify that we only care about the last row and ignore the other ones. If we define $\bfb_j:=\bfB_{3,j}$, we obtain the equation
 \begin{equation}
    \partial_t \bm{b}=\begin{pmatrix}
    \partial_1u\\ \partial_2 u \\ 2\left((\partial_1 u)\bm{b}_1+(\partial_2 u)\bm{b}_2\right)
@@ -251,7 +539,7 @@ We have stated above that $\partial_3\bfb_3=0$ . This directly leads to $\partia
 \partial_t\bfb=
     \begin{pmatrix}
     \partial_1 u\\\partial_2 u
-    \end{pmatrix}
+    \end{pmatrix}.
 \end{equation}
 Furthermore, we define $\bfs:=\sigma_{3,j}$. Consequentially, we obtain the governing equation
 \begin{equation}
@@ -259,18 +547,18 @@ Furthermore, we define $\bfs:=\sigma_{3,j}$. Consequentially, we obtain the gove
 \end{equation}
 We can now define our new system of equations
 \begin{align}
-\partial_t u(t,\bfx) &= -\nabla p + f +\nabla\cdot \bfs+\mu_s\Delta u,\\
+\partial_t u(t,\bfx) &= -\partial_3 p + f +\nabla\cdot \bfs+\mu_s\Delta u,\\
 \bfs(t,\bfx) &=\int_{-\infty}^t-\partial_{t'}\bfb(t,t',\bfx)G(t,t')\D t',\label{eq:s2D}\\
 \partial_t\bfb(t,t',\bfx)&=
 \begin{pmatrix}
 \partial_1 u(t,\bfx)\\\partial_2 u(t,\bfx)
 \end{pmatrix},
 \end{align}
-where $\Omega\subset\rr^2$ is our domain with an element $\bfx$. We let $u(t,\bfx), p(t,\bfx), f(t,\bfx)\colon\rr^+\times\rr^2\to\rr$ denote the third component of the velocity, th pressure and a generic source/sink term respectively. $\Delta$ now stands for the two-dimensional \textsc{Laplace}-operator. To define the stress and finger tensor we use $\bfs(t,\bfx)$ and  $\bfb(t,\bfx)\colon\rr^+\times\rr^2\to\rr^2$ respectively.
+where $\Omega\subset\rr^2$ is our domain with an element $\bfx$. We let $u(t,\bfx), p(t,\bfx), f(t,\bfx)\colon\rr^+\times\rr^2\to\rr$ denote the third component of the velocity, the pressure and a generic source/sink term respectively. $\Delta$ now stands for the two-dimensional \textsc{Laplace}-operator. To define the stress and finger tensor, we use $\bfs(t,\bfx)$ and  $\bfb(t,\bfx)\colon\rr^+\times\rr^2\to\rr^2$ respectively.
 
-By using our assumptions we now deducted a true two-dimensional problem. This can be interpreted as a slice orthogonally to the fluid's flowing direction. During this deduction we silently eliminated the nonlinearity in $\bfb_3$ because it is not relevant for the equations anymore. This makes work much easier as we will see later on.
+By using our assumptions, we now deducted a true two-dimensional problem. This can be interpreted as a slice orthogonally to the fluid's flowing direction. During this deduction we silently eliminated the nonlinearity in $\bfb_3$ because it is not relevant for the equations anymore. This makes work much easier, as we will see later on.
 \subsection{\textsc{Laplace} transformation}
-The next step that is usually taken is the introduction of an \enquote{age} variable $\tau=t-t'$. This is sensible because if we take a look at \eqref{eq:s2D}, we see that only the times $t'$ close to $t$ are relevant (recall that $G$ is exponentially declining the larger the difference between $t$ and $t'$). The further back in history $t'$ gets, the less contribution it makes. By putting this transformation into our equations we obtain
+The next step, that is usually taken, is the introduction of an \enquote{age} variable $\tau=t-t'$. This is sensible because if we take a look at \eqref{eq:s2D}, we see that only the times $t'$ close to $t$ are relevant (recall that $G$ is exponentially declining the larger the difference between $t$ and $t'$). The further back in history $t'$ gets, the less contribution it makes. By putting this transformation into our equations, we obtain
 \begin{equation}
     \bfs(t,\bfx)=\int_0^\infty\partial_\tau\bfb(t,t-\tau,\bfx)G(t,t-\tau)\D\tau.\label{eq:sage}
 \end{equation}
@@ -282,24 +570,24 @@ Using the chain rule the governing equation for the Finger tensor transforms to
 \end{equation}
 with the corresponding boundary and initial conditions
 \begin{align}
-    \bfb(t,t) &= \bm{0}\\
-    \bfb(t,0) &= \bm{0}
+    \bfb(t,t) &= \bm{0},\\
+    \bfb(t,0) &= \bm{0}.
 \end{align}
-On first glance this appears to have made our situation worse because we now have two time derivatives in the equation. Luckily there is a tool that can help us with that: the \textsc{Laplace} transformation. We define
+On first glance this appears to have made our situation worse because we now have two time derivatives in the equation. Luckily, there is a tool that can help us with that: the \textsc{Laplace} transformation. We define
 \begin{equation}
-L_{\bfb}(t,\bfx,s) := \mathcal{L}\{\bfb\}(t,\bfx,s) \int_0^\infty\bfb(t,t-\tau,\bfx)e^{-s\tau}\D\tau
+L_{\bfb}(t,\bfx,s) := \mathcal{L}\{\bfb\}(t,\bfx,s)=\int_0^\infty\bfb(t,t-\tau,\bfx)e^{-s\tau}\D\tau
 \end{equation}
 as the \textsc{Laplace} transform of $\bfb$, where $s\in\cc$ is a transformation parameter. 
-Because the integral and the differential operator are linear we observe that this results in
+Because the integral and the differential operator are linear, we observe that this results in
 \begin{equation}
     \partial_tL_{\bfb}(t,\bfx,s) + L_{\partial_\tau\bfb}(t,\bfx,s) = \begin{pmatrix}
     \partial_1 u(t,\bfx)\\\partial_2 u(t,\bfx)
     \end{pmatrix}.
 \end{equation}
-However, because $\partial_\tau$ is not independent of $\tau$, we have use integration by parts to transform it to
+However, because $\partial_\tau$ is not independent of $\tau$, we have to use integration by parts to transform it to
 \begin{align}
-    L_{\partial_\tau\bfb}(t,\bfx,s) &= \int_0^\infty\partial_\tau\bfb(t,t-\tau,\bfx)e^{-s\tau}\D\tau\\ &=\lim_{r\to\infty}\bfb(t,t-r,\bfx)e^{-sr}-\bfb(t,t,\bfx)e^{-s\cdot 0}+s\int_0^\infty\bfb(t,t-\tau)e^{-s\tau}\D\tau\\
-    \intertext{the first term vanishes because $e$ is dominant so it remains that}
+    L_{\partial_\tau\bfb}(t,\bfx,s) &= \int_0^\infty\partial_\tau\bfb(t,t-\tau,\bfx)e^{-s\tau}\D\tau\\ &=\lim_{r\to\infty}\bfb(t,t-r,\bfx)e^{-sr}-\bfb(t,t,\bfx)e^{-s\cdot 0}+s\int_0^\infty\bfb(t,t-\tau)e^{-s\tau}\D\tau.\\
+    \intertext{The first term vanishes because $e$ is dominant so it remains that}
     &= -\bfb(t,t,\bfx) +sL_{\bfb}(t,\bfx, s)\\
     &= sL_{\bfb}(t,\bfx,s).
 \end{align}
@@ -311,11 +599,11 @@ We have successfully eliminated the time derivative in $\tau$ direction. The gov
 \end{equation}
 The corresponding initial condition is 
 \begin{equation}
-    L_{\bfb}(0,\bfx,s) = \bm{0}
+    L_{\bfb}(0,\bfx,s) = \bm{0}.
 \end{equation} 
-As a next step we will introduce the conformation tensor, which non-dimensionalizes $L_{\bfb}$ . It is defined as 
+As a next step, we will introduce the conformation tensor, which non-dimensionalizes $L_{\bfb}$ . It is defined as 
 \begin{equation}
-    \bfC_s(t,\bfx) := sL_{\bfb}(t,\bfx,s)
+    \bfC_s(t,\bfx) := sL_{\bfb}(t,\bfx,s),
 \end{equation}
 and has the governing equation
 \begin{equation}
@@ -323,39 +611,39 @@ and has the governing equation
     s\partial_1u\\s\partial_2 u
     \end{pmatrix}.
 \end{equation}
-This transformation worked very well and eliminated many problems but the question remains: How do we retrieve $\bfs$?
+This transformation worked very well and eliminated many problems, but the question remains: How do we retrieve $\bfs$?
 Let's recall \eqref{eq:sage}.
-Because we only have a finite history and start stress free we can cut the integral off at $t$
+Because we only have a finite history and start stress free, we can cut the integral off at $t$
 \begin{equation}
     \bfs(t,\bfx)=\int_0^t\partial_\tau\bfb(t,t-\tau,\bfx)G(t,t-\tau)\D\tau.\label{eq:sagered}
 \end{equation}
-If we assume that the \textsc{Laplace} transform of $G$ is well-defined and allow that $G$ is space dependent we can set
+If we assume that the \textsc{Laplace} transform of $G$ is well-defined and allow that $G$ is space dependent, we can set
 \begin{equation}
     g(\bfx,t,s) =\int_0^\infty G(t,t',\bfx)e^{-st'}\D t'.
 \end{equation}
 Then $\bfs$ is simply given by an inverse Laplace transform so specifically
 \begin{equation}
-    \bfs(t,\bfx) =\mathcal{L}^{-1}\{\bfC_s(t,\bfx)g(t,\bfx,s)\}(t,\bfx)
+    \bfs(t,\bfx) =\mathcal{L}^{-1}\{\bfC_s(t,\bfx)g(t,\bfx,s)\}(t,\bfx).
 \end{equation}
-At first glance one may we tempted to be satisfied with this. However, numerically it is unclear how this would work. One of the nice properties of this approach is that if we choose 
+At first glance one may be tempted to be satisfied with this. However, numerically it is unclear how this would work. One of the nice properties of this approach is that if we choose 
 \begin{equation}
     G(t,t-\tau)= \mu_p e^{-\tau/\lambda},\quad s=\frac{1}{\lambda},
 \end{equation}
-where $\lambda$ is the material specific relaxation time, we can retrieve the \textsc{Maxwell} / \textsc{Oldroyd}-B model as follows
+where $\lambda$ is the material specific relaxation time, we can retrieve the \textsc{Maxwell} / \textsc{Oldroyd}-B model 
 \begin{align}
-    \bfs(t,\bfx)&=\mu_p\int_0^t\partial_\tau\bfb(t,t-\tau,\bfx)e^{-\tau/\lambda}\D\tau\\
-    \intertext{using integration by parts again}
-    &=\mu_p\bfb(t,0)e^{-t/\lambda}-\mu_p\bfb(t,t)e^{-0/\lambda}+\frac{\mu_p}{\lambda}\int_0^t\bfb(t,t-\tau)e^{-\tau/\lambda}\D\tau\\
-    \intertext{if we use the boundary and initial conditions and extend the integral to $\infty$ we get}
+    \bfs(t,\bfx)&=\mu_p\int_0^t\partial_\tau\bfb(t,t-\tau,\bfx)e^{-\tau/\lambda}\D\tau,\\
+    \intertext{using integration by parts,}
+    &=\mu_p\bfb(t,0)e^{-t/\lambda}-\mu_p\bfb(t,t)e^{-0/\lambda}+\frac{\mu_p}{\lambda}\int_0^t\bfb(t,t-\tau)e^{-\tau/\lambda}\D\tau.\\
+    \intertext{If we use the boundary and initial conditions and extend the integral to $\infty$, we get}
     &=\frac{\mu_p}{\lambda}\int_0^\infty\bfb(t,t-\tau)e^{-\tau/\lambda}\D\tau\\
-    &=\frac{\mu_p}{\lambda}L_{\bfb}(t,\bfx,1/\lambda) = \mu_p\bfC_{1/\lambda}
+    &=\frac{\mu_p}{\lambda}L_{\bfb}(t,\bfx,1/\lambda) = \mu_p\bfC_{1/\lambda}.
 \end{align}
-So using this assumptions we removed the integral term completely! In this example the stress tensor is just the scaled conformation tensor. 
+So using this assumptions, we removed the integral term completely! In this example the stress tensor is just the scaled conformation tensor. 
 \section{Discretization and building the numerical scheme}
-The next step will be to build a numerical scheme to solve these equations. For this we firstly need the weak formulation then we will discuss the discretizations in space and time. Our equations are now given by 
+The next step will be to build a numerical scheme to solve these equations. For this, we firstly need the weak formulation. Then we will discuss the discretizations in space and time. Our equations are now given by 
 \begin{align}
     \label{eq:transfeq1}
-    \partial_t u(t,\bfx) &= -\nabla p + f +\nabla\cdot \bfs+\mu_s\Delta u,\\
+    \partial_t u(t,\bfx) &= -\partial_3 p + f +\nabla\cdot \bfs+\mu_s\Delta u,\\
     \label{eq:transfeq2}
     \bfs(t,\bfx)&=\mu_p\bfC_{1/\lambda},\\
     \partial_t\bfC_{1/\lambda}(t,\bfx) &= -\frac{1}{\lambda}\bfC_{1/\lambda}(t,\bfx)+\begin{pmatrix}
@@ -364,20 +652,20 @@ The next step will be to build a numerical scheme to solve these equations. For 
     \label{eq:transfeq3}
 \end{align}
 \subsection{Weak formulation}
-To get the weak formulation for equations \eqref{eq:transfeq1} to \eqref{eq:transfeq3} we will use the standard approach. So let $\varphi = (\varphi_1,\varphi_2)\in C^\infty(\Omega\times\rr,\rr^2)$ and $\psi\in C^\infty(\Omega\times\rr,\rr)$ be testfunctions of compact support. By integrating in space we can transform \eqref{eq:transfeq3} to 
+To get the weak formulation for equations \eqref{eq:transfeq1} to \eqref{eq:transfeq3}, we will use the standard approach. So let $\varphi = (\varphi_1,\varphi_2)\in C^\infty(\Omega\times\rr,\rr^2)$ and $\psi\in C^\infty(\Omega\times\rr,\rr)$ be testfunctions of compact support. By integrating in space, we can transform \eqref{eq:transfeq3} to 
 \begin{equation}
     \int_\Omega(\partial_t\bfC_{1/\lambda}+\frac{1}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
     \begin{pmatrix}
     \frac{1}{\lambda}\int_\Omega\partial_1 u\varphi_1\D\Omega\\\frac{1}{\lambda}\int_\Omega\partial_2 u\varphi_2\D\Omega\\
     \end{pmatrix}.
 \end{equation}
-We will not modify this equation further, as we do not have any knowledge about the boundary values of $\bfC$. The spatial derivatives of $u$ however, is not a problem during the simulation. Equation \eqref{eq:transfeq2} does not need to be handled obviously, so what remains is equation \eqref{eq:transfeq1}, which also is the most complicated one. Integration over $\Omega$ and multiplication with the respective testfunction yields
+We will not modify this equation further, as we do not have any knowledge about the boundary values of $\bfC$. The spatial derivatives of $u$ however, are not a problem during the simulation. Equation \eqref{eq:transfeq2} does not need to be handled, so what remains is equation \eqref{eq:transfeq1}, which also is the most complicated one. Integration over $\Omega$ and multiplication with the respective testfunction yields
 \begin{equation}
-    \int_\Omega(\partial_t u + \nabla p -\nabla\cdot \bfs -\mu_s\Delta u)\psi\D\Omega = 0.
+    \int_\Omega(\partial_t u + \partial_3 p -\nabla\cdot \bfs -\mu_s\Delta u)\psi\D\Omega = 0.
 \end{equation}
-Using the linearity of the integral we get
+Using the linearity of the integral, we get
 \begin{equation}
-    \int_\Omega(\partial_t u)\psi\D\Omega +\int_\Omega\nabla p\psi\D\Omega -\int_\Omega(\nabla\cdot \bfs)\psi\D\Omega -\mu_s\int_\Omega\psi\Delta u\D\Omega=0.
+    \int_\Omega(\partial_t u)\psi\D\Omega +\int_\Omega\partial_3 p\psi\D\Omega -\int_\Omega(\nabla\cdot \bfs)\psi\D\Omega -\mu_s\int_\Omega\psi\Delta u\D\Omega=0.
 \end{equation}
 The first two terms do not need additional work. So we will focus on the last two. The last term is easily rewritten using well-known Green's Theorem. So we obtain
 \begin{equation}
@@ -389,19 +677,38 @@ Applying basic calculus and integration by parts lets us transform the remaining
 \end{equation}
 Because we chose $u = 0$ on $\partial\Omega$, the boundary integral becomes $0$. Putting both transformations back in the original equation yields
 \begin{equation}
-    \int_\Omega(\partial_t u)\psi\D\Omega +\int_\Omega\nabla p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega+\mu_s\int_\Omega\nabla u\cdot\nabla\psi\D\Omega = 0.
+    \int_\Omega(\partial_t u)\psi\D\Omega +\int_\Omega\partial_3 p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega+\mu_s\int_\Omega\nabla u\cdot\nabla\psi\D\Omega = 0.
 \end{equation}
-If we recap this section we can give the following system of weak formulations for our governing equations
+If we recap this section, we can give the following system of weak formulations for our governing equations
 \begin{align}
-     \int_\Omega(\partial_t u)\psi\D\Omega +\int_\Omega\nabla p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega+\mu_s\int_\Omega\nabla u\cdot\nabla\psi\D\Omega = 0,\\
+     \int_\Omega(\partial_t u)\psi\D\Omega +\int_\Omega\partial_3 p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega+\mu_s\int_\Omega\nabla u\cdot\nabla\psi\D\Omega = 0,\\
      \bfs =\mu_p\bfC_{1/\lambda},\\
       \int_\Omega(\partial_t\bfC_{1/\lambda}+\frac{1}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
      \begin{pmatrix}
      \frac{1}{\lambda}\int_\Omega\partial_1 u\varphi_1\D\Omega\\\frac{1}{\lambda}\int_\Omega\partial_2 u\varphi_2\D\Omega\\
      \end{pmatrix}.
 \end{align}
-\subsection{Spatial discretization}
+
 \subsection{Time discretization}
+Our goal in this section is to discretize the time dimension in this equation. We will use the implicit Euler method for this. To be specific, we approximate 
+\begin{equation}
+    \partial_t(\cdot)^{n+1}\approx\frac{(\cdot)^{n+1}-(\cdot)^n}{\Delta t},\label{eq:timestep}
+\end{equation}
+where $n$ refers to the $n$-th timestep, which we assume is already known, and $\Delta t$ is the timestep width. If the argument, on which the differential operator operates, is linear then this results in a linear system to be solved in every timestep. In return for the work we put into every timestep, this method is stable for every timestep width.
+\par 
+To get rid of some indices we set $(\cdot)^{n+1}:=(\cdot)$ If we put \eqref{eq:timestep} into our weak form, we obtain 
+\begin{align}
+  \int_\Omega(u-u^n)\psi\D\Omega +\Delta t\left(\int_\Omega\partial_3 p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega+\mu_s\int_\Omega\nabla u\cdot\nabla\psi\D\Omega\right) = 0,\\
+  \bfs =\mu_p\bfC_{1/\lambda},\\
+  \int_\Omega(\bfC_{1/\lambda} - \bfC_{1/\lambda}^n +\frac{\Delta t}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
+  \begin{pmatrix}
+  \frac{\Delta t}{\lambda}\int_\Omega\partial_1 u\varphi_1\D\Omega\\\frac{\Delta t}{\lambda}\int_\Omega\partial_2 u\varphi_2\D\Omega\\
+  \end{pmatrix}.
+\end{align}
+\par 
+There are numerous possible means to solve the resulting linear system. We will discuss a few possibilities later on.
+\subsection{Spatial discretization}
+Now that we have transformed the equation in their weak forms, we can think about how to discretize them in space. We will use the finite element method (FEM) for that.
 \section{Numerical results}
 \section{Conclusion}
 
