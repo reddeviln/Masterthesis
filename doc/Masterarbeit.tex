@@ -8,7 +8,7 @@
 
 \addtokomafont{sectioning}{\rmfamily}
 %\usepackage[ngerman]{babel}% deutsches Sprachpaket wird geladen
-\usepackage[english]{babel}% englisches Sprachpaket wird geladen
+\usepackage[ngerman,english]{babel}% englisches Sprachpaket wird geladen
 \usepackage{tabularx}
 %\usepackage{lmodern}% Für die Schrift
 \usepackage[T1]{fontenc} % westeuropäische Codierung wird verlangt
@@ -45,6 +45,7 @@
 \usepackage{csquotes}
 \usepackage{bm}
 \usepackage{todonotes}
+\usepackage{lipsum}
 
 % Hier werden neue Theorems erstellt.
 \theoremstyle{definition}
@@ -91,6 +92,7 @@
 \newcommand{\D}{\mathop{}\!\mathrm{d}}
 \floatname{algorithm}{Algorithmus}
 \renewcommand{\thesubfigure}{\thefigure.\arabic{subfigure}}
+\addto{\captionsenglish}{\renewcommand{\bibname}{References}}
 \lstset{language=Matlab,
     basicstyle={\scriptsize \ttfamily},
     breaklines=true,
@@ -142,19 +144,23 @@
 \end{center}
 \end{center}
 \end{titlepage}
+\begin{otherlanguage}{ngerman}
+  
+
 \chapter*{Danksagung}
-Lorem impsum
+\lipsum[1]
 %Ich möchte mich bei Herrn Professor Gassner und seiner Arbeitsgruppe ganz herzlich für die kompetente und umfangreiche Betreuung bedanken. Insbesondere bei Herrn Lucas Friedrich für sein außerordentliches Engagement, das weit über Sprechstundenzeiten hinaus ging. 
 %\par Zusätzlich bedanke ich mich noch bei meiner Familie, meinen Freunden und Kommilitonen und meiner Freundin für ihre Geduld und ihr Verständnis.
-\\[1cm]
+%\\[1cm]
 Köln, \today 
 \\[1cm]
 Nils Dornbusch
+\end{otherlanguage}
 \newpage
 \tableofcontents
 \newpage
 \chapter{Introduction}
-Lorem ipsum
+\lipsum[1]
 %This work aims to provides an analysis of the Integro-Differential-equations which occur when modeling the behaviour of non-Newtonian fluids. The motivation arises in Physics when studying for example liquid glass or granule. This is often needed in space applications. I will reference the relevant physical phenomena which the interested reader can follow to learn more about as this is not the main focus of this work.\\
 %The main focus will actually lie in the numerical challenges, which the equations present. We will also touch upon issues regarding the implementation.
 %\par 
@@ -892,6 +898,11 @@ There are numerous possible means to solve the resulting linear system. We will 
 \section{Spatial discretization}
 Now that we have transformed the equation in their weak forms, we can think about how to discretize them in space. We will use the finite element method (FEM) for that.
 \chapter{Numerical results}
+Now we have everything we need to put our equations into a simulation. We will first introduce the framework which handled all the calculations performed for this work. After that we will show convergence and discuss some test cases and limitations of this approach.
+\section{Software}
+All simulations conducted for this work used the FEniCS framework (\cite{AlnaesBlechta2015a}, \cite{LoggMardalEtAl2012a}). Other components of this project are the C++ backend DOLFIN (\cite{LoggWells2010a}, \cite{LoggWellsEtAl2012a}), the compiler for the variational form FFC (\cite{KirbyLogg2006a}, \cite{LoggOlgaardEtAl2012a}, \cite{OlgaardWells2010b}), the language definition for variational forms UFL(\cite{AlnaesEtAl2012}, \cite{Alnaes2012a}) and the corresponding code generator UFC (\cite{AlnaesLoggEtAl2009a}, \cite{AlnaesLoggEtAl2012a}).
+\par 
+The advantages of using a framework at all are obvious. The less time one spends coding, the more one can assign to theoretical tasks. Another nice property is that the whole debugging process shorted by a large bit. The software is also throughly tested so bugs are much less frequent. Literature on how to get started with FEniCS is easy to find. A nice tutorial is given by the founders of FEniCS in  \cite{Langtangen2017a}. 
 \chapter{Conclusion}
 
 \addcontentsline{toc}{chapter}{List of figures}
@@ -902,6 +913,7 @@ Now that we have transformed the equation in their weak forms, we can think abou
 \bibliographystyle{amsplain}
 \bibliography{References}{}
 \newpage
+\begin{otherlanguage}{ngerman}
 \chapter*{Eigenständigkeitserklärung}
 Hiermit versichere ich an Eides statt, dass ich die vorliegende Arbeit selbstständig und ohne die Benutzung anderer als der angegebenen  Hilfsmittel  angefertigt  habe.  
 Alle  Stellen,  die  wörtlich  oder  sinngemäß  aus  veröffentlichten  und  nicht  veröffentlichten  Schriften  entnommen  wurden,  sind  als  solche  kenntlich  gemacht.  
@@ -911,4 +923,5 @@ Ich  versichere,  dass  die  eingereichte    elektronische    Fassung    der    
 Köln, \today
 \\[2\bigskipamount]
 Nils Dornbusch
+\end{otherlanguage}
 \end{document}
