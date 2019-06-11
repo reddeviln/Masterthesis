@@ -4,7 +4,7 @@
 % Quelle: http://www.mi.uni-koeln.de/wp-MIEDV/% Datum: Juli 201% Copyright Universität zu Köln
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[12pt,a4paper]{scrartcl}
+\documentclass[12pt,a4paper,twoside, open=right]{scrreprt}
 
 \addtokomafont{sectioning}{\rmfamily}
 %\usepackage[ngerman]{babel}% deutsches Sprachpaket wird geladen
@@ -34,7 +34,7 @@
 \usepackage{amsthm} % erlaubt die Benutzung von eigenen Theoremen
 \usepackage{hyperref} % Links und Verweise werden innerhalb von PDF Dokumenten erzeugt
 \usepackage{wrapfig} % Das Paket ermöglicht es von Schrift umflossene Bilder und Tabellen einzufügen.
-\numberwithin{equation}{section} % Nummerierungen der Gleichungen, die durch equation erstellt werden, sind gebunden an die section
+%\numberwithin{equation}{section} % Nummerierungen der Gleichungen, die durch equation erstellt werden, sind gebunden an die section
 \usepackage{latexsym} % LaTeX-Symbole werden geladen
 \usepackage{tikz} % Erlaubt es mit tikz zu zeichnen
 \usepackage{tabularx} % Erlaubt Tabellen 
@@ -44,6 +44,7 @@
 \usepackage{stmaryrd} % St Mary Road Symbole werden geladen
 \usepackage{csquotes}
 \usepackage{bm}
+\usepackage{todonotes}
 
 % Hier werden neue Theorems erstellt.
 \theoremstyle{definition}
@@ -141,9 +142,10 @@
 \end{center}
 \end{center}
 \end{titlepage}
-\section*{Danksagung}
-Ich möchte mich bei Herrn Professor Gassner und seiner Arbeitsgruppe ganz herzlich für die kompetente und umfangreiche Betreuung bedanken. Insbesondere bei Herrn Lucas Friedrich für sein außerordentliches Engagement, das weit über Sprechstundenzeiten hinaus ging. 
-\par Zusätzlich bedanke ich mich noch bei meiner Familie, meinen Freunden und Kommilitonen und meiner Freundin für ihre Geduld und ihr Verständnis.
+\chapter*{Danksagung}
+Lorem impsum
+%Ich möchte mich bei Herrn Professor Gassner und seiner Arbeitsgruppe ganz herzlich für die kompetente und umfangreiche Betreuung bedanken. Insbesondere bei Herrn Lucas Friedrich für sein außerordentliches Engagement, das weit über Sprechstundenzeiten hinaus ging. 
+%\par Zusätzlich bedanke ich mich noch bei meiner Familie, meinen Freunden und Kommilitonen und meiner Freundin für ihre Geduld und ihr Verständnis.
 \\[1cm]
 Köln, \today 
 \\[1cm]
@@ -151,7 +153,7 @@ Nils Dornbusch
 \newpage
 \tableofcontents
 \newpage
-\section{Introduction}
+\chapter{Introduction}
 Lorem ipsum
 %This work aims to provides an analysis of the Integro-Differential-equations which occur when modeling the behaviour of non-Newtonian fluids. The motivation arises in Physics when studying for example liquid glass or granule. This is often needed in space applications. I will reference the relevant physical phenomena which the interested reader can follow to learn more about as this is not the main focus of this work.\\
 %The main focus will actually lie in the numerical challenges, which the equations present. We will also touch upon issues regarding the implementation.
@@ -168,14 +170,14 @@ Lorem ipsum
 %At the end of this work we would like to answer the question: \enquote{Is this numerical method worth to try with the full system in 5-dimensions (3 spatial + 1 time  + 1 age dimension) in exa-scale systems?}\par 
 %So without further ado let us dive into the matter!
 \newpage
-\section{Mathematical basics}
+\chapter{Mathematical basics}
 In this chapter, various typical definitions and theorems are presented, which will be used extensively throughout this work. Most of them are just a recap of well known theorems and are therefore presented without proof. The interested reader may follow the literature referenced in the beginning of each section.
-\subsection{Basics and notation}
+\section{Basics and notation}
 In the beginning, we will quickly state basic mathematical facts and introduce some notation, which we will use throughout this work. Most of this should be self explanatory.
 \begin{notation}
     We will use $\nn$ as the natural numbers, starting from 1, and $\rr,\cc,\qq$ as per standard notation. With $\kk$ we denote a field, which can be $\rr$ or $\cc$.
 \end{notation} 
-\subsection{Functional analysis}
+\section{Functional analysis}
 \label{sec:funcana}
 Here, we cover basics of functional analysis as necessary for this work and the finite element method especially. We will follow \cite{Ganesan2017} for this.
 \begin{defn}[Norm]
@@ -296,6 +298,7 @@ As one might know, a \textsc{Cauchy} sequence does not converge in general. The 
     $L^1_{loc}$ is a true extension of $L^1$. Consider $f=\frac{1}{x}$. $f$ belongs to $L^1_{loc}$, but not to $L^1$. 
 \end{bsp}
 \begin{defn}
+    \label{defn:weakderivative}
     Let $\alpha$ be a multi index. A function $f\in L^1_{loc}$ has a \emph{weak derivative} $\nu=D^\alpha f\in L^1_{loc}$ if $\forall \varphi\in C_0^\infty$
     \begin{equation}
         \int_\Omega\nu\varphi\D\Omega = (-1)^{\abs{\alpha}}\int_\Omega fD^\alpha\varphi \D\Omega,
@@ -330,7 +333,7 @@ As one might know, a \textsc{Cauchy} sequence does not converge in general. The 
     The $H^m$ spaces are very important for all numerical methods because of their property that they are \textsc{Hilbert} spaces. The whole theory, which follows hereafter, relies heavily on this assumption.
 \end{rem}
 
-\subsection{The finite element method}
+\section{The finite element method}
 \label{sec:fem}
 This section covers the basics of the finite element method (FEM). This is a standard approach, which is used in almost every book about this topic. We still use \cite{Ganesan2017} for reference.
 Let us start by introducing the concept of \emph{weak solutions}. Consider the \textsc{Poisson} problem
@@ -377,7 +380,7 @@ We can observe that we can use \textsc{Green} here because we assume $u\in H^1(\
     \end{equation}
     and $F=f$ remains the same. Note, that $a$ is not an inner product in the strict sense here. Consider $u\equiv c$ for $c\in\rr$ constant. Then $a(u,u)=0$ but $u$ is not necessarily zero. So we get a so called \emph{seminorm} if we use $p(u):=\sqrt{a(u,u)}$. All properties are the same, as a normal norm would have, but the zero uniqueness. However, \textsc{Lax-Milgram} does not require a true inner product, so we can still deduce that this problem has a unique solution for a given set of boundary conditions.
 \end{bsp}
-\paragraph*{Standard \textsc{Galerkin} method}
+\subsection{Standard \textsc{Galerkin} method}
 So far we only covered the theory behind PDEs. It seems like we have answered all questions. We know in which space our solution lives, and we can now try all linear combinations for a given basis and are finished. Unfortunately it is not that easy. Recall that $u\in H^1(\Omega)$ in our example earlier. The problem is that $H^1(\Omega)$ is a space of infinite dimension. Because no computer can handle infinitly many cases, we have to reduce the problem somehow. So we use finite dimensional subspaces of the solution space and calculate the best approximation in this subspace. How this spaces are constructed exactly, will be explained later on. 
 \par 
 Let $V$ a \textsc{Hilbert} space and our solution space. Furthermore let $V_h\subset V$ be finite dimensional subspace with a discretization parameter $h$. We want that our discrete solution converges to the continuous one, when $h\to 0$. Because the properties of $a$ and $F$ also apply in $V_h$, \textsc{Lax-Milgram} still guarantees existence and uniqueness of the solution. Our new problem is given by
@@ -412,9 +415,67 @@ This already looks like a matrix vector multiplication. So let us define $a_{i,j
     \end{equation}
     This would then be plugged into a non-linear solver. However, existence or even uniqueness cannot be guaranteed and must be assessed on a case-by-case basis. This is an open research topic.
 \end{rem}
-\paragraph*{Finite element spaces}
+\subsection{Finite element spaces}
 For now, we handled the problem with an arbitrary subspace $V_h$. But how would we choose such space and its basis functions?
-\subsection{\textsc{Laplace} transform}
+\begin{notation}
+    We denote by
+    \begin{equation}
+        P_k(K):=\left\{p\colon K\to\rr\left\vert p(x)=\sum_{\abs{\alpha}\le k}c_ax^a,\right.\quad x\in K\right\}
+    \end{equation}
+    the set of all polynomials of degree less than or equal to $k$. $c_a$ are constant coefficients.
+\end{notation}
+We will construct a mesh by starting with a decomposition $\tau_h$ of $\Omega$ into open cells $K$ with $\overline{\Omega}=\bigcup_{K\in\tau_h}\overline{K}$.
+\begin{defn}
+    We use $\Sigma_k$ as the set of degrees of freedom. These are given as linear nodal functionals $N_i(v)$ for $i=0,\dotsc,n$, where $n= \dim P_k -1$. $(K,P_k,\tau_h)$ is called a \emph{finite element}. If $N_i(v)$ is given by $N_i(v)=v(a_i)$, where $a_i$ is a set of points, we call $(K,P_k,\tau_h)$ a \textsc{Lagrange} \emph{finite element}. The points $a_i$ are called \emph{nodes} of the finite element.
+\end{defn}
+
+    We defined finite elements, but not all $\tau_h$ are admissible.
+\begin{defn}
+    A decomposition of the domain $\Omega\subset\rr^d$ into cells $K\in\tau_h$ is admissible if
+    \begin{enumerate}
+        \item $\overline{\Omega}=\bigcup_{K\in\tau_h}\overline{K}$,
+        \item any nonempty intersection of two cells $\overline{K_1}\cap\overline{K_2}$ is either a vertex, an edge or a face of both cells.
+    \end{enumerate}
+\end{defn}
+How do we construct $V_h$ from here so that $V_h\subset H^1(\Omega)$?
+\begin{defn}
+    For $v_h\in V_h$ we want that $v_h\vert_K\in P_k$. This requirement is enough to define $v_h\vert_K$ uniquely because for each $x\in K$ the degrees of freedoms are linear independent.
+\end{defn}
+The following theorem ensures us that the combination of all cells still results in $V_h$ being a subset of $H^1(\Omega)$.
+\begin{sa}
+    If for every $K\in\tau_h,P_k\subset H^1(K)$, and $V_h\subset C^0(\Omega)$, then $V_h\subset H^1(\Omega)$.
+\end{sa}
+Because this may not be a well known theorem, we will give a proof here.
+\begin{proof}
+    Let $v\in V_h$ be given. If we can show that the weak derivatives $D^\alpha v\in L^2(\Omega)$ for $\abs{\alpha}=1$. The natural choice would be the piecewise defined function $w:=D^\alpha(v\vert_K)\in L^2(K)$. Let $\varphi\in C^\infty_0(\Omega)$ be arbitrary. It holds that 
+    \begin{equation}
+        \int_\Omega(w\varphi+vD^\alpha \varphi)\D x = \sum_{K\in\tau_h}\int_K(D^\alpha(v\vert_K)\varphi+v\vert_K D^\alpha\varphi)\D x,
+    \end{equation}
+    where we just used the linearity of the integral. If we recall the definition of the weak derivative (definition \ref{defn:weakderivative}), we can see how we can rewrite $D^\alpha(v\vert_k)$. We obtain
+    \begin{align}
+        \sum_{K\in\tau_h}\int_K(D^\alpha(v\vert_K)\varphi+v\vert_K D^\alpha\varphi)\D x&=\sum_{K\in\tau_h}\left(-\int_K v\vert_KD^\alpha\varphi+\int_K v\vert_K D^\alpha\varphi +\int_{\partial K}v\vert_K\varphi n_K\D\partial K\right),\\\intertext{which is obviously just}& =\sum_{K\in\tau_h}\int_{\partial K}v\vert_K\varphi n_K\D\partial K.
+    \end{align}
+    $n_k$ is the outer unit normal for $K$. We just applied integration by parts to the first term. Because we chose $\varphi$ to be zero on the boundary of $\Omega$, the integral over each boundary face of $\Omega$ becomes zero. For all inner faces $\partial K_1\cap \partial K_2$ we get the term twice, once for every cell. However both times the normal points in the opposite direction. So our equation reduces to 
+    \begin{equation}
+        \sum_{K\in\tau_h}\int_{\partial K}v\vert_K\varphi n_K\D\partial K=0 \quad \forall\varphi\in C^\infty_0.
+    \end{equation}
+    That proofs that $w$ is indeed the weak derivative of $v$. Because $v$ was arbitrary, it follows $V_h\subset H^1(\Omega)$ and with that the theorem.
+\end{proof}
+\begin{rem}
+    If we take a look back at the last theorem, we can see that the continuity of the dofs across neighboring faces is enough for our solution to be in $H^1(\Omega)$. 
+\end{rem}
+Another thing to consider, is the order of convergence. If we choose $\dim P_k$ equally on all cells, one can expect a convergence of order $k+1$. However, in practice this is influenced by the time stepping scheme if the the problem is time dependent. If the geometry is not rectangular, the mesh approximation to the geometry will also influence the order of convergence. To get an heuristic idea, which order of convergence we are achieving, one defines the $EOC$
+\begin{defn}
+    For a set of errors $\varepsilon_k$ and discretization $h_k$, where $h\to 0$ for $k\to\infty$, we define the \emph{experimental order of convergence (EOC)} as the limit of 
+    \begin{equation}
+        EOC_k(\varepsilon_k,h_k)=-\frac{\log\frac{\varepsilon_k}{\varepsilon_{k-1}}}{\log{\frac{h_k}{h_{k-1}}}}.\label{eq:EOC}
+    \end{equation} 
+\end{defn}
+\begin{rem}
+    In practice, it is of course not possible to take a real limit. Usually, one calculates four or five refinements and normally the limit of $EOC_k$ becomes obvious. 
+\end{rem}
+This short discussion of the finite element method does not claim to be comprehensive, but rather a short overview of important facts, which are necessary to interpret the numerical results, presented later.  
+\section{\textsc{Laplace} transform}
 \label{sec:laplacetransform}
 In this section we will introduce the \textsc{Laplace} transform and some basic properties of it. We will loosely follow \cite{Widder1945} for this.
 \begin{defn}
@@ -454,10 +515,131 @@ We can give a relationship between the \textsc{Laplace} and \textsc{Fourier} tra
     \end{equation}
     where $\gamma$ is a real number so that the path of integration is inside the convergence of the \textsc{Laplace} transform.
 \end{sa}
-\section{Modeling}
-\subsection{\textsc{Navier-Stokes} Equation}
-\subsection{\textsc{Maxwell/Oldroyd-B} model}
-\subsection{Dimension reduction}
+In this chapter, we gathered all the important general mathematical background information, which we will use heavily from now on. 
+\chapter{Modeling}
+Until now, our mathematical work was in no way specific to the problem, which this work tries to solve. We want to change this now. For this, we will give some (short) introduction into the physics behind the Non-Newtonian behavior. The introduction for this will however be intentionally vague as this work is more focused on mathematics then the physics behind it. After that, we will use some assumptions to make the problem accessible for a master's thesis.
+\section{\textsc{Navier-Stokes} Equation}
+Many books have been written about the \textsc{Navier-Stokes} equations. We will use some ideas from \cite{Lukaszewicz2016} and \cite{White2006} to outline the main facts. Just the incompressible variant of the equations will be considered and the density is normalized to one and therefor will be omitted.
+\subsection{Basics of fluid dynamics}
+To understand fluid dynamics one must consider two coordinate systems. At first, there is the usual fixed \textsc{Euler}ian coordinate system (spatial coordinates) that is stationary. Secondly, there is the \textsc{Lagrange}ian coordinate system (material coordinates) that follows one particle in the flow. 
+\begin{defn}
+    Let the position of some particle in the fluid be denoted in the \textsc{Euler}ian grid. At time $t=0$ it occupies position $X$. Suppose that $x$ is the position of the said particle at a finite time $t$. This new position is then a function of its position at $t=0$ and time. So we introduce
+    \begin{equation}
+        x=x(X,t).
+    \end{equation}
+\end{defn}
+We want this transformation to be continuous and invertible with the inverse $X=X(x,t)$, with $X$ and $x$ sufficiently smooth functions. 
+\begin{defn}
+    For a function $x$ as above we define the \textsc{Jacobi}an as
+    \begin{equation}
+        J(X,t)= \det\left(\frac{\partial x_i}{\partial X_j}\right).
+    \end{equation}
+\end{defn}
+The \textsc{Jacobi}an is finite and positive with the assumptions that $x$ is invertible and sufficiently smooth. We use $u$ for the velocity, $p$ for the pressure with their normal physical interpretations.
+\begin{defn}[material derivative]
+    If we want to take the derivative of a quantity $f(x,t)$ in the fluid flow direction we get the \emph{material derivative}, which is given by 
+    \begin{equation}
+        \frac{D}{Dt}f(x,t):=\frac{\partial f}{\partial t} + u\cdot\nabla f.
+    \end{equation}
+\end{defn}
+\begin{rem}
+    Note that instead of $u$ one could choose any vector $x$ to obtain a derivative in the direction of $x$.
+\end{rem}
+The main idea behind the \textsc{Navier-Stokes} equation is the concept of \emph{conversation}. 
+\begin{defn}
+    If for a property $x$, it holds that on some finite volume $\Omega$
+    \begin{equation}
+        \frac{d}{dt}\int_\Omega x\D\Omega = -\int_{\partial\Omega}xu\cdot n\D\partial\Omega+\int_\Omega s\D\Omega,\label{eq:conservation}
+    \end{equation}
+   with $s$ some source or sink and $n$ the unit normal (outward), is valid, then $x$ is \emph{conserved}.
+\end{defn}
+\begin{rem}
+    Conservation means that over time a property can only change over the boundary or through sources or sinks inside. This is motivated from the mass, energy and momentum conservation in physics.
+\end{rem}
+\subsection{Momentum equation}
+Because we assumed the density of the fluid is one, the momentum of it is just the velocity. The momentum is a conserved property so it holds
+\begin{equation}
+    \frac{d}{dt}\int_\Omega u\D\Omega = -\int_{\partial\Omega}uu^T\cdot n\D\partial\Omega +\int_\Omega s\D\Omega,
+\end{equation} where we get a rank two tensor in the boundary term because we write $uu^T$ as the dyadic product of the two vectors. Using \textsc{Gauß}'s theorem, we can rewrite the boundary integral. This leads to 
+\begin{equation}
+    \frac{d}{dt}\int_\Omega u\D\Omega = -\int_\Omega \nabla\cdot(uu^T)\D\Omega +\int_\Omega s\D\Omega.
+\end{equation}
+
+\begin{sa}[\textsc{Reynolds} transport theorem]
+    Let $f$ be a vector valued function, $u_e$ be the velocity of the area element. It holds that
+    \begin{equation}
+        \frac{d}{dt}\int_{\Omega(t)}f\D \Omega =\int_{\Omega(t)}\partial_t f\D \Omega+\int_{\partial\Omega(t)}(u_e\cdot n)f\D \partial \Omega,
+    \end{equation}
+    where $n$ is the outward unit normal vector.
+\end{sa}
+Using the theorem and realizing that $\Omega$ is constant in time, we get
+\begin{equation}
+    \int_\Omega (\partial_t u +\nabla\cdot(uu^T)-s)\D\Omega =0.
+\end{equation}
+\begin{sa}
+    Let $x$ and $y$ be vectors of same length. It holds that
+    \begin{equation}
+    \nabla\cdot(xy^T)=(\nabla\cdot x)y+x\cdot\nabla y.
+    \end{equation}
+\end{sa}
+Applying this to our equation we obtain,
+
+\begin{equation}
+    \partial_t u +u\cdot\nabla u+u\nabla\cdot u - s = 0.
+\end{equation}
+
+But because we have mass conservation, we have $\nabla\cdot u =0$ (in general $\partial_t \rho + \nabla\cdot(\rho u) =0$). So our equation reduces to 
+\begin{equation}
+    \partial_t u+ u\cdot \nabla u -s =0
+\end{equation}
+This is, apart from $s$, just the material derivative of $u$.
+One question remains. How does one calculate $s$? For that we refer to \textsc{Cauchy}'s momentum equation. But firstly, we have to realize that one can break up $s$ into body forces and surface forces. So 
+\begin{equation}
+   \partial_t u + u\cdot \nabla u = f_{body} +f_{surf} .
+\end{equation}
+The body forces can be of various types so we will collect them in a function $f$. In the \textsc{Cauchy} momentum equation the surface forces are modeled using a symmetric stress tensor $\tau$, specifically
+\begin{equation}
+    \partial_t u + u\cdot \nabla u = f + \nabla\cdot\tau.
+\end{equation}
+It is interesting to note that one the entries on the diagonal of $\tau$ are the stresses normal to the fluid direction, and all others are parallel to the fluids direction. That motivates 
+\begin{equation}
+    \tau = -pI+\sigma,
+\end{equation}
+where $p$ is the pressure and $I$ the corresponding identity matrix. Plugging this into our equation yields
+\begin{equation}
+    \partial_t u + u\cdot \nabla u = -\nabla p + f + \nabla\cdot\sigma.
+\end{equation}
+Note that this equation is not complete. One has to give a model for the (also called) stress tensor $\sigma$ and for the pressure. This however, is very fluid dependent. Exactly this will be the topic of the next section.
+\section{\textsc{Maxwell/Oldroyd-B} model}
+Before we start discussing the two related models used to model the stress tensor, we will give a short introduction into non-\textsc{Newton}ian fluids in general. A nice general introduction is given in \cite{Ouellette2013}.
+\subsection{What is a non-\textsc{Newton}ian fluid and why is it relevant?}
+Generally speaking, a non-\textsc{Newton}ian fluid differs from a \textsc{Newton} fluid in the behavior of the viscosity. \textsc{Newton} formulated laws, which the ideal fluid should obey. One of them was that the viscosity should be independent of the stress the fluid encountered. All fluids, which obey this law, are called \textsc{Newtonian} fluids and the others non-\textsc{Newtonian}. Non-\textsc{Newtonian} fluids are far more spread as one would imagine: from ketchup to honey and toothpaste to the famous water-cornstarch mixture that jumps on loud speakers; these types of fluids are everywhere. Even granular movement in space and liquid plastic in 3D printers behaves that way. So there are plenty of reasons to care about the difficult task of modeling these fluids. \par 
+There are many different types of non-\textsc{Newtonian} behavior. Ketchup for example has a so called \emph{pseudoplastic} behavior, that means that the viscosity decreases with increased stress. In this work we will cover the fluids that have the \emph{viscoelastic }behavior. That means that elastic and viscous effects are working together as a linear combination. Liquid plastic and granular flows often shows this type of non-\textsc{Newtonian} behavior.
+\subsection{Upper-Convected \textsc{Maxwell} model}
+This is exactly the type, which the Upper-convected \textsc{Maxwell} model describes best. This is obtained by combining dampers and springs and model them with known physical laws. The easiest case is shown in Figure \ref{fig:maxwell}.
+\begin{figure}
+    \centering
+    
+    \def\svgwidth{0.5\textwidth}
+    \input{Maxwell_diagram.pdf_tex}
+    \caption[\textsc{Maxwell} model]{\textsc{Maxwell} model adopted from \cite{Pekaje}}
+    \label{fig:maxwell}
+    
+\end{figure}
+\textsc{Hooke}'s law is used for the spring $E$ and the damper acts as a \textsc{Newtonian} fluid of viscosity $\mu$. 
+The resulting governing equations for the deformation tensor or Finger tensor reads
+\begin{equation}
+    \partial_t B + (u\cdot\nabla)B-(\nabla u)B-B(\nabla u)^T =0.
+\end{equation}
+And somehow we obtain that \todo{why?}
+\begin{equation}
+     \sigma(t,x) = \int_{-\infty}^t-\partial_{t'}B(t,t',x)G(t,t')\D t',
+\end{equation}
+where 
+\begin{equation}
+    G(t,t')=\mu_p\cdot e^{-(t-t')/\lambda}.
+\end{equation}
+\section{Dimension reduction}
 After we have discussed a bit of physics in the previous sections, we will now focus on making these equations easier to handle. To provide better readability we will omit the arguments where it is obvious. We start from the well-known \textsc{Navier-Stokes} equations
 \begin{align}
 \label{eq:NS3Dbegin}
@@ -557,7 +739,7 @@ We can now define our new system of equations
 where $\Omega\subset\rr^2$ is our domain with an element $\bfx$. We let $u(t,\bfx), p(t,\bfx), f(t,\bfx)\colon\rr^+\times\rr^2\to\rr$ denote the third component of the velocity, the pressure and a generic source/sink term respectively. $\Delta$ now stands for the two-dimensional \textsc{Laplace}-operator. To define the stress and finger tensor, we use $\bfs(t,\bfx)$ and  $\bfb(t,\bfx)\colon\rr^+\times\rr^2\to\rr^2$ respectively.
 
 By using our assumptions, we now deducted a true two-dimensional problem. This can be interpreted as a slice orthogonally to the fluid's flowing direction. During this deduction we silently eliminated the nonlinearity in $\bfb_3$ because it is not relevant for the equations anymore. This makes work much easier, as we will see later on.
-\subsection{\textsc{Laplace} transformation}
+\section{\textsc{Laplace} transformation}
 The next step, that is usually taken, is the introduction of an \enquote{age} variable $\tau=t-t'$. This is sensible because if we take a look at \eqref{eq:s2D}, we see that only the times $t'$ close to $t$ are relevant (recall that $G$ is exponentially declining the larger the difference between $t$ and $t'$). The further back in history $t'$ gets, the less contribution it makes. By putting this transformation into our equations, we obtain
 \begin{equation}
     \bfs(t,\bfx)=\int_0^\infty\partial_\tau\bfb(t,t-\tau,\bfx)G(t,t-\tau)\D\tau.\label{eq:sage}
@@ -639,7 +821,7 @@ where $\lambda$ is the material specific relaxation time, we can retrieve the \t
     &=\frac{\mu_p}{\lambda}L_{\bfb}(t,\bfx,1/\lambda) = \mu_p\bfC_{1/\lambda}.
 \end{align}
 So using this assumptions, we removed the integral term completely! In this example the stress tensor is just the scaled conformation tensor. 
-\section{Discretization and building the numerical scheme}
+\chapter{Discretization and building the numerical scheme}
 The next step will be to build a numerical scheme to solve these equations. For this, we firstly need the weak formulation. Then we will discuss the discretizations in space and time. Our equations are now given by 
 \begin{align}
     \label{eq:transfeq1}
@@ -651,7 +833,7 @@ The next step will be to build a numerical scheme to solve these equations. For 
     \end{pmatrix}.
     \label{eq:transfeq3}
 \end{align}
-\subsection{Weak formulation}
+\section{Weak formulation}
 To get the weak formulation for equations \eqref{eq:transfeq1} to \eqref{eq:transfeq3}, we will use the standard approach. So let $\varphi = (\varphi_1,\varphi_2)\in C^\infty(\Omega\times\rr,\rr^2)$ and $\psi\in C^\infty(\Omega\times\rr,\rr)$ be testfunctions of compact support. By integrating in space, we can transform \eqref{eq:transfeq3} to 
 \begin{equation}
     \int_\Omega(\partial_t\bfC_{1/\lambda}+\frac{1}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
@@ -689,7 +871,7 @@ If we recap this section, we can give the following system of weak formulations 
      \end{pmatrix}.
 \end{align}
 
-\subsection{Time discretization}
+\section{Time discretization}
 Our goal in this section is to discretize the time dimension in this equation. We will use the implicit Euler method for this. To be specific, we approximate 
 \begin{equation}
     \partial_t(\cdot)^{n+1}\approx\frac{(\cdot)^{n+1}-(\cdot)^n}{\Delta t},\label{eq:timestep}
@@ -707,21 +889,24 @@ To get rid of some indices we set $(\cdot)^{n+1}:=(\cdot)$ If we put \eqref{eq:t
 \end{align}
 \par 
 There are numerous possible means to solve the resulting linear system. We will discuss a few possibilities later on.
-\subsection{Spatial discretization}
+\section{Spatial discretization}
 Now that we have transformed the equation in their weak forms, we can think about how to discretize them in space. We will use the finite element method (FEM) for that.
-\section{Numerical results}
-\section{Conclusion}
+\chapter{Numerical results}
+\chapter{Conclusion}
 
-\addcontentsline{toc}{section}{List of figures}
+\addcontentsline{toc}{chapter}{List of figures}
 \setcounter{lofdepth}{2}
 \listoffigures
 \newpage
-\addcontentsline{toc}{section}{References}
+\addcontentsline{toc}{chapter}{References}
 \bibliographystyle{amsplain}
 \bibliography{References}{}
 \newpage
-\section*{Eigenständigkeitserklärung}
-Hiermit versichere ich, Nils Dornbusch, an Eides statt, dass ich die vorliegende Arbeit selbstständig und ohne die Benutzung anderer als der angegebenen Hilfsmittel angefertigt habe. Alle Stellen, die wörtlich oder sinngemäß aus veröffentlichten und nicht veröffentlichten Schriften entnommen wurden, sind als solche kenntlich gemacht. Die Arbeit ist in gleicher oder ähnlicher Form oder auszugsweise im Rahmen einer anderen Prüfung noch nicht vorgelegt worden. Ich versichere, dass die eingereichte elektronische Fassung der eingereichten Druckfassung vollständig entspricht.
+\chapter*{Eigenständigkeitserklärung}
+Hiermit versichere ich an Eides statt, dass ich die vorliegende Arbeit selbstständig und ohne die Benutzung anderer als der angegebenen  Hilfsmittel  angefertigt  habe.  
+Alle  Stellen,  die  wörtlich  oder  sinngemäß  aus  veröffentlichten  und  nicht  veröffentlichten  Schriften  entnommen  wurden,  sind  als  solche  kenntlich  gemacht.  
+Die  Arbeit  ist  in  gleicher  oder  ähnlicher  Form  oder  auszugsweise  im  Rahmen  einer  anderen  Prüfung  noch  nicht  vorgelegt  worden. 
+Ich  versichere,  dass  die  eingereichte    elektronische    Fassung    der    eingereichten    Druckfassung    vollständig    entspricht.
 \\[\bigskipamount]
 Köln, \today
 \\[2\bigskipamount]
