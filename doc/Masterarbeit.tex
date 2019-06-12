@@ -82,6 +82,7 @@
 \newcommand{\sii}{\sum_{k=1}^{\infty}}
 \newcommand{\de}{\mathrm{d}}
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\lpnorm}[1]{\left(\int\abs{#1}^2\D\Omega \right)^{1/2}}
 \newcommand{\bfu}{\bm{u}}
 \newcommand{\bff}{\bm{f}}
 \newcommand{\bfB}{\bm{B}}
@@ -262,9 +263,17 @@ As one might know, a \textsc{Cauchy} sequence does not converge in general. The 
     A complete vector space with an inner product is called \emph{\textsc{Hilbert} space}.
 \end{defn}
 \begin{sa}[\textsc{Schwarz} inequality]
+    \label{sa:Schwarz}
     Let $V$ be a vector space. Then 
     \begin{equation}
         \abs{\dotp{u}{v}}\le\norm{u}_V\norm{v}_V\quad \forall u,v\in V.
+    \end{equation}
+\end{sa}
+\begin{sa}[\textsc{Hölder's} inequality]
+    \label{sa:hoelder}
+    Let $f,g \colon V\to\kk$ be functions with the necessary regularity and $\frac{1}{p}+\frac{1}{q}=1$. It holds
+    \begin{equation}
+        \int\abs{fg}\D V\le\left(\int\abs{f}^p\D V\right)^{1/p}\left(\int\abs{g}^q\D V\right)^{1/q}
     \end{equation}
 \end{sa}
 \begin{bsp}
@@ -371,6 +380,7 @@ We can observe that we can use \textsc{Green} here because we assume $u\in H^1(\
     We see that if $a$ is the inner product of $V$ and induces the norm, then both properties are satisfied. The first is simply the \textsc{Schwarz} inequality and the second by definition. In this case $\sqrt{a(v,v)}$ is called \emph{energy norm}, which is the natural norm for error analysis of this problem.
 \end{rem}
 \begin{sa}[\textsc{Lax-Milgram}]
+    \label{sa:LaxMilgram}
     Let $V$ be a \textsc{Hilbert} space, $a(\cdot,\cdot)$ be a continuous coercive bilinear form and $F$ a continuous linear functional. Then there exists a unique $u\in V$ such that
     \begin{equation}
         a(u,v)=F(v)\quad \forall v\in V.
@@ -896,7 +906,101 @@ To get rid of some indices we set $(\cdot)^{n+1}:=(\cdot)$ If we put \eqref{eq:t
 \par 
 There are numerous possible means to solve the resulting linear system. We will discuss a few possibilities later on.
 \section{Spatial discretization}
-Now that we have transformed the equation in their weak forms, we can think about how to discretize them in space. We will use the finite element method (FEM) for that.
+Now that we have transformed the equation in their weak forms, we can think about how to discretize them in space. We will use the finite element method (FEM) for that. We will write the equations in the form $AU=b$. This is not necessary for solving it in FEniCS -it can do it by itself- but for understanding the problem it is nonetheless relevant. 
+\par 
+At first we have to break the problem down into the bilinear form $a(U,\phi)$ and the linear form $L_{n+1}(\phi)$. We will define 
+\begin{equation}
+   U=\begin{pmatrix}
+   \bfC_{1/\lambda}\\u
+   \end{pmatrix} \text{ and } 
+   \phi=\begin{pmatrix}
+   \varphi\\\psi
+   \end{pmatrix}.
+\end{equation}
+Note that these vectors have three entries each. Because we choose $\varphi$ entry-wise and $\psi$ linear independent, we can write the whole system as a sum of every term inside. Putting our new defined variables in results in the equation
+\begin{align}
+    &\int_\Omega[U\cdot\phi+\Delta t((\mu_pU_{1:2}+\mu_s\nabla U_3)\cdot\nabla\phi_3)+\frac{\Delta t}{\lambda}(U_{1:2}\cdot\phi_{1:2}-\nabla U_3\cdot\phi_{1:2})]\D\Omega\\
+    &=\int_\Omega [U^n\cdot\phi-\Delta t\partial_3 p\phi_3]\D\Omega.
+\end{align}
+We denoted with 1:2 that the vector containing the first and second entry should be taken. The left side of the equation is our $a(U,\phi)$. That this is a bilinear form is trivially true due to the linearity of the integral and the dot product. However, it is not symmetrical and therefore no inner product. That means, that our resulting matrix $A$ is not symmetrical, which is not optimal for the linear solver.\par 
+The right side of the equation is our linear form, which only consists of the term from the time discretization and the derivative of the pressure.
+\section{Existence of a solution}
+We now want to proof, with the help of Theorem \ref{sa:LaxMilgram} (\textsc{Lax-Milgram}), that there exists a unique solution for our problem. Firstly we have to show that 
+\begin{equation}
+    \abs{a(U,\phi)}\le\beta\norm{U}_{H^1}\norm{\phi}_{H^1},
+\end{equation}
+where $\norm{\cdot}_{H^1}$ is the corresponding \textsc{Sobolev} norm. In our case it is given by
+\begin{equation}
+    \norm{U}_{H^1}:=\left(\int_\Omega\abs{U}^2+\abs{\nabla U}^2\D\Omega\right)^{1/2},
+\end{equation}
+where the absolute value is the \text{Euclidean} absolute value of a vector or matrix, depending on the dimensions of $U$. $\nabla U$ will be the \textsc{Jacobian} matrix if $U$ is a vector. We will omit the subscript on the integral because it is obviously just $\Omega$ everywhere. We begin with
+\begin{align}
+   \abs{a(U,\phi)}&=\int\left\vert U\cdot\phi+U_{1:2}\cdot\left(\Delta t\mu_p\nabla\phi_3+\frac{\Delta t}{\lambda}\phi_{1:2}\right)\right.\\&+\left.\nabla U_3\cdot\left(\Delta t\mu_s\nabla\phi_3-\frac{\Delta t}{\lambda}\phi_{1:2}\right)\right\vert\D\Omega.
+\end{align}
+$U_{1:2}$ does not suite us very well, so we will transform it to $U$ and pay attention to the dimension. We can put this term together with the original $U$ term and obtain
+\begin{align}
+    &\le \int\left\vert U\cdot\left(\Delta t\mu_p\begin{pmatrix}
+        \nabla\phi_3\\0
+        \end{pmatrix}+\left(1+\frac{\Delta t}{\lambda}\right)\phi\right)\right.\\&+\left.\begin{pmatrix}
+       \nabla U_3\\0
+        \end{pmatrix}\cdot\left(\Delta t \mu_s\begin{pmatrix}
+        \nabla\phi_3\\0
+        \end{pmatrix}+\left(1+\frac{\Delta t}{\lambda}\right)\phi\right)\right\vert\D\Omega.
+\end{align}
+This transformation is an inequality because we added $\frac{\Delta t}{\lambda}\phi_3U_3$ to the equation to make it look nicer. The second term was also adjusted so that the second factor in each summand is, apart from the different $\mu$s, the same. We now introduce 
+\begin{equation}
+    \tilde\beta:=\max\left(\Delta t\mu_p,\Delta t\mu_s,\left(1+\frac{\Delta t}{\lambda}\right)\right).
+\end{equation}
+This way we will get rid of the constant factors in the integral. It results
+\begin{align}
+&\le \tilde\beta\int \abs{U\cdot\left(\begin{pmatrix}
+\nabla\phi_3\\0
+\end{pmatrix}+\phi\right)+\begin{pmatrix}
+\nabla U_3\\0
+\end{pmatrix}\cdot\left(\begin{pmatrix}
+\nabla\phi_3\\0
+\end{pmatrix}+\phi\right)}\D\Omega.
+\end{align}
+Our goal is to rewrite everything in the integral as a big dot product of vectors, which entries should be $U$ and $\nabla U$ or $\phi$ and $\nabla \phi$ respectively. When we apply theorem \ref{sa:Schwarz} (\textsc{Schwarz} inequality) to it, we will get the desired results. So we transform the inequality to read
+\begin{equation}
+    = \tilde\beta\int\abs{\begin{pmatrix}
+        U\\ \nabla U_3\\0
+        \end{pmatrix}\cdot\begin{pmatrix}
+        \begin{pmatrix}
+        \nabla\phi_3\\0\end{pmatrix}+\phi
+        \\\begin{pmatrix}
+        \nabla\phi_3\\0\end{pmatrix}+\phi
+        \end{pmatrix}}\D\Omega.
+\end{equation}
+Note that the vectors have six entries each so this transformation is well defined. In fact we can further reduce this to
+\begin{equation}
+    =\tilde\beta\int\abs{\begin{pmatrix}
+        U\\\nabla U_3\\0\\U\\\nabla U_3\\0
+        \end{pmatrix}\cdot\begin{pmatrix}
+        \nabla\phi_3\\0\\\nabla\phi_3\\0\\\phi\\\phi
+        \end{pmatrix}}\D\Omega.
+\end{equation}
+The interested reader can by simply multiplying everything verify that this is in fact exactly the same. Let us apply \ref{sa:Schwarz} to the dot product inside the integral. This variant is also known as \textsc{Cauchy-Schwarz}. This results in 
+\begin{equation}
+   \le\tilde\beta\int\abs{\begin{pmatrix}
+       U\\\nabla U_3\\0\\U\\\nabla U_3\\0
+       \end{pmatrix}}\abs{\begin{pmatrix}
+   \nabla\phi_3\\0\\\nabla\phi_3\\0\\\phi\\\phi
+\end{pmatrix}}\D\Omega.
+\end{equation} 
+Let us insert the definition of the absolute value of a vector. We then get
+\begin{equation}
+    =\tilde\beta\int\sqrt{2\abs{U}^2+2\abs{\nabla U_3}^2}\sqrt{2\abs{\nabla\phi_3}^2+2\abs{\phi}^2}\D\Omega.
+\end{equation}
+We can now use \ref{sa:hoelder} with $f$ and $g$ the left and right factors respectively. Note that we can omit the absolute value of the product since both factors are positive. We use $p=q=2$ and therefore obtain
+\begin{equation}
+    \abs{a(U,\phi)}\le\beta\left(\int\abs{U}^2+\abs{\nabla U_3}^2\D\Omega \right)^{1/2}\left(\int\abs{\phi}^2+\abs{\nabla\phi_3}^2\D\Omega\right)^{1/2},
+\end{equation} 
+where we define $\beta=\frac{\tilde\beta}{2}$. If we replace $\nabla U_3$ with $\nabla U$, $\nabla\phi_3$ with $\nabla\phi$ and use the respective matrix norm, we get
+\begin{equation}
+    \le\beta\left(\int\abs{U}^2+\abs{\nabla U}^2\D\Omega \right)^{1/2}\left(\int\abs{\phi}^2+\abs{\nabla\phi}^2\D\Omega\right)^{1/2}=\beta\norm{U}_{H^1}\norm{\phi}_{H^1},
+\end{equation}
+which is exactly what we wanted to show because $\beta$ is obviously positive in physical relevant cases. We have shown that $a(U,\phi)$ is continuous. What remains to show is that there exists an $\alpha>0$ for that $a(U,U)\ge \alpha\norm{U}_{H^1}^2$ for all $U$.
 \chapter{Numerical results}
 Now we have everything we need to put our equations into a simulation. We will first introduce the framework which handled all the calculations performed for this work. After that we will show convergence and discuss some test cases and limitations of this approach.
 \section{Software}
