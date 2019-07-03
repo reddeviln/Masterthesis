@@ -71,9 +71,10 @@ class FEniCSSimulation:
         """defines the residual for UCM"""
 
         x = SpatialCoordinate(self.mesh)
-        exy = exp(-(x[0]**2 + x[1]**2))
-        resU = 4 * self.mup * exy * (x[0]**2 + x[1]**2 - 1)
-        result = resU * v * dx
+        normx = x[0]**2 + x[1]**2
+        exy = exp(-(normx-1))
+        R = - 4 * self.mup * (exy* (1 - normx) - 1) - self.gradP
+        result =  R * v * dx - 2 / Lambda * (x[0] * CV1 * dx + x[1] * CV2 * dx)
         return result
 
 
@@ -88,7 +89,7 @@ class FEniCSSimulation:
         un1, un2, un3 = split(self.u_n)
 
         if residualon == 1:
-            self.F = u * v * dx - un3 * v * dx + dt*( self.residual(t, Lambda, CV1, CV2, v) \
+            self.F = u * v * dx - un3 * v * dx + dt*(self.gradP * v * dx + self.residual(t, Lambda, CV1, CV2, v) \
                 + dot(self.mup*as_vector([C1, C2]), grad(v)) * dx\
                 + Constant(self.mu) * dot(grad(u), grad(v)) * dx) \
                 + (C1 - un1 + dt / Lambda * C1) * CV1 * dx\
@@ -171,14 +172,22 @@ def run_postprocessing(u_D, listofSolutions, listNumElem, Spaces):
 
     error = []
     rate = []
+    vtkexact = File("output/withstressRes/exact.pvd")
 
     for i in range(0, len(listofSolutions)):
-        u_D.t = 1
         u_e = interpolate(u_D, Spaces[i])
+
         error.append(errornorm(u_e.sub(2), listofSolutions[i].sub(2), degree_rise=5))
-    n = len(error)
-    vtkexact = File("output/withstressRes/exact.pvd")
+        #diffu = Function.copy(u_e)
+        #diffu.assign(diffu-listofSolutions[i])
+        #error.append(norm(diffu.sub(2).vector(),'linf'))
     vtkexact << u_e.sub(2)
+    n = len(error)
+
+    vtkdiff = File("output/withstressRes/diff.pvd")
+    u_diff = Function.copy(u_e)
+    u_diff.assign(u_diff-listofSolutions[len(listofSolutions)-1])
+    vtkdiff <<u_diff.sub(2)
     from math import log as ln
     rate.append(0)
     for i in range(1, n):

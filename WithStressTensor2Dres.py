@@ -21,7 +21,7 @@ for i in range(0,5):
     print('N = ',nCells)
     domain = mshr.Circle(Point(0, 0), 1, nCells)
     mesh = mshr.generate_mesh(domain, nCells)
-    WithStressTensorSim.append(FEniCSSimulation(Constant(0), Constant(0), Constant(0), Constant(0.9)))
+    WithStressTensorSim.append(FEniCSSimulation(Constant(2), Constant(0), Constant(0), Constant(0.9)))
     WithStressTensorSim[i].mesh = mesh
     # dofs
     WithStressTensorSim[i].V.append(FunctionSpace(WithStressTensorSim[i].mesh, element))
@@ -32,10 +32,10 @@ for i in range(0,5):
         return on_boundary
 
 
-    u_I = Expression(('0', '0', 'exp(-a*pow(x[0], 2) - a*pow(x[1], 2)) - 1/exp(1)'), degree=5, a=1)
+    u_I = Expression(('-2*x[0]*(exp(-(pow(x[0], 2) + pow(x[1], 2)-1))-1)', '-2*x[1]*(exp(-(pow(x[0], 2) + pow(x[1], 2)-1))-1)', 'exp(-(pow(x[0], 2) + pow(x[1], 2)-1))-1'), element=WithStressTensorSim[i].V[0].ufl_element())
 
     # boundary conditions
-    WithStressTensorSim[i].boundary_condition('Dirichlet', Constant(0), WithStressTensorSim[i].V[0].sub(2), boundary)
+    WithStressTensorSim[i].boundary_condition('Dirichlet', Constant((0,0,0)), WithStressTensorSim[i].V[0], boundary)
 
 
     # initial condition
@@ -60,5 +60,9 @@ combined = []
 for i in range (0,n):
     combined.append([numElem[i], error[i], rate[i]])
 print(tabulate(combined, headers =['#Elements per radius', 'inf error', 'EOC']))
-
+plt.semilogy(numElem, error)
+plt.title("Convergence in L2")
+plt.xlabel("# Elements per diameter")
+plt.ylabel("L2-error")
+plt.show()
 
