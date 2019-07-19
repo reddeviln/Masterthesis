@@ -777,9 +777,7 @@ L_{\bfb}(t,\bfx,s) =\int_0^\infty\bfb(t,t-\tau,\bfx)e^{-s\tau}\D\tau
 as the \textsc{Laplace} transform of $\bfb$, where $s\in\cc$ is the frequency parameter. 
 We can switch derivative and integral because we assume both limits to exist.
 \begin{equation}
-    \partial_tL_{\bfb}(t,\bfx,s) + L_{\partial_\tau\bfb}(t,\bfx,s) = \begin{pmatrix}
-    \partial_1 u(t,\bfx)\\\partial_2 u(t,\bfx)
-    \end{pmatrix}.
+    \partial_tL_{\bfb}(t,\bfx,s) + L_{\partial_\tau\bfb}(t,\bfx,s) = \frac{1}{s}\nabla u.
 \end{equation}
 However, because $\partial_\tau$ is not independent of $\tau$, we have to use integration by parts to transform it to
 \begin{align}
@@ -790,9 +788,7 @@ However, because $\partial_\tau$ is not independent of $\tau$, we have to use in
 \end{align}
 We have successfully eliminated the time derivative in $\tau$ direction. The governing equation for the \textsc{Laplace} transform of the finger tensor is given by
 \begin{equation}
-(\partial_t +s)L_{\bfb}(t,\bfx,s) = \begin{pmatrix}
-\partial_1 u(t,\bfx)\\\partial_2 u(t,\bfx)
-\end{pmatrix}.
+(\partial_t +s)L_{\bfb}(t,\bfx,s) = \frac{1}{s}\nabla u
 \end{equation}
 The corresponding initial condition is 
 \begin{equation}
@@ -804,9 +800,7 @@ As a next step, we will introduce the conformation tensor, which non-dimensional
 \end{equation}
 and has the governing equation
 \begin{equation}
-    \partial_t\bfC_s(t,\bfx)+s\bfC_s(t,\bfx) =\begin{pmatrix}
-    s\partial_1u\\s\partial_2 u
-    \end{pmatrix}.
+    \partial_t\bfC_s(t,\bfx)+s\bfC_s(t,\bfx) =\nabla u
 \end{equation}
 This transformation worked very well and eliminated many problems, but the question remains: how do we retrieve $\bfs$?
 Let's recall \eqref{eq:sage}.
@@ -843,18 +837,14 @@ The next step will be to build a numerical scheme to solve these equations. For 
     \partial_t u(t,\bfx) &= -\partial_3 p + f +\nabla\cdot \bfs+\mu_s\Delta u,\\
     \label{eq:transfeq2}
     \bfs(t,\bfx)&=\mu_p\bfC_{1/\lambda},\\
-    \partial_t\bfC_{1/\lambda}(t,\bfx) &= -\frac{1}{\lambda}\bfC_{1/\lambda}(t,\bfx)+\begin{pmatrix}
-    \frac{1}{\lambda}\partial_1u\\\frac{1}{\lambda}\partial_2 u
-    \end{pmatrix}.
+    \partial_t\bfC_{1/\lambda}(t,\bfx) &= -\frac{1}{\lambda}\bfC_{1/\lambda}(t,\bfx)+\nabla u
     \label{eq:transfeq3}
 \end{align}
 \section{Weak formulation}
 To get the weak formulation for equations \eqref{eq:transfeq1} to \eqref{eq:transfeq3}, we will use the standard approach. So let $\varphi = (\varphi_1,\varphi_2)\in \mathrm{C}^\infty_0(\Omega\times\rr)$ with values in $\rr^2$ and $\psi\in \mathrm{C}^\infty_0(\Omega\times\rr)$ real-valued be testfunctions of compact support. By integrating in space, we can transform \eqref{eq:transfeq3} to 
 \begin{equation}
     \int_\Omega(\partial_t\bfC_{1/\lambda}+\frac{1}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
-    \begin{pmatrix}
-    \frac{1}{\lambda}\int_\Omega\partial_1 u\varphi_1\D\Omega\\\frac{1}{\lambda}\int_\Omega\partial_2 u\varphi_2\D\Omega\\
-    \end{pmatrix}.
+   \int_\Omega \nabla u\cdot \varphi\D\Omega.
 \end{equation}
 We will not modify this equation further, as we do not have any knowledge about the boundary values of $\bfC$. The spatial derivatives of $u$ however, are not a problem during the simulation. Equation \eqref{eq:transfeq2} does not need to be handled, so what remains is equation \eqref{eq:transfeq1}, which also is the most complicated one. Integration over $\Omega$ and multiplication with the respective testfunction yields
 \begin{equation}
@@ -881,9 +871,7 @@ If we recap this section, we can give the following system of weak formulations 
      \int_\Omega(\partial_t u)\psi\D\Omega +\int_\Omega\partial_3 p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega+\mu_s\int_\Omega\nabla u\cdot\nabla\psi\D\Omega = 0,\\
      \bfs =\mu_p\bfC_{1/\lambda},\\
       \int_\Omega(\partial_t\bfC_{1/\lambda}+\frac{1}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
-     \begin{pmatrix}
-     \frac{1}{\lambda}\int_\Omega\partial_1 u\varphi_1\D\Omega\\\frac{1}{\lambda}\int_\Omega\partial_2 u\varphi_2\D\Omega\\
-     \end{pmatrix}.
+     \int_\Omega \nabla u\cdot\varphi\D\Omega.
 \end{align}
 
 \section{Time discretization}
@@ -898,9 +886,7 @@ To get rid of some indices we set $(\cdot)^{n+1}:=(\cdot)$ If we put \eqref{eq:t
   \int_\Omega(u-u^n)\psi\D\Omega +\Delta t\left(\int_\Omega\partial_3 p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega+\mu_s\int_\Omega\nabla u\cdot\nabla\psi\D\Omega\right) = 0,\\
   \bfs =\mu_p\bfC_{1/\lambda},\\
   \int_\Omega(\bfC_{1/\lambda} - \bfC_{1/\lambda}^n +\frac{\Delta t}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
-  \begin{pmatrix}
-  \frac{\Delta t}{\lambda}\int_\Omega\partial_1 u\varphi_1\D\Omega\\\frac{\Delta t}{\lambda}\int_\Omega\partial_2 u\varphi_2\D\Omega\\
-  \end{pmatrix}.
+  \Delta t\int_\Omega\nabla u\cdot\varphi\D\Omega.
 \end{align}
 \par 
 There are numerous possible means to solve the resulting linear system. We will discuss a few possibilities later on.
@@ -918,7 +904,7 @@ At first we have to break the problem down into the bilinear form $a(U,\phi)$ an
 \end{equation}
 Note that these vectors have three entries each. Because we choose $\varphi$ entry-wise and $\psi$ linear independent, we can write the whole system as a sum of every term inside. Putting our new defined variables in results in the equation
 \begin{align}
-    &\int_\Omega[U\cdot\phi+\Delta t((\mu_pU_{1:2}+\mu_s\nabla U_3)\cdot\nabla\phi_3)+\frac{\Delta t}{\lambda}(U_{1:2}\cdot\phi_{1:2}-\nabla U_3\cdot\phi_{1:2})]\D\Omega\\
+    &\int_\Omega[U\cdot\phi+\Delta t((\mu_pU_{1:2}+\mu_s\nabla U_3)\cdot\nabla\phi_3)+\frac{\Delta t}{\lambda}U_{1:2}\cdot\phi_{1:2}-\Delta t\nabla U_3\cdot\phi_{1:2}]\D\Omega\\
     &=\int_\Omega [U^n\cdot\phi-\Delta t\partial_3 p\phi_3]\D\Omega.
 \end{align}
 We denoted with 1:2 that the vector containing the first and second entry should be taken. The left side of the equation is our $a(U,\phi)$. That this is a bilinear form is trivially true due to the linearity of the integral and the dot product. However, it is not symmetrical and therefore no inner product. That means, that our resulting matrix $A$ is not symmetrical, which is not optimal for the linear solver.\par 
@@ -939,7 +925,7 @@ We now want to proof, with the help of Theorem \ref{sa:LaxMilgram} (\textsc{Lax-
 \end{equation}
 where we use the inner products as defined in \ref{sec:funcana}. This inner product induces a norm on $X$ which we will use to show the existence of a solution. We will omit the subscript on the integral because it is obviously just $\Omega$ everywhere. We begin with
 \begin{align}
-   \abs{a(U,\phi)}^2&=\left(\int\left\vert U\cdot\phi+U_{1:2}\cdot\left(\Delta t\mu_p\nabla\phi_3+\frac{\Delta t}{\lambda}\phi_{1:2}\right)\right.\right.\\&+\left.\left.\nabla U_3\cdot\left(\Delta t\mu_s\nabla\phi_3-\frac{\Delta t}{\lambda}\phi_{1:2}\right)\right\vert\D\Omega\right)^2.
+   \abs{a(U,\phi)}^2&=\left(\int\left\vert U\cdot\phi+U_{1:2}\cdot\left(\Delta t\mu_p\nabla\phi_3+\frac{\Delta t}{\lambda}\phi_{1:2}\right)\right.\right.\\&+\left.\left.\nabla U_3\cdot\left(\Delta t\mu_s\nabla\phi_3-\Delta t\phi_{1:2}\right)\right\vert\D\Omega\right)^2.
 \end{align}
 $U_{1:2}$ does not suite us very well, so we will transform it to $U$ and pay attention to the dimension. We can put this term together with the original $U$ term and obtain
 \begin{align}
@@ -949,11 +935,11 @@ $U_{1:2}$ does not suite us very well, so we will transform it to $U$ and pay at
        \nabla U_3\\0
         \end{pmatrix}\cdot\left(\Delta t \mu_s\begin{pmatrix}
         \nabla\phi_3\\0
-        \end{pmatrix}+\left(1+\frac{\Delta t}{\lambda}\right)\phi\right)\right\vert\D\Omega\right)^2.
+        \end{pmatrix}+\left(1+\Delta t\right)\phi\right)\right\vert\D\Omega\right)^2.
 \end{align}
 This transformation is an inequality because we added $\frac{\Delta t}{\lambda}\phi_3U_3$ to the equation to make it look nicer. The second term was also adjusted so that the second factor in each summand is, apart from the different $\mu$s, the same. We now introduce 
 \begin{equation}
-    \tilde\beta:=\max\left(\Delta t\mu_p,\Delta t\mu_s,\left(1+\frac{\Delta t}{\lambda}\right)\right).
+    \tilde\beta:=\max\left(\Delta t\mu_p,\Delta t\mu_s,\left(1+\frac{\Delta t}{\lambda}\right), (1+\Delta t)\right).
 \end{equation}
 This way we will get rid of the constant factors in the integral. It results
 \begin{align}
@@ -1007,27 +993,27 @@ where we define $\beta=\frac{\tilde\beta^2}{2}$. Now we will rewrite this to sho
 \end{align} which shows that $a(U,\phi)$ is continuous. What remains to show is that there exists an $\alpha>0$ for that $a(U,U)\ge \alpha\langle U,U\rangle_X$ for all $U$. Let us begin with
 \begin{align}
     a(U,U)&=\int U\cdot U+U_{1:2}\cdot\left(\Delta t\mu_p\nabla U_3+\frac{\Delta t}{\lambda}U_{1:2}\right)\\
-    &+\nabla U_3\cdot\left(\Delta t\mu_s\nabla U_3 -\frac{\Delta t}{\lambda}U_{1:2}\right)\D\Omega.
+    &+\nabla U_3\cdot\left(\Delta t\mu_s\nabla U_3 -\Delta tU_{1:2}\right)\D\Omega.
 \end{align}
 The dot product follows the distributive law. This way we can expand the parenthesis. We get
 \begin{equation}
     =\int\abs{U}^2+\frac{\Delta t}{\lambda}\abs{U_{1:2}}^2+\Delta t\mu_p U_{1:2}\cdot\nabla U_3
-    +\Delta t\mu_s\abs{\nabla U_3}^2-\frac{\Delta t}{\lambda}\nabla U_3\cdot U_{1:2}\D\Omega.
+    +\Delta t\mu_s\abs{\nabla U_3}^2-\Delta t\nabla U_3\cdot U_{1:2}\D\Omega.
 \end{equation} 
 We need $\abs{\nabla U_3}^2$ without a coefficient and the other terms need to be greater than 0. This way we can just leave them out. For this we add $(+1-1+\Delta t\mu_s -\Delta t\mu_s)\abs{\nabla U_3}^2=0$ to the equation. This results in 
 \begin{equation}
-     =\int\abs{U}^2+\abs{\nabla U_3}^2+\frac{\Delta t}{\lambda}\abs{U_{1:2}}^2+(\Delta t\mu_p-\frac{\Delta t}{\lambda}) U_{1:2}\cdot\nabla U_3
+     =\int\abs{U}^2+\abs{\nabla U_3}^2+\frac{\Delta t}{\lambda}\abs{U_{1:2}}^2+(\Delta t\mu_p-\Delta t) U_{1:2}\cdot\nabla U_3
     +(\Delta t\mu_s-1)\abs{\nabla U_3}^2\D\Omega,
 \end{equation} 
 where we used the symmetry of the inner product. As a preparation, we factor out $\frac{\Delta t}{\lambda}$ as follows 
 \begin{equation}
-    =\int\abs{U}^2+\abs{\nabla U_3}^2+\frac{\Delta t}{\lambda}\left(\abs{U_{1:2}}^2+(\lambda\mu_p-1)U_{1:2}\cdot\nabla U_3+(\lambda\mu_s-\frac{\lambda}{\Delta t})\abs{\nabla U_3}^2 \right)\D\Omega.\label{eq:ref1}
+    =\int\abs{U}^2+\abs{\nabla U_3}^2+\frac{\Delta t}{\lambda}\left(\abs{U_{1:2}}^2+(\lambda\mu_p-\lambda)U_{1:2}\cdot\nabla U_3+(\lambda\mu_s-\frac{\lambda}{\Delta t})\abs{\nabla U_3}^2 \right)\D\Omega.\label{eq:ref1}
 \end{equation}
 Because for any dot product it holds that
 \begin{equation}
     \langle a+b,a+b\rangle=\langle a,a\rangle+2\langle a,b\rangle + \langle b,b\rangle,
 \end{equation}
-we can observe that the part in parenthesis of \eqref{eq:ref1} looks like the right hand side of the equation above. However, there are some constant factors in \eqref{eq:ref1} that need to be dealt with. We define $\beta:=\min\{\sqrt{(\mu_s-\frac{1}{\Delta t})\lambda},\frac{\lambda\mu_p-1}{2}\}$. Plugging this into \eqref{eq:ref1} yields
+we can observe that the part in parenthesis of \eqref{eq:ref1} looks like the right hand side of the equation above. However, there are some constant factors in \eqref{eq:ref1} that need to be dealt with. We define $\beta:=\min\{\sqrt{(\mu_s-\frac{1}{\Delta t})\lambda},\frac{\lambda\mu_p-\lambda}{2}\}$. Plugging this into \eqref{eq:ref1} yields
 \begin{equation}
     a(U,U)\ge \int\abs{U}^2+\abs{\nabla U_3}^2+\frac{\Delta t}{\lambda}\abs{U_{1:2}+\beta\nabla U_3}^2\D\Omega.
 \end{equation}
@@ -1052,27 +1038,25 @@ We want to show the convergence for the \textsc{Maxwell} model $(\mu_s=0)$ first
 We set the initial conditions
 \begin{equation}
     u(t=0) = e^{-\norm{x}_2-1}-1,
-    \quad\bfC(t=0) = -2\bfx(e^{-\norm{x}_2 -1}-1)
+    \quad\bfC(t=0) = -2\bfx(e^{-(\norm{x}_2^2 -1)}-1)
 \end{equation}
-where $\bfx\in\Omega$ and $e$ the usual notation for the \textsc{Eulerian} number. This initial condition is obviously continuous at the boundary. Because the exact solution of this equation is not known, we will use the concept of \emph{manufactured solution}. This means that we modify our physical problem by adding a so called residual. By doing this we can artificially create a known solution. This becomes clearer by doing this for our problem step by step.\par 
-The first step in the process of manufactured solution is to set a function, which should be the exact solution. In our case, we want the solutions to remain the initial condition. We could have introduced a time dependent solution here, but it only makes calculations more complex. Next, we plug these solution functions into our equations and add the residual $\bfR\colon\Omega\to\rr^3$ on the right side. It does not matter, if we use the classic or weak formulation of our problem. By using the classic formulation we get
+where $\bfx\in\Omega$ and $e$ the usual notation for the \textsc{Eulerian} number. This initial condition is obviously continuous at the boundary. Because the exact solution of this equation is not known, we will use the concept of \emph{manufactured solution}. This means that we modify our physical problem by adding a so called residual. By doing this we can artificially create a known solution. This becomes clearer by applying this technique for our problem step by step.\par 
+The first step in the process of creating a manufactured solution is to set a function, which should be the exact solution. In our case, we want the solutions to remain the initial condition. We could have introduced a time dependent solution here, but it only makes calculations more complex. Next, we plug these solution functions into our equations and add the residual $\bfR\colon\Omega\to\rr^3$ on the right side. It does not matter, if we use the classic or weak formulation of our problem. By using the classic formulation we get
 \begin{align}
-    0 &= -\partial_3 p-2\mu_p \nabla\cdot [\bfx(e^{-\norm{x}_2 -1}-1)] +\bfR_1,\\
-    -\frac{2}{\lambda}\bfx(e^{-\norm{x}_2 -1}-1)&= \frac{1}{\lambda}\nabla (e^{-\norm{x}_2 -1}-1) +\bfR_{2:3}.
+    0 &= -\partial_3 p-2\mu_p \nabla\cdot [\bfx(e^{-(\norm{x}_2^2 -1)}-1)] +\bfR_1,\\
+    -\frac{2}{\lambda}\bfx(e^{-(\norm{x}_2^2 -1)}-1)&= \nabla (e^{-(\norm{x}_2^2 -1)}-1) +\bfR_{2:3}.
 \end{align}
 Note that the time derivative evaluated to zero in both cases. Next, we solve this set of equations for $\bfR$. To do that we expand the divergence and the gradient operators to obtain
 \begin{align}
-   \bfR_1 &= \partial_3 p +4\mu_p(e^{-\norm{x}_2 -1}(1-\norm{x}_2^2)-1),\\
-   \bfR_{2:3} &= \frac{2}{\lambda}\bfx.
+   \bfR_1 &= \partial_3 p +4\mu_p(e^{-(\norm{x}_2^2 -1)}(1-\norm{x}_2^2)-1),\\
+   \bfR_{2:3} &=2\bfx\left(e^{-(\norm{x}_2^2 -1)}\left(1-\frac{1}{\lambda}\right)+\frac{1}{\lambda}\right).
 \end{align}
-Because we chose $u$ and $\bfC$ intelligently, the residual for $\bfC$ reduces to just one term. To solve the equations, we have to get everything back into the weak formulation. Luckily only a term for the residual has to be added. This results in 
+To solve the equations, we have to get everything back into the weak formulation. This results in 
 \begin{align}
 \int_\Omega(u-u^n)\psi\D\Omega +\Delta t\left(\int_\Omega\partial_3 p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega-\int_\Omega \bfR_1\psi\D\Omega\right) = 0,\\
 \bfs =\mu_p\bfC_{1/\lambda},\\
 \int_\Omega(\bfC_{1/\lambda} - \bfC_{1/\lambda}^n +\frac{\Delta t}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
-\begin{pmatrix}
-\frac{\Delta t}{\lambda}\int_\Omega\partial_1 u\varphi_1\D\Omega\\\frac{\Delta t}{\lambda}\int_\Omega\partial_2 u\varphi_2\D\Omega\\
-\end{pmatrix}+\int_{\Omega}\bfR_{2:3}\cdot\phi\D\Omega.
+\Delta t\int_\Omega \nabla u\cdot\varphi\D\Omega+\Delta t\int_{\Omega}\bfR_{2:3}\cdot\varphi\D\Omega.
 \end{align}
 The solution of this system is exactly our initial condition. This way we can easily calculate approximation errors. 
 \begin{table}
@@ -1092,7 +1076,7 @@ The solution of this system is exactly our initial condition. This way we can ea
 \begin{figure}
     
     
-    \includegraphics[width=\textwidth]{mesh}
+    \includegraphics[width=\textwidth]{meshcircle}
     \caption{Finest mesh of the unit disc}
     \label{fig:mesh}
 \end{figure}
