@@ -1,4 +1,4 @@
-\documentclass[12pt,a4paper]{beamer}
+\documentclass[12pt,a4paper,handout]{beamer}
 
 \usefonttheme{professionalfonts}
 %\usepackage[ngerman]{babel}% deutsches Sprachpaket wird geladen
@@ -111,7 +111,7 @@
 \renewcommand{\@thesubfigure}{\thesubfigure:\hskip\subfiglabelskip}
 \makeatother
 \begin{document}
-    \title{ Numerical Solution of Integro-Differential equations}
+    \title{Numerical Solution of Integro-Differential Equations}
     \author{Nils Dornbusch}
     \date{July 09, 2019}
     \maketitle
@@ -120,8 +120,9 @@
     \end{frame}
 \section{Introduction}
 \frame{
-    \frametitle{Introduction and motivation}
-        Non Newtonian fluids have a wide range of applications. This include
+    \frametitle{Introduction}
+    A Non-Newtonian fluid is a fluid that changes its viscosity under stress.
+        There are many examples for them. These include
         \begin{itemize}[<+->]
         \item toothpaste
         \item liquid plastic
@@ -129,8 +130,7 @@
         \item and many more.
         \end{itemize}}
 \begin{frame}
-    \frametitle{Why this work is written}
-    Some reasons, why this work is written:
+    \frametitle{Motivation}
     \begin{itemize}[<+->]
         \item Simulation of this particular fluid model does not exist 
         \item First step in trying to develop a stable numerical approach
@@ -142,7 +142,7 @@
         \frametitle{Physics}
         \begin{itemize}[<+->]
             \item  The physical model uses the well-known Navier Stokes equations
-            \item The stress tensor is modeled according to the Maxwell/Oldroyd-B model
+            \item The stress tensor is modeled using an integral model
         \end{itemize}
     \end{frame}
 
@@ -154,48 +154,64 @@
         \sigma(t,\hat\bfx)&= \int_{-\infty}^t-\partial_{t'}\bfB(t,t',\hat\bfx)G(t,t')\D t',\\
         \partial_t \bfB &=- (\bfu\cdot\nabla)\bfB+(\nabla \bfu)\bfB+\bfB(\nabla\bfu)^T.
         \end{align*}
-        with $G(t,t')=\mu_p\cdot e^{-(t-t')/\lambda}$, $\bfu$ the velocity vector, $\bff$ a generic source term, $\sigma$ the stress tensor, $\mu_s, \mu_p$ the solvent and polymer viscosity respectively, $p$ the pressure, $\lambda$ the relaxation time and $\bfB$ the finger tensor.
+        with e.g. $G(t,t')=\mu_p\cdot e^{-(t-t')/\lambda}$, $\bfu$ the velocity vector, $\bff$ a generic source term, $\sigma$ the stress tensor, $\mu_s, \mu_p$ the solvent and polymer viscosity respectively, $p$ the pressure, $\lambda$ the relaxation time and $\bfB$ the Finger tensor.
      \end{frame}
  \begin{frame}
      \frametitle{Boundary conditions}
+     We choose suitable initial and boundary conditions for the velocity. For $\bfB$ we use
      \begin{align*}
-          \bfu &= \bfu_b \text{ on }\partial\Omega,\\
-         \bfu(t=0) &=\bfu_0,\\
-         \bfB(t,t,\hat\bfx)& = \bm{1}\\
-         \bfB(0,t',\hat\bfx) &=\bm{1}
+         \bfB(t,t,\hat\bfx)& = \bm{1},\\
+         \bfB(0,t',\hat\bfx) &=\bm{1},
      \end{align*}
+     which means that we assume a stress free start of the simulation.
  \end{frame}
 \section{Dimension reduction}
     \begin{frame}
         \frametitle{Assumptions for the dimension reduction}
-        These are very complex equations. This work uses following assumptions:
-        \begin{itemize}
+        These are very complex equations. This work uses the following assumptions:
+        \begin{itemize}[<+->]
             \item $\bfu= (0,0,u)^T$, $\bff=\bm{0}$, $\nabla p\equiv(0,0,\partial_3 p)$
-            \item $\partial_3\bfB_{3,j} =0 \quad\forall j\in\{1,2,3\}$
-        \end{itemize}
-    That way we can deduce a true 2D model of the cross section of e.g. a tube.
+            \item $\partial_3\bfB =\bm{0}$
+         \end{itemize}
+    \uncover<3->{This yields a 2D model for the cross sectional flow in a e.g. tube.}\\
+    
+    \only<4>{\begin{figure}
+            \includegraphics[width=0.5\textwidth]{h006-laminar-flow}
+            \caption{Visualization of the assumptions (reference in the thesis)}
+         \end{figure}}
     \end{frame}
 \begin{frame}
     \frametitle{Dimension reduction}
+    We observe
     \begin{itemize}[<+->]
         \item $0=\ddiv u = \partial_3 u$
-        \item therefore $(\bfu\cdot\nabla)\bfu=u\partial_3 u= 0$
+        \item therefore $(\bfu\cdot\nabla)\bfu=(0,0,u\partial_3 u)= \bm{0}$
         \item $\Delta \bfu = (0,0,\Delta u) = (0,0,\Delta_{2D}u)$
     \end{itemize}
-\uncover<3->{Now take a look at the finger tensor equation.}
 \end{frame}
 \begin{frame}
     \frametitle{Dimension reduction}
     Recall $\partial_t \bfB =- (\bfu\cdot\nabla)\bfB+(\nabla \bfu)\bfB+\bfB(\nabla\bfu)^T$
     \begin{itemize}[<+->]
         \item we get $\partial_t \bfB_{i,j}=-u(\partial_3 \bfB_{i,j})$ for $(i,j)\in\{1,2\}^2$
-        \item if we choose $\bfB_{i,j}$ constant for $(i,j)\in\{1,2\}^2$, it will remain constant
-        \item we choose the identity
+        \item because $\partial_3 \bfB =\bm{0}$ we know that this block is constant in time
+        \item according to initial condition we choose the identity for this block
         \item only last row/column of interest
-        \item recall $\partial_3 B_{3,3}=0$
+        \item recall $\partial_3 \bfB_{3,3}=0$
         \item new variable $\bfb=\bfB_{3,j}$ for $j=1,2$
         \item and $\bfs(t,\hat\bfx) =\int_{-\infty}^t-\partial_{t'}\bfb(t,t',\hat\bfx)G(t,t')\D t'$.
     \end{itemize}  
+\end{frame}
+\begin{frame}
+    \frametitle{Dimension reduction}
+    To visualize the previous ideas:
+    \begin{equation*}
+    \bfB=\begin{pmatrix}
+        1&0&\bfb_1\\
+        0&1&\bfb_2\\
+        \bfb_1&\bfb_2&*
+    \end{pmatrix}
+    \end{equation*}
 \end{frame}
 \begin{frame}
     \frametitle{Dimension reduction}
@@ -223,11 +239,11 @@
 \section{Laplace transform}
 \begin{frame}
     \frametitle{Laplace transform}
-    We want to eliminate the integral. Our solution: Laplace transform $\bfb$. We follow these steps 
+    We want to eliminate the integral. Our solution: 
     \begin{enumerate}[<+->]
         \item introduce $\tau= t-t'$ (age variable)
         \item put this into the equations
-        \item Laplace transform $\bfb$
+        \item perform the Laplace transform of $\bfb$ with respect to $\tau$
     \end{enumerate}
 \end{frame}
 \begin{frame}
@@ -245,7 +261,7 @@
     \frametitle{Laplace transform}
     Transform $\bfb\mapsto L_b:=\int_0^\infty \bfb(x,t,t-\tau)e^{-s\tau}\D \tau$. This yields
     \begin{equation*}
-    \partial_tL_{\bfb}(t,\bfx,s) + L_{\partial_\tau\bfb}(t,\bfx,s) = \nabla u.
+    \partial_tL_{\bfb}(t,\bfx,s) + L_{\partial_\tau\bfb}(t,\bfx,s) = \frac{1}{s}\nabla u.
     \end{equation*}
     Second part of the sum:
         \begin{align*}
@@ -258,8 +274,9 @@
     \frametitle{Laplace transform}
     Using $C_s:=sL_b(t,\bfx,s)$ we obtain
     \begin{equation*}
-         \partial_t\bfC_s(t,\bfx)+s\bfC_s(t,\bfx)=s\nabla u
+         \partial_t\bfC_s(t,\bfx)+s\bfC_s(t,\bfx)=\nabla u
     \end{equation*}
+    Until now no assumptions on the function type of $G$ were made.
     If we set $s:=\frac{1}{\lambda}$ and use $G(t,t-\tau)=\mu_pe^{-\tau/\lambda}$, it follows
     \begin{equation*}
         \bfs(t,\bfx)=\mu_pC_{1/\lambda}(t,\bfx)
@@ -272,7 +289,7 @@
         \label{eq:transfeq2}
         \bfs(t,\bfx)&=\mu_p\bfC_{1/\lambda},\\
         \partial_t\bfC_{1/\lambda}(t,\bfx) &= -\frac{1}{\lambda}\bfC_{1/\lambda}(t,\bfx)+\frac{1}{\lambda}\nabla u    \end{align*}
-        This is a linear system of which the existence and uniqueness of the solution is proven in this work.
+        This is a linear system of which the existence and uniqueness of the solution is proven in the thesis.
 \end{frame}
 \section{Numerics}
 \begin{frame}
@@ -280,13 +297,29 @@
     The software used is FEniCS. 
     \begin{itemize}[<+->]
         \item Framework for solving PDEs with finite element discretization (limited DG support available)
-        \item just have to plug in the weak form and maybe time loop
-        \item MPI support, however we have not tested how good it is 
+        \item have to plug in the weak form and maybe time loop
+        \item MPI support, however not tested yet 
     \end{itemize}
     \begin{figure}
         \includegraphics[width=0.5\textwidth]{FenicsCode}
         \caption{Weak formulation for the derived equations with timestepping}
     \end{figure}
+\end{frame}
+\begin{frame}
+\frametitle{Simulation cases}
+The following cases were simulated
+\begin{itemize}[<+->]
+    \item Circle mesh 
+    \begin{itemize}[<+->]
+        \item Startup flow with a fixed pressure 
+        \item Flow with manufactured solution for convergence
+    \end{itemize}
+    \item square mesh (side length = 2)
+    \begin{itemize}[<+->]
+        \item cross section of an ideal rheometer
+    \end{itemize}
+\end{itemize}
+\uncover<6>{Note: Units have been omitted but have to be chosen consistently. }
 \end{frame}
 \begin{frame}
     \frametitle{Numerical results}
@@ -297,27 +330,13 @@
         \subfigure[4852 cells]{\includegraphics[width=0.4\textwidth]{MeshSquare}}
     \end{figure}
 \end{frame}
-\begin{frame}
-    \frametitle{Simulation cases}
-    The following cases were simulated
-    \begin{itemize}[<+->]
-        \item Circle mesh 
-        \begin{itemize}[<+->]
-            \item Startup flow with a fixed pressure 
-            \item Flow with manufactured solution for convergence
-        \end{itemize}
-        \item square mesh (side length = 2)
-        \begin{itemize}[<+->]
-            \item cross section of an ideal rheometer
-        \end{itemize}
-    \end{itemize}
-\end{frame}
+
 \begin{frame}
     \frametitle{Startup flow fixed pressure}
     \begin{figure}
         \subfigure{\includegraphics[width=0.4\textwidth]{vel}}
-        \subfigure{\includegraphics[width=0.4\textwidth]{centerlinevel}}
-        \caption{Startup flow Maxwell with $E=1$ and $p=-5$}
+        \subfigure{\includegraphics[width=0.5\textwidth]{centerlinevel}}
+        \caption{Startup flow Maxwell with $E=1$ and $p=-3$}
     \end{figure}
 \end{frame}
 \begin{frame}
@@ -328,11 +347,11 @@
         \begin{tabular}{c|c|c}
             $\approx$ \# Elements per diameter& $\mathrm{L}^2$-error&EOC\\
             \hline
-            20 & 0.0597072 & -\\
-            40 & 0.0179654 & 1.73268\\
-            80 & 0.00538169 & 1.73909\\
-            160 & 0.00145236 & 1.88966\\
-            320 & 0.000381656 & 1.92806
+            20 & 0.0797652 & -\\
+            40 & 0.0233543 & 1.77207\\
+            80 & 0.00615334 & 1.92425\\
+            160 & 0.00163421 & 1.91278\\
+            320 & 0.000433982 & 1.91288
         \end{tabular}
         \caption{Convergence of the \textsc{Maxwell} model $(\mu_s=0)$}
     \end{table}
@@ -346,21 +365,29 @@
     \frametitle{Conclusion}
     \begin{itemize}[<+->]
         \item Simulation of a 2D problem 
-        \item physical properties were satisfied
-        \item convergence was obtained in practice
-        \item theoretical existence and uniqueness was proven
+        \item theoretical existence and uniqueness were proven
+        \item results match physical expectations
+        \item numerical convergence was obtained in practice
+        \item simulation of a flow inside a rheometer cross section
     \end{itemize}
 \end{frame}
 \begin{frame}
     \frametitle{Outlook}
-    Some points which still need considering
+    Open questions:
     \begin{itemize}[<+->]
-        \item What if the \enquote{Laplace trick} is not possible?
-        \item What if the pressure is not constant?
-        \item What if the flow is not only limited to one direction? 
-        \item How can parallelization speed up the calculation? 
+        \item For this thesis:
+        \begin{itemize}[<+->]
+            \item What if the pressure is not constant?
+             \item What if the \enquote{Laplace trick} is not possible?
+        \end{itemize}
+       \item In the long run:
+       \begin{itemize}[<+->]
+          \item What if the flow is not only limited to one direction? 
+          \item How can parallelization speed up the calculation? 
+          \item How does one handle a continuous set of relaxation times?
+          \item How can one use a simulation to perform parameter estimations?
+       \end{itemize}
     \end{itemize}
-\uncover<4->{First two may be answered at the end of the work.}
 \end{frame}
 \begin{frame}
 \huge{Thank you for your attention!}

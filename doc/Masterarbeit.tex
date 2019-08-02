@@ -530,20 +530,21 @@ We can give a relationship between the \textsc{Laplace} and \textsc{Fourier} tra
 \end{sa}
 In this chapter, we gathered all the important general mathematical background information, which we will use heavily from now on. 
 \chapter{Modeling}
+\label{ch:model}
 Until now, our mathematical work was in no way specific to the problem, which this work tries to solve. We want to change this now. For this, we will give some (short) introduction into the physics behind the non-\textsc{Newtonian} behavior. The introduction for this will however be intentionally vague as this work is more focused on mathematics then the physics behind it. After that, we will use some assumptions to make the problem accessible for a master's thesis.
 \section{\textsc{Navier-Stokes} Equation}
 Many books have been written about the \textsc{Navier-Stokes} equations. We will use some ideas from \cite{Lukaszewicz2016} and \cite{White2006} to outline the main facts. Just the incompressible variant of the equations will be considered and the density is normalized to one and therefore will be omitted.
 \subsection{Basics of fluid dynamics}
 To understand fluid dynamics one must consider two coordinate systems. At first, there is the usual fixed \textsc{Eulerian} coordinate system (spatial coordinates) that is stationary. Secondly, there is the \textsc{Lagrangian} coordinate system (material coordinates) that follows one particle in the flow. 
 \begin{defn}
-    Let the position of some particle in the fluid be denoted in the \textsc{Euler}ian grid. At time $t=0$ it occupies position $X$. Suppose that $x$ is the position of the said particle at a finite time $t$. This new position is then a function of its position at $t=0$ and time. So we introduce
+    Let the position of some particle in the fluid be denoted in the \textsc{Eulerian} grid. At time $t=0$ it occupies position $X$. Suppose that $x$ is the position of the said particle at a finite time $t$. This new position is then a function of its position at $t=0$ and time. So we introduce
     \begin{equation}
         x=x(X,t).
     \end{equation}
 \end{defn}
 We want this transformation to be continuous and invertible with the inverse $X=X(x,t)$, with $X$ and $x$ sufficiently smooth functions. 
 \begin{defn}
-    For a function $x$ as above we define the \textsc{Jacobi}an as
+    For a function $x$ as above we define the \textsc{Jacobian} as
     \begin{equation}
         J(X,t)= \det\left(\frac{\partial x_i}{\partial X_j}\right).
     \end{equation}
@@ -625,12 +626,15 @@ where $p$ is the pressure and $I$ the corresponding identity matrix. Plugging th
 Note that this equation is not complete. One has to give a model for the (also called) stress tensor $\sigma$ and for the pressure. This however, is very fluid dependent. Exactly this will be the topic of the next section.
 \section{\textsc{Maxwell/Oldroyd-B} model}
 \label{sec:physics}
+
 Before we start discussing the two related models used to model the stress tensor, we will give a short introduction into non-\textsc{Newtonian} fluids in general. A nice general introduction is given in \cite{Ouellette2013}.
 \subsection{What is a non-\textsc{Newtonian} fluid and why is it relevant?}
-Generally speaking, a non-\textsc{Newton}ian fluid differs from a \textsc{Newton} fluid in the behavior of the viscosity. \textsc{Newton} formulated laws, which the ideal fluid should obey. One of them was that the viscosity should be independent of the stress the fluid encountered. All fluids, which obey this law, are called \textsc{Newtonian} fluids and the others non-\textsc{Newtonian}. Non-\textsc{Newtonian} fluids are far more spread as one would imagine: from ketchup to honey and toothpaste to the famous water-cornstarch mixture that jumps on loud speakers; these types of fluids are everywhere. Even granular movement in space and liquid plastic in 3D printers behaves that way. So there are plenty of reasons to care about the difficult task of modeling these fluids. \par 
-There are many different types of non-\textsc{Newtonian} behavior. Ketchup for example has a so called \emph{pseudoplastic} behavior, that means that the viscosity decreases with increased stress. In this work we will cover the fluids that have the \emph{viscoelastic }behavior. That means that elastic and viscous effects are working together as a linear combination. Liquid plastic and granular flows often shows this type of non-\textsc{Newtonian} behavior.
+Generally speaking, a non-\textsc{Newton}ian fluid differs from a \textsc{Newton} fluid in the behavior of the viscosity. \textsc{Newton} formulated laws, which the ideal fluid should obey. One of them was that the viscosity should be independent of the stress the fluid encountered. All fluids, which obey this law, are called \textsc{Newtonian} fluids and the others non-\textsc{Newtonian}. Non-\textsc{Newtonian} fluids are far more spread as one would imagine: from ketchup to honey and toothpaste to the famous water-cornstarch mixture that jumps on loudspeakers; these types of fluids are everywhere. Even granular movement in space and liquid plastic in 3D printers behaves that way. So there are plenty of reasons to care about the difficult task of modeling these fluids. \par 
+There are many different types of non-\textsc{Newtonian} behavior. Ketchup for example has a so called \emph{pseudoplastic} behavior, that means that the viscosity decreases with increased stress. In this work we will cover the fluids that have the \emph{viscoelastic }behavior. That means that elastic and viscous effects are working together as a linear combination. Liquid plastic and granular flows often show this type of non-\textsc{Newtonian} behavior.
 \subsection{Upper-Convected \textsc{Maxwell} model}
 This is exactly the type, which the Upper-convected \textsc{Maxwell} model describes best. This is obtained by combining dampers and springs and model them with known physical laws. The easiest case is shown in Figure \ref{fig:maxwell}.
+\subsection{\textsc{Oldroyd-B} model}
+The governing equation in this equation is the same as in the previous subsection. However, the \textsc{Maxwell} model sets $\mu_s=0$ and eliminates the diffusion term in the equations. The \textsc{Oldroyd-B} model includes the full \textsc{Navier-Stokes} equations.
 \begin{figure}
     \centering
     
@@ -676,7 +680,7 @@ where $G\colon\rr^+\times\rr^+\to\rr^+$ is a weight function which decays fast i
 \end{equation} 
 where $\mu_p\in\rr^+$ is the polymer viscosity and $\lambda\in\rr$ the relaxation time. Both are fluid- dependent parameters. However, $G$ can be more complex. For example, if $G$ becomes space-dependent, this introduces many new problems. This is why we will stick to \eqref{eq:G} for now.
 \par 
-The term $\bfB\colon\rr^+\times\rr^+\times\hat\Omega\to\rr^{3\times 3}$ in \eqref{eq:generalsig} is called the \emph{Finger tensor} and obeys the differential equation
+The term $\bfB\colon\rr^+\times\rr^+\times\hat\Omega\to\rr^{3\times 3}$ in \eqref{eq:generalsig} is called the \emph{\textsc{Finger} tensor} and obeys the differential equation
 \begin{equation}
 \label{eq:Bfull}
     \partial_t \bfB + (\bfu\cdot\nabla)\bfB-(\nabla \bfu)\bfB-\bfB(\nabla\bfu)^T = \bm{0}.
@@ -747,9 +751,7 @@ We can now define our new system of equations
 \partial_t u(t,\bfx) &= -\partial_3 p + f +\nabla\cdot \bfs+\mu_s\Delta u,\\
 \bfs(t,\bfx) &=\int_{-\infty}^t-\partial_{t'}\bfb(t,t',\bfx)G(t,t')\D t',\label{eq:s2D}\\
 \partial_t\bfb(t,t',\bfx)&=
-\begin{pmatrix}
-\partial_1 u(t,\bfx)\\\partial_2 u(t,\bfx)
-\end{pmatrix},
+\nabla u,
 \end{align}
 where $\Omega\subset\rr^2$ is the domain with an element $\bfx$. We let $u(t,\bfx), p(t,\bfx), f(t,\bfx)\colon\rr^+\times\rr^2\to\rr$ denote the third component of the velocity, the pressure and a generic source/sink term respectively. $\Delta$ stands for the two-dimensional \textsc{Laplace}-operator. To define the stress and finger tensor, we use $\bfs(t,\bfx)$ and  $\bfb(t,\bfx)\colon\rr^+\times\rr^2\to\rr^2$ respectively.
 
@@ -761,9 +763,7 @@ The next step, that is usually taken, is the introduction of an \enquote{age} va
 \end{equation}
 Using the chain rule the governing equation for the Finger tensor transforms to  
 \begin{equation}
-    \partial_t \bfb +\partial_\tau\bfb = \begin{pmatrix}
-    \partial_1 u(t,\bfx)\\\partial_2 u(t,\bfx)
-    \end{pmatrix},
+    \partial_t \bfb +\partial_\tau\bfb = \nabla u,
 \end{equation}
 with the corresponding boundary and initial conditions
 \begin{align}
@@ -777,9 +777,7 @@ L_{\bfb}(t,\bfx,s) =\int_0^\infty\bfb(t,t-\tau,\bfx)e^{-s\tau}\D\tau
 as the \textsc{Laplace} transform of $\bfb$, where $s\in\cc$ is the frequency parameter. 
 We can switch derivative and integral because we assume both limits to exist.
 \begin{equation}
-    \partial_tL_{\bfb}(t,\bfx,s) + L_{\partial_\tau\bfb}(t,\bfx,s) = \begin{pmatrix}
-    \partial_1 u(t,\bfx)\\\partial_2 u(t,\bfx)
-    \end{pmatrix}.
+    \partial_tL_{\bfb}(t,\bfx,s) + L_{\partial_\tau\bfb}(t,\bfx,s) = \frac{1}{s}\nabla u.
 \end{equation}
 However, because $\partial_\tau$ is not independent of $\tau$, we have to use integration by parts to transform it to
 \begin{align}
@@ -790,9 +788,7 @@ However, because $\partial_\tau$ is not independent of $\tau$, we have to use in
 \end{align}
 We have successfully eliminated the time derivative in $\tau$ direction. The governing equation for the \textsc{Laplace} transform of the finger tensor is given by
 \begin{equation}
-(\partial_t +s)L_{\bfb}(t,\bfx,s) = \begin{pmatrix}
-\partial_1 u(t,\bfx)\\\partial_2 u(t,\bfx)
-\end{pmatrix}.
+(\partial_t +s)L_{\bfb}(t,\bfx,s) = \frac{1}{s}\nabla u
 \end{equation}
 The corresponding initial condition is 
 \begin{equation}
@@ -804,9 +800,7 @@ As a next step, we will introduce the conformation tensor, which non-dimensional
 \end{equation}
 and has the governing equation
 \begin{equation}
-    \partial_t\bfC_s(t,\bfx)+s\bfC_s(t,\bfx) =\begin{pmatrix}
-    s\partial_1u\\s\partial_2 u
-    \end{pmatrix}.
+    \partial_t\bfC_s(t,\bfx)+s\bfC_s(t,\bfx) =\nabla u
 \end{equation}
 This transformation worked very well and eliminated many problems, but the question remains: how do we retrieve $\bfs$?
 Let's recall \eqref{eq:sage}.
@@ -843,18 +837,14 @@ The next step will be to build a numerical scheme to solve these equations. For 
     \partial_t u(t,\bfx) &= -\partial_3 p + f +\nabla\cdot \bfs+\mu_s\Delta u,\\
     \label{eq:transfeq2}
     \bfs(t,\bfx)&=\mu_p\bfC_{1/\lambda},\\
-    \partial_t\bfC_{1/\lambda}(t,\bfx) &= -\frac{1}{\lambda}\bfC_{1/\lambda}(t,\bfx)+\begin{pmatrix}
-    \frac{1}{\lambda}\partial_1u\\\frac{1}{\lambda}\partial_2 u
-    \end{pmatrix}.
+    \partial_t\bfC_{1/\lambda}(t,\bfx) &= -\frac{1}{\lambda}\bfC_{1/\lambda}(t,\bfx)+\nabla u
     \label{eq:transfeq3}
 \end{align}
 \section{Weak formulation}
 To get the weak formulation for equations \eqref{eq:transfeq1} to \eqref{eq:transfeq3}, we will use the standard approach. So let $\varphi = (\varphi_1,\varphi_2)\in \mathrm{C}^\infty_0(\Omega\times\rr)$ with values in $\rr^2$ and $\psi\in \mathrm{C}^\infty_0(\Omega\times\rr)$ real-valued be testfunctions of compact support. By integrating in space, we can transform \eqref{eq:transfeq3} to 
 \begin{equation}
     \int_\Omega(\partial_t\bfC_{1/\lambda}+\frac{1}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
-    \begin{pmatrix}
-    \frac{1}{\lambda}\int_\Omega\partial_1 u\varphi_1\D\Omega\\\frac{1}{\lambda}\int_\Omega\partial_2 u\varphi_2\D\Omega\\
-    \end{pmatrix}.
+   \int_\Omega \nabla u\cdot \varphi\D\Omega.
 \end{equation}
 We will not modify this equation further, as we do not have any knowledge about the boundary values of $\bfC$. The spatial derivatives of $u$ however, are not a problem during the simulation. Equation \eqref{eq:transfeq2} does not need to be handled, so what remains is equation \eqref{eq:transfeq1}, which also is the most complicated one. Integration over $\Omega$ and multiplication with the respective testfunction yields
 \begin{equation}
@@ -881,9 +871,7 @@ If we recap this section, we can give the following system of weak formulations 
      \int_\Omega(\partial_t u)\psi\D\Omega +\int_\Omega\partial_3 p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega+\mu_s\int_\Omega\nabla u\cdot\nabla\psi\D\Omega = 0,\\
      \bfs =\mu_p\bfC_{1/\lambda},\\
       \int_\Omega(\partial_t\bfC_{1/\lambda}+\frac{1}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
-     \begin{pmatrix}
-     \frac{1}{\lambda}\int_\Omega\partial_1 u\varphi_1\D\Omega\\\frac{1}{\lambda}\int_\Omega\partial_2 u\varphi_2\D\Omega\\
-     \end{pmatrix}.
+     \int_\Omega \nabla u\cdot\varphi\D\Omega.
 \end{align}
 
 \section{Time discretization}
@@ -898,9 +886,7 @@ To get rid of some indices we set $(\cdot)^{n+1}:=(\cdot)$ If we put \eqref{eq:t
   \int_\Omega(u-u^n)\psi\D\Omega +\Delta t\left(\int_\Omega\partial_3 p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega+\mu_s\int_\Omega\nabla u\cdot\nabla\psi\D\Omega\right) = 0,\\
   \bfs =\mu_p\bfC_{1/\lambda},\\
   \int_\Omega(\bfC_{1/\lambda} - \bfC_{1/\lambda}^n +\frac{\Delta t}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
-  \begin{pmatrix}
-  \frac{\Delta t}{\lambda}\int_\Omega\partial_1 u\varphi_1\D\Omega\\\frac{\Delta t}{\lambda}\int_\Omega\partial_2 u\varphi_2\D\Omega\\
-  \end{pmatrix}.
+  \Delta t\int_\Omega\nabla u\cdot\varphi\D\Omega.
 \end{align}
 \par 
 There are numerous possible means to solve the resulting linear system. We will discuss a few possibilities later on.
@@ -918,7 +904,7 @@ At first we have to break the problem down into the bilinear form $a(U,\phi)$ an
 \end{equation}
 Note that these vectors have three entries each. Because we choose $\varphi$ entry-wise and $\psi$ linear independent, we can write the whole system as a sum of every term inside. Putting our new defined variables in results in the equation
 \begin{align}
-    &\int_\Omega[U\cdot\phi+\Delta t((\mu_pU_{1:2}+\mu_s\nabla U_3)\cdot\nabla\phi_3)+\frac{\Delta t}{\lambda}(U_{1:2}\cdot\phi_{1:2}-\nabla U_3\cdot\phi_{1:2})]\D\Omega\\
+    &\int_\Omega[U\cdot\phi+\Delta t((\mu_pU_{1:2}+\mu_s\nabla U_3)\cdot\nabla\phi_3)+\frac{\Delta t}{\lambda}U_{1:2}\cdot\phi_{1:2}-\Delta t\nabla U_3\cdot\phi_{1:2}]\D\Omega\\
     &=\int_\Omega [U^n\cdot\phi-\Delta t\partial_3 p\phi_3]\D\Omega.
 \end{align}
 We denoted with 1:2 that the vector containing the first and second entry should be taken. The left side of the equation is our $a(U,\phi)$. That this is a bilinear form is trivially true due to the linearity of the integral and the dot product. However, it is not symmetrical and therefore no inner product. That means, that our resulting matrix $A$ is not symmetrical, which is not optimal for the linear solver.\par 
@@ -939,7 +925,7 @@ We now want to proof, with the help of Theorem \ref{sa:LaxMilgram} (\textsc{Lax-
 \end{equation}
 where we use the inner products as defined in \ref{sec:funcana}. This inner product induces a norm on $X$ which we will use to show the existence of a solution. We will omit the subscript on the integral because it is obviously just $\Omega$ everywhere. We begin with
 \begin{align}
-   \abs{a(U,\phi)}^2&=\left(\int\left\vert U\cdot\phi+U_{1:2}\cdot\left(\Delta t\mu_p\nabla\phi_3+\frac{\Delta t}{\lambda}\phi_{1:2}\right)\right.\right.\\&+\left.\left.\nabla U_3\cdot\left(\Delta t\mu_s\nabla\phi_3-\frac{\Delta t}{\lambda}\phi_{1:2}\right)\right\vert\D\Omega\right)^2.
+   \abs{a(U,\phi)}^2&=\left(\int\left\vert U\cdot\phi+U_{1:2}\cdot\left(\Delta t\mu_p\nabla\phi_3+\frac{\Delta t}{\lambda}\phi_{1:2}\right)\right.\right.\\&+\left.\left.\nabla U_3\cdot\left(\Delta t\mu_s\nabla\phi_3-\Delta t\phi_{1:2}\right)\right\vert\D\Omega\right)^2.
 \end{align}
 $U_{1:2}$ does not suite us very well, so we will transform it to $U$ and pay attention to the dimension. We can put this term together with the original $U$ term and obtain
 \begin{align}
@@ -949,11 +935,11 @@ $U_{1:2}$ does not suite us very well, so we will transform it to $U$ and pay at
        \nabla U_3\\0
         \end{pmatrix}\cdot\left(\Delta t \mu_s\begin{pmatrix}
         \nabla\phi_3\\0
-        \end{pmatrix}+\left(1+\frac{\Delta t}{\lambda}\right)\phi\right)\right\vert\D\Omega\right)^2.
+        \end{pmatrix}+\left(1+\Delta t\right)\phi\right)\right\vert\D\Omega\right)^2.
 \end{align}
 This transformation is an inequality because we added $\frac{\Delta t}{\lambda}\phi_3U_3$ to the equation to make it look nicer. The second term was also adjusted so that the second factor in each summand is, apart from the different $\mu$s, the same. We now introduce 
 \begin{equation}
-    \tilde\beta:=\max\left(\Delta t\mu_p,\Delta t\mu_s,\left(1+\frac{\Delta t}{\lambda}\right)\right).
+    \tilde\beta:=\max\left(\Delta t\mu_p,\Delta t\mu_s,\left(1+\frac{\Delta t}{\lambda}\right), (1+\Delta t)\right).
 \end{equation}
 This way we will get rid of the constant factors in the integral. It results
 \begin{align}
@@ -1007,27 +993,27 @@ where we define $\beta=\frac{\tilde\beta^2}{2}$. Now we will rewrite this to sho
 \end{align} which shows that $a(U,\phi)$ is continuous. What remains to show is that there exists an $\alpha>0$ for that $a(U,U)\ge \alpha\langle U,U\rangle_X$ for all $U$. Let us begin with
 \begin{align}
     a(U,U)&=\int U\cdot U+U_{1:2}\cdot\left(\Delta t\mu_p\nabla U_3+\frac{\Delta t}{\lambda}U_{1:2}\right)\\
-    &+\nabla U_3\cdot\left(\Delta t\mu_s\nabla U_3 -\frac{\Delta t}{\lambda}U_{1:2}\right)\D\Omega.
+    &+\nabla U_3\cdot\left(\Delta t\mu_s\nabla U_3 -\Delta tU_{1:2}\right)\D\Omega.
 \end{align}
 The dot product follows the distributive law. This way we can expand the parenthesis. We get
 \begin{equation}
     =\int\abs{U}^2+\frac{\Delta t}{\lambda}\abs{U_{1:2}}^2+\Delta t\mu_p U_{1:2}\cdot\nabla U_3
-    +\Delta t\mu_s\abs{\nabla U_3}^2-\frac{\Delta t}{\lambda}\nabla U_3\cdot U_{1:2}\D\Omega.
+    +\Delta t\mu_s\abs{\nabla U_3}^2-\Delta t\nabla U_3\cdot U_{1:2}\D\Omega.
 \end{equation} 
 We need $\abs{\nabla U_3}^2$ without a coefficient and the other terms need to be greater than 0. This way we can just leave them out. For this we add $(+1-1+\Delta t\mu_s -\Delta t\mu_s)\abs{\nabla U_3}^2=0$ to the equation. This results in 
 \begin{equation}
-     =\int\abs{U}^2+\abs{\nabla U_3}^2+\frac{\Delta t}{\lambda}\abs{U_{1:2}}^2+(\Delta t\mu_p-\frac{\Delta t}{\lambda}) U_{1:2}\cdot\nabla U_3
+     =\int\abs{U}^2+\abs{\nabla U_3}^2+\frac{\Delta t}{\lambda}\abs{U_{1:2}}^2+(\Delta t\mu_p-\Delta t) U_{1:2}\cdot\nabla U_3
     +(\Delta t\mu_s-1)\abs{\nabla U_3}^2\D\Omega,
 \end{equation} 
 where we used the symmetry of the inner product. As a preparation, we factor out $\frac{\Delta t}{\lambda}$ as follows 
 \begin{equation}
-    =\int\abs{U}^2+\abs{\nabla U_3}^2+\frac{\Delta t}{\lambda}\left(\abs{U_{1:2}}^2+(\lambda\mu_p-1)U_{1:2}\cdot\nabla U_3+(\lambda\mu_s-\frac{\lambda}{\Delta t})\abs{\nabla U_3}^2 \right)\D\Omega.\label{eq:ref1}
+    =\int\abs{U}^2+\abs{\nabla U_3}^2+\frac{\Delta t}{\lambda}\left(\abs{U_{1:2}}^2+(\lambda\mu_p-\lambda)U_{1:2}\cdot\nabla U_3+(\lambda\mu_s-\frac{\lambda}{\Delta t})\abs{\nabla U_3}^2 \right)\D\Omega.\label{eq:ref1}
 \end{equation}
 Because for any dot product it holds that
 \begin{equation}
     \langle a+b,a+b\rangle=\langle a,a\rangle+2\langle a,b\rangle + \langle b,b\rangle,
 \end{equation}
-we can observe that the part in parenthesis of \eqref{eq:ref1} looks like the right hand side of the equation above. However, there are some constant factors in \eqref{eq:ref1} that need to be dealt with. We define $\beta:=\min\{\sqrt{(\mu_s-\frac{1}{\Delta t})\lambda},\frac{\lambda\mu_p-1}{2}\}$. Plugging this into \eqref{eq:ref1} yields
+we can observe that the part in parenthesis of \eqref{eq:ref1} looks like the right hand side of the equation above. However, there are some constant factors in \eqref{eq:ref1} that need to be dealt with. We define $\beta:=\min\{\sqrt{(\mu_s-\frac{1}{\Delta t})\lambda},\frac{\lambda\mu_p-\lambda}{2}\}$. Plugging this into \eqref{eq:ref1} yields
 \begin{equation}
     a(U,U)\ge \int\abs{U}^2+\abs{\nabla U_3}^2+\frac{\Delta t}{\lambda}\abs{U_{1:2}+\beta\nabla U_3}^2\D\Omega.
 \end{equation}
@@ -1036,12 +1022,76 @@ Because $\frac{\Delta t}{\lambda}$ and the absolute value are positive we obtain
     a(U,U)\ge\int\abs{U}^2+\abs{\nabla U_3}^2\D\Omega =\norm{U}_{X}^2.
 \end{equation}
 Because $U$ was arbitrary, this deduction holds $\forall U\in X(\Omega)$. This shows the existence and uniqueness of the solution for our problem with \textsc{Lax-Milgram}.
+\chapter{Different approaches for the integral equation}
+In chapter \ref{ch:model} we could eliminate the integral from the equation completely by taking sensible assumptions on the memory function $G$. However, this is a very specific case and the more complex physical models do not have this nice feature. In this chapter we will discuss possibilities for a more general approach. 
+\section{Linear combination of relaxation times}
+In physics, most of the time it is sufficient to model the fluid's behavior using a linear combination of relaxation times. So let $N$ be an integer then we set
+\begin{equation}
+    G(\tau)=\sum_{n=1}^{N}\mu_p^{(n)}e^{-\tau/\lambda_n},
+\end{equation}
+where $\mu_p^{(n)}$ and $\lambda_n$ are a sets of polymer viscosities and relaxation times respectively. You can think of this process as interpolating the spectrum of the fluid's relaxation times. We will now deduce a new formula for $\bfs$ by putting in our assumption. This yields
+\begin{equation}
+    \bfs(t)=\int_0^t\partial_\tau \bfb(t,t-\tau)\sum_{n=1}^{N}\mu_p^{(n)}e^{-\tau/\lambda_n}\D\tau.
+\end{equation}
+Because all $\mu_p^{(n)}$ are constant and the integral operator is linear we can rewrite this to read
+\begin{equation}
+    \bfs(t) = \sum_{n=1}^{N}\mu_p^{(n)}\int_0^t\partial_\tau \bfb(t,t-\tau)e^{-\tau/\lambda_n}\D\tau.
+\end{equation}
+We will now follow a similar pattern as we did in chapter \ref{ch:model}. We will use integration by parts. It results
+\begin{equation}
+    \bfs(t)=\sum_{n=1}^{N}\left(\mu_p^{(n)}\bfb(t,0)e^{-t/\lambda_n}-\mu_p^{(n)}\bfb(t,t)+\frac{\mu_p^{(n)}}{\lambda_n}\int_0^t\bfb(t,t-\tau)e^{-\tau/\lambda_n}\D\tau \right).
+\end{equation}
+We can now use the initial condition on $\bfb$ to eliminate some terms. The integral can also be extended to $\infty$ without changing the value. We obtain
+\begin{equation}
+    \bfs(t)=\sum_{n=1}^N\frac{\mu_p^{(n)}}{\lambda_n}\int_0^\infty\bfb(t,t-\tau)e^{-\tau/\lambda_n}\D\tau.
+\end{equation}
+But this integral is exactly the \textsc{Laplace}-Transform of $\bfb$. So our equation for $\bfs$ becomes
+\begin{equation}
+    \bfs(t)=\sum_{n=1}^N\frac{\mu_p^{(n)}}{\lambda_n}L_{\bfb}(t,1/\lambda_n)=\sum_{n=1}^N\mu_p^{(n)}\bfC_{1/\lambda_n}.
+\end{equation}
+If we look closely at the equation above one can see that we now have $N$ equations for $\bfC$ to simulate. So to calculate $\bfs$ we have to simulate 
+\begin{equation}
+    \partial_t \bfC_{1/\lambda_n}+\frac{1}{\lambda_n}\bfC_{1/\lambda_n}=\nabla u
+\end{equation}
+for all $n$. This increases the computational effort but should still be more efficient than brute force calculating the integral at every timestep. Because $G$ is just a linear combination, all proofs and statements we made about the simpler equation remain true for this one.
+\section{A simple integral equation}
+In this section we will take a look at a related integral equation. This has the same complexity regarding the integral as the ones we were looking at earlier, but the complexity regarding dimension and number of equations is much reduced. This makes it easier to concentrate on the main problem and to gather ideas, how one may approach the problem in general. We use 
+\begin{align}
+   \dot\phi(t)&=-\phi(t)-\int_0^tm(t-\tau)\dot\phi(\tau)\D\tau\\,
+   m(t)&=v_1\phi(t)+v_2\phi(t)^2,
+\end{align}
+where we use the dot notation for the derivative. $v_1$ and $v_2$ are given constants.
 \chapter{Numerical results}
-Now we have everything we need to put our equations into a simulation. We will first introduce the framework which handled all the calculations performed for this work. After that we will show convergence and discuss some test cases and limitations of this approach.
+Now we have everything we need to put our equations into a simulation. We will first introduce the framework, which handled all the calculations performed for this work. After that we will show convergence and discuss some test cases and limitations of this approach.
 \section{Software}
 All simulations conducted for this work used the FEniCS framework (\cite{AlnaesBlechta2015a}, \cite{LoggMardalEtAl2012a}). Other components of this project are the C++ backend DOLFIN (\cite{LoggWells2010a}, \cite{LoggWellsEtAl2012a}), the compiler for the variational form FFC (\cite{KirbyLogg2006a}, \cite{LoggOlgaardEtAl2012a}, \cite{OlgaardWells2010b}), the language definition for variational forms UFL(\cite{AlnaesEtAl2012}, \cite{Alnaes2012a}) and the corresponding code generator UFC (\cite{AlnaesLoggEtAl2009a}, \cite{AlnaesLoggEtAl2012a}).
 \par 
-The advantages of using a framework at all are obvious. The less time one spends coding, the more one can assign to theoretical tasks. Another nice property is that the whole debugging process shorted by a large bit. The software is also throughly tested so bugs are much less frequent. Literature on how to get started with FEniCS is easy to find. A nice tutorial is given by the founders of FEniCS in  \cite{Langtangen2017a}. The code, that has been written for this work, can be found in the appendix and on the CD, which accompanies this.
+The advantages of using a framework at all are obvious. The less time one spends coding, the more one can assign to theoretical tasks. Another nice property is that the whole debugging process is shortened by a large bit. The software is also throughly tested so bugs are much less frequent. Literature on how to get started with FEniCS is easy to find. A nice tutorial is given by the founders of FEniCS in  \cite{Langtangen2017a}. The code, that has been written for this work, can be found in the appendix and on the CD, which accompanies this.
+\section{Simulation cases}
+The next sections will be all about simulations and their results. This section should give a quick overview of all the relevant cases studied. \\
+Two domains were used throughout the simulations. 
+\begin{figure}
+    \includegraphics[width=\textwidth]{meshcircle}
+    \caption{Finest mesh of the unit disc}
+    \label{fig:mesh}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=\textwidth]{meshsquare}
+    \caption{Mesh of a square with sidelength 2}
+    \label{fig:meshsquare}
+\end{figure}
+They can be seen in figures \ref{fig:mesh} and \ref{fig:meshsquare}.
+We used the unit disc for the following simulation cases:
+\begin{itemize}
+    \item Convergence of our implementation
+    \item Startup flow (fluid at rest in the beginning but perpendicular pressure)
+\end{itemize}
+The square had applications in these cases:
+\begin{itemize}
+    \item Startup flow
+    \item \enquote{ideal} rheometer cross-section
+\end{itemize}
+The reason why we simulated the startup flow case twice will be obvious once we compare the results. Videos of these testcases will be appended to the presentation and to the CD that accompanies this work.
 \section{Convergence}
 In this section we will use a setup to show the convergence of the implementation and the EOC. We will the unit disc as our domain. We want 
 \begin{equation}
@@ -1052,51 +1102,48 @@ We want to show the convergence for the \textsc{Maxwell} model $(\mu_s=0)$ first
 We set the initial conditions
 \begin{equation}
     u(t=0) = e^{-\norm{x}_2-1}-1,
-    \quad\bfC(t=0) = -2\bfx(e^{-\norm{x}_2 -1}-1)
+    \quad\bfC(t=0) = -2\bfx(e^{-(\norm{x}_2^2 -1)}-1)
 \end{equation}
-where $\bfx\in\Omega$ and $e$ the usual notation for the \textsc{Eulerian} number. This initial condition is obviously continuous at the boundary. Because the exact solution of this equation is not known, we will use the concept of \emph{manufactured solution}. This means that we modify our physical problem by adding a so called residual. By doing this we can artificially create a known solution. This becomes clearer by doing this for our problem step by step.\par 
-The first step in the process of manufactured solution is to set a function, which should be the exact solution. In our case, we want the solutions to remain the initial condition. We could have introduced a time dependent solution here, but it only makes calculations more complex. Next, we plug these solution functions into our equations and add the residual $\bfR\colon\Omega\to\rr^3$ on the right side. It does not matter, if we use the classic or weak formulation of our problem. By using the classic formulation we get
+where $\bfx\in\Omega$ and $e$ the usual notation for the \textsc{Eulerian} number. This initial condition is obviously continuous at the boundary. Because the exact solution of this equation is not known, we will use the concept of \emph{manufactured solution}. This means that we modify our physical problem by adding a so called residual. By doing this we can artificially create a known solution. This becomes clearer by applying this technique for our problem step by step.\par 
+The first step in the process of creating a manufactured solution is to set a function, which should be the exact solution. In our case, we want the solutions to remain the initial condition. We could have introduced a time dependent solution here, but it only makes calculations more complex. Next, we plug these solution functions into our equations and add the residual $\bfR\colon\Omega\to\rr^3$ on the right side. It does not matter, if we use the classic or weak formulation of our problem. By using the classic formulation we get
 \begin{align}
-    0 &= -\partial_3 p-2\mu_p \nabla\cdot [\bfx(e^{-\norm{x}_2 -1}-1)] +\bfR_1,\\
-    -\frac{2}{\lambda}\bfx(e^{-\norm{x}_2 -1}-1)&= \frac{1}{\lambda}\nabla (e^{-\norm{x}_2 -1}-1) +\bfR_{2:3}.
+    0 &= -\partial_3 p-2\mu_p \nabla\cdot [\bfx(e^{-(\norm{x}_2^2 -1)}-1)] +\bfR_1,\\
+    -\frac{2}{\lambda}\bfx(e^{-(\norm{x}_2^2 -1)}-1)&= \nabla (e^{-(\norm{x}_2^2 -1)}-1) +\bfR_{2:3}.
 \end{align}
 Note that the time derivative evaluated to zero in both cases. Next, we solve this set of equations for $\bfR$. To do that we expand the divergence and the gradient operators to obtain
 \begin{align}
-   \bfR_1 &= \partial_3 p +4\mu_p(e^{-\norm{x}_2 -1}(1-\norm{x}_2^2)-1),\\
-   \bfR_{2:3} &= \frac{2}{\lambda}\bfx.
+   \bfR_1 &= \partial_3 p +4\mu_p(e^{-(\norm{x}_2^2 -1)}(1-\norm{x}_2^2)-1),\\
+   \bfR_{2:3} &=2\bfx\left(e^{-(\norm{x}_2^2 -1)}\left(1-\frac{1}{\lambda}\right)+\frac{1}{\lambda}\right).
 \end{align}
-Because we chose $u$ and $\bfC$ intelligently, the residual for $\bfC$ reduces to just one term. To solve the equations, we have to get everything back into the weak formulation. Luckily only a term for the residual has to be added. This results in 
+To solve the equations, we have to get everything back into the weak formulation. This results in 
 \begin{align}
 \int_\Omega(u-u^n)\psi\D\Omega +\Delta t\left(\int_\Omega\partial_3 p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega-\int_\Omega \bfR_1\psi\D\Omega\right) = 0,\\
 \bfs =\mu_p\bfC_{1/\lambda},\\
 \int_\Omega(\bfC_{1/\lambda} - \bfC_{1/\lambda}^n +\frac{\Delta t}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
-\begin{pmatrix}
-\frac{\Delta t}{\lambda}\int_\Omega\partial_1 u\varphi_1\D\Omega\\\frac{\Delta t}{\lambda}\int_\Omega\partial_2 u\varphi_2\D\Omega\\
-\end{pmatrix}+\int_{\Omega}\bfR_{2:3}\cdot\phi\D\Omega.
+\Delta t\int_\Omega \nabla u\cdot\varphi\D\Omega+\Delta t\int_{\Omega}\bfR_{2:3}\cdot\varphi\D\Omega.
 \end{align}
 The solution of this system is exactly our initial condition. This way we can easily calculate approximation errors. 
 \begin{table}
     \centering
-    \begin{tabular}{c|c|c}
-        $\approx$ \# Elements per diameter& $\mathrm{L}^2$-error&EOC\\
+    \begin{tabular}{c|c|c|c|c}
+        $\approx$ \# Elements per diameter& $\mathrm{L}^2$-error&EOC in $\mathrm{L}^2$&$\mathrm{L}^\infty$-error &EOC in $\mathrm{L}^\infty$\\
         \hline
-        20 & 0.0597072 & -\\
-        40 & 0.0179654 & 1.73268\\
-        80 & 0.00538169 & 1.73909\\
-        160 & 0.00145236 & 1.88966\\
-        320 & 0.000381656 & 1.92806
+        20 & 0.0797652 & - & 0.877305 & -\\
+        40 & 0.0233543 & 1.77207 & 0.195846 & 2.16336\\
+        80 & 0.00615334 & 1.92425 & 0.100548 & 0.96184\\
+        160 & 0.00163421 & 1.91278 & 0.0369229 & 1.44529\\
+        320 & 0.000433982 & 1.91288 & 0.0198643 & 0.89434
     \end{tabular}
 \caption{Convergence of the \textsc{Maxwell} model}
 \label{tab:maxwellconv}
 \end{table}
-\begin{figure}
-    
-    
-    \includegraphics[width=\textwidth]{mesh}
-    \caption{Finest mesh of the unit disc}
-    \label{fig:mesh}
-\end{figure}
-Table \ref{tab:maxwellconv} shows the $\mathrm{L}^2$ error and order of convergence of this example. The boundary of the domain was approximated using a polygonal chain, which increases proportionally with the number of cells. The principle of the winning least order is also applicable to the geometry. This might also explain, why in the beginning the EOC is a bit far from the expected 2. As we have 320 elements per diameter we also approximate the circle with 320 segments in the polygonal chain which, to a naked eye, is indistinguishable from a true circle. The time integration order of one is also negatively influencing the EOC. We used $\Delta t = 0.1$ and calculated until $T=1$. As the polymer viscosity we used $0.9$. Figure \ref{fig:mesh} shows the mesh at approximately 320 elements per diameter. 
+
+Table \ref{tab:maxwellconv} shows the $\mathrm{L}^2$ error and order of convergence of this example as well as these values for the $\mathrm{L}^\infty$ norm respectively. The boundary of the domain was approximated using a polygonal chain, which increases proportionally with the number of cells. The principle of the winning least order is also applicable to the geometry. This might also explain, why in the beginning the EOC is a bit far from the expected 2. As we have 320 elements per diameter we also approximate the circle with 320 segments in the polygonal chain which, to a naked eye, is indistinguishable from a true circle. The time integration order of one is also negatively influencing the EOC. We used $\Delta t = 0.1$ and calculated until $T=1$. As the polymer viscosity we used $1$. It is typical for these kind of simulations that the $\mathrm{L}^\infty$ error is worse than $\mathrm{L}^2$. This is because it is much more sensitive for things like geometry approximations.
+\subsection{\textsc{Oldroyd-B}}
+\section{Startup flow on unit disc}
+\section{Startup flow on square}
+\section{\enquote{Ideal} rheometer}
+
 \chapter{Conclusion}
 
 \addcontentsline{toc}{chapter}{List of figures}
