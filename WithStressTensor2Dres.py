@@ -42,7 +42,7 @@ for i in range(0,5):
     WithStressTensorSim[i].impose_initial_condition(u_I)
 
     # variational form
-    WithStressTensorSim[i].form_variational_problem_full2D(1, 1)
+    WithStressTensorSim[i].form_variational_problem_full2D(4, 1, 0.01)
 
     # run
     parameters["form_compiler"]["cpp_optimize"] = True
@@ -59,8 +59,8 @@ n = len(rate)
 combined = []
 for i in range (0,n):
     combined.append([numElem[i], error[i], rate[i]])
-print(tabulate(combined, headers =['#Elements per radius', 'inf error', 'EOC']))
-plt.semilogy(numElem, error)
+print(tabulate(combined, headers =['#Elements per radius', 'L2 error', 'EOC']))
+plt.loglog(numElem, error)
 plt.title("Convergence in L2")
 plt.xlabel("# Elements per diameter")
 plt.ylabel("L2-error")

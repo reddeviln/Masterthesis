@@ -74,13 +74,14 @@ class FEniCSSimulation:
         normx = x[0]**2 + x[1]**2
         exy = exp(-(normx-1))
         R = - 4 * self.mup * (exy* (1 - normx) - 1) - self.gradP
-        result =  R * v * dx - 2 / Lambda * (x[0] * CV1 * dx + x[1] * CV2 * dx)
+        R23 =   - 2 * x * (exy * (1 - 1 / Lambda) + 1 / Lambda)
+        result =  R * v * dx + dot(R23 , as_vector([CV1,CV2])) * dx
+
         return result
 
 
-    def form_variational_problem_full2D(self, Lambda, residualon):
+    def form_variational_problem_full2D(self, Lambda, residualon, dt):
         """define the variational problem for the equations with stress tensor"""
-        dt = Constant(0.1)
         t = 0
         Lambda = Constant(Lambda)
         self.U = TrialFunction(self.V[0])
@@ -94,16 +95,15 @@ class FEniCSSimulation:
                 + Constant(self.mu) * dot(grad(u), grad(v)) * dx) \
                 + (C1 - un1 + dt / Lambda * C1) * CV1 * dx\
                 + (C2 - un2 + dt / Lambda * C2) * CV2 * dx \
-                - dt *(1 / Lambda * u.dx(0) * CV1 * dx \
-                + 1 / Lambda * u.dx(1) * CV2 * dx)
+                - dt * dot(grad(u), as_vector([CV1, CV2])) * dx
         elif residualon == 0:
             self.F = u * v * dx - un3 * v * dx + dt * (self.gradP * v * dx \
                      + dot(self.mup * as_vector([C1, C2]), grad(v)) * dx \
                      + Constant(self.mu) * dot(grad(u), grad(v)) * dx) \
                      + (C1 - un1 + dt / Lambda * C1) * CV1 * dx \
                      + (C2 - un2 + dt / Lambda * C2) * CV2 * dx \
-                     - dt * (1 / Lambda * u.dx(0) * CV1 * dx \
-                     + 1 / Lambda * u.dx(1) * CV2 * dx)
+                     - dt * (u.dx(0) * CV1 * dx \
+                     + u.dx(1) * CV2 * dx)
         else:
             raise ValueError('residualon needs to be 0 or 1 but it was ', residualon)
 
@@ -152,17 +152,24 @@ class FEniCSSimulation:
         """run the actual simulation for with newton iteration"""
 
         dt = T_end / num_steps
+        print(dt)
         vtkfile = File(filename)
         t = 0
-        U = Function(self.V[0])
+        U = Function(self.V[0], name="velocity")
         a = lhs(self.F)
         L = rhs(self.F)
-
+        A = assemble(a)
+        U.assign(self.u_n)
+        vtkfile << (U.sub(2), t)
+        [bcu.apply(A) for bcu in self.bc]
         for n in range(num_steps):
             t += dt
-            solve(a == L, U, self.bc)
+            b = assemble(L)
+            [bcu.apply(b) for bcu in self.bc]
+            solve(A, U.vector(), b)
             print("time: ",t)
-            vtkfile << (U.sub(2), t)
+            if n % 10 == 0:
+                vtkfile << (U.sub(2), t)
             self.u_n.assign(U)
         self.result = U
 
@@ -177,17 +184,15 @@ def run_postprocessing(u_D, listofSolutions, listNumElem, Spaces):
     for i in range(0, len(listofSolutions)):
         u_e = interpolate(u_D, Spaces[i])
 
-        error.append(errornorm(u_e.sub(2), listofSolutions[i].sub(2), degree_rise=5))
-        #diffu = Function.copy(u_e)
-        #diffu.assign(diffu-listofSolutions[i])
-        #error.append(norm(diffu.sub(2).vector(),'linf'))
+        #error.append(errornorm(u_e.sub(2), listofSolutions[i].sub(2), degree_rise=5))
+        error.append(norm(u_e.sub(2).vector()-listofSolutions[i].sub(2).vector(),'linf'))
     vtkexact << u_e.sub(2)
     n = len(error)
 
-    vtkdiff = File("output/withstressRes/diff.pvd")
-    u_diff = Function.copy(u_e)
-    u_diff.assign(u_diff-listofSolutions[len(listofSolutions)-1])
-    vtkdiff <<u_diff.sub(2)
+    #vtkdiff = File("output/withstressRes/diff.pvd")
+    #u_diff = Function.copy(u_e)
+    #u_diff.assign(u_diff-listofSolutions[len(listofSolutions)-1])
+    #vtkdiff <<u_diff.sub(2)
     from math import log as ln
     rate.append(0)
     for i in range(1, n):
