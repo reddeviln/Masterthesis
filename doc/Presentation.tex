@@ -261,7 +261,7 @@
     \frametitle{Laplace transform}
     Transform $\bfb\mapsto L_b:=\int_0^\infty \bfb(x,t,t-\tau)e^{-s\tau}\D \tau$. This yields
     \begin{equation*}
-    \partial_tL_{\bfb}(t,\bfx,s) + L_{\partial_\tau\bfb}(t,\bfx,s) = \nabla u.
+    \partial_tL_{\bfb}(t,\bfx,s) + L_{\partial_\tau\bfb}(t,\bfx,s) = \frac{1}{s}\nabla u.
     \end{equation*}
     Second part of the sum:
         \begin{align*}
@@ -274,7 +274,7 @@
     \frametitle{Laplace transform}
     Using $C_s:=sL_b(t,\bfx,s)$ we obtain
     \begin{equation*}
-         \partial_t\bfC_s(t,\bfx)+s\bfC_s(t,\bfx)=s\nabla u
+         \partial_t\bfC_s(t,\bfx)+s\bfC_s(t,\bfx)=\nabla u
     \end{equation*}
     Until now no assumptions on the function type of $G$ were made.
     If we set $s:=\frac{1}{\lambda}$ and use $G(t,t-\tau)=\mu_pe^{-\tau/\lambda}$, it follows
@@ -335,8 +335,8 @@ The following cases were simulated
     \frametitle{Startup flow fixed pressure}
     \begin{figure}
         \subfigure{\includegraphics[width=0.4\textwidth]{vel}}
-        \subfigure{\includegraphics[width=0.4\textwidth]{centerlinevel}}
-        \caption{Startup flow Maxwell with $E=1$ and $p=-5$}
+        \subfigure{\includegraphics[width=0.5\textwidth]{centerlinevel}}
+        \caption{Startup flow Maxwell with $E=1$ and $p=-3$}
     \end{figure}
 \end{frame}
 \begin{frame}
@@ -345,13 +345,13 @@ The following cases were simulated
     \begin{table}
         \centering
         \begin{tabular}{c|c|c}
-            $\approx$ \# Elements per diameter& $\mathrm{L}^2$-error&order\\
+            $\approx$ \# Elements per diameter& $\mathrm{L}^2$-error&EOC\\
             \hline
-            20 & 0.0597072 & -\\
-            40 & 0.0179654 & 1.73268\\
-            80 & 0.00538169 & 1.73909\\
-            160 & 0.00145236 & 1.88966\\
-            320 & 0.000381656 & 1.92806
+            20 & 0.0797652 & -\\
+            40 & 0.0233543 & 1.77207\\
+            80 & 0.00615334 & 1.92425\\
+            160 & 0.00163421 & 1.91278\\
+            320 & 0.000433982 & 1.91288
         \end{tabular}
         \caption{Convergence of the \textsc{Maxwell} model $(\mu_s=0)$}
     \end{table}
