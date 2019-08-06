@@ -1082,7 +1082,7 @@ We will use timesteps $0=t_0,\dotsc,t_N=T$, where $T$ is the end time. The times
 \begin{equation}
     \int_0^{t_n}f(t)=\sum_{j=0}^{n-1}\int_{t_j}^{t_{j+1}}f(t)\D t\label{eq:generalint}
 \end{equation}
-for a generic $f$. Now, we have to choose a method for calculating the integral in \eqref{eq:generalint}. By using the trapezoidal rule and $h_j\equiv \Delta t$, we could solve this problem in $\mathcal{O}(n^2)$ calculations. But that is very inefficient so we will try to find a better method.
+for a generic $f$. Now, we have to choose a method for calculating the integral in \eqref{eq:generalint}. By using the trapezoidal rule and $h_j\equiv \Delta t$, we could solve this problem in $\mathcal{O}(N^2)$ calculations. But that is very inefficient so we will try to find a better method.
 \subsection{Exponentially increasing time intervals}
 We try to use the knowledge, that the resulting solution $\phi$ is exponentially declining (can be easily seen by setting $v_1=v_2=0$). Therefore it would make sense that we use intervals that increase their size exponentially. A similar trick is done in calculating the Fast-\textsc{Fourier}-Transformation. So we set $t_j=h2^j$ and choose 
 \begin{equation}
@@ -1124,17 +1124,35 @@ We introduce $\beta_n=2^{-n}s_n$. We obtain
      \phi_{n+1}(2^{-n}+h+\beta_n) &= \phi_n(2^{-n}+\beta-\frac{h}{2}m_n)+\frac{h}{2}m_n\phi_0,\\
      \beta_{n+1} &= 2^{-n-1}s_{n+1}=\frac{1}{2}(\beta_n+\frac{h}{2}m_n) .
 \end{align}
-\begin{figure}
+\begin{figure}[htb]
+    \centering
     \includegraphics[width=\textwidth]{Phidiff}
-    \caption{Both $\phi$ with $h=\Delta t=0.01$}
+    \caption{Both $\phi$ with $h=\Delta t=0.01$ and $v_1=1.5,~v_2=0.5$}
     \label{fig:phifalse}
 \end{figure}
-This is now an explicit algorithm with $\mathcal{O}(n)$ to solve the equation for $\phi$. However as one can see in figure \ref{fig:phifalse}, it does not converge to the correct solution. Moreover it is unclear if for $h\to 0$ the error would become better as it would lead to $h_N\to T$. This means that this method is not suitable for our problem and we need to find a new approach.
+This is now an explicit algorithm with $\mathcal{O}(N)$ to solve the equation for $\phi$. However as one can see in figure \ref{fig:phifalse}, it does not converge to the correct solution. Moreover it is unclear if for $h\to 0$ the error would become better as it would lead to $h_N\to T$. This means that this method is not suitable for our problem and we need to find a new approach.
 \subsection{Transformation of the argument}
-The reason that the last method did not work was probably due to the fact that we eliminated the history completely. So we need an algorithm with super linear runtime. The next idea one could follow is to transform $t=f(u)$ and $\tilde\phi(u)=\phi(f(u))$, where $f$ is a diffeomorphism (bijective function with differentiable inverse). Let us recall \eqref{eq:phianalytic} and insert our transformation. This leads to 
+The reason that the last method did not work was probably due to the fact that we eliminated the history completely. So we need an algorithm with super linear runtime. The next idea one could follow is to transform $t=f(u)$ and $\tilde\phi(u)=\phi(f(u))$, where $f$ is a diffeomorphism (bijective function with differentiable inverse).  Let $u_0=f^{-1}(0)$. This is unique because $f$ is especially injective. If we recall \eqref{eq:phianalytic} and insert our transformation for $t$, we obtain
 \begin{equation}
-    \tilde{\phi}(u)=\tilde{\phi}(u_0) +\int_{u_0}^{u}f'(u')[\tilde{m}(u')(\tilde\phi(u_0)-\tilde{\phi}(f^{-1}(f(u)-f(u')))-\tilde{\phi}(u)]\D u'
+    \phi(f(u)) = \phi(f(u_0))+\int_{u_0}^{u}f'(u')[m(f(u'))(\phi(f(u_0))-\phi(f(u)-f(u')))-\phi(f(u))]\D u'.
 \end{equation}
+Now we can transform $\phi$ to $\tilde\phi$. We still have not changed the contents of the equation but just the way it is expressed. The transformed equation reads
+\begin{equation}
+    \tilde{\phi}(u)=\tilde{\phi}(u_0) +\int_{u_0}^{u}f'(u')[\tilde{m}(u')(\tilde\phi(u_0)-\tilde{\phi}(f^{-1}(f(u)-f(u'))))-\tilde{\phi}(u)]\D u'.
+\end{equation}
+The goal of this transformation is that we can use equally spaced points in $u$ and $u'$ but do not have effort $\mathcal{O}(N^2)$. The term that all depends on is $\tilde\phi(f^{-1}(f(u)-f(u')))$ because this is the only time that old timesteps effect the current one. Ideally 
+\begin{equation}
+    F(u'):=f^{-1}(f(u)-f(u'))=u,\quad u'\in[u_0,u]
+\end{equation}
+\begin{figure}[hbt]
+    \centering
+    \includegraphics[width=\textwidth]{HistoryF}
+    \caption{History dependency for different $f$}
+    \label{fig:Fustrich}
+\end{figure}
+almost everywhere. This would again eliminate the history completely like in the previous example. So it is unrealistic to fulfill this demands. To better understand $F(u')$, we will have a look at figure \ref{fig:Fustrich}. On the $y$-axis we have the value of $F(u')$ which we want to be $u$ as long as possible. The $x$-axis shows the different value of $u'$. As $u'$ approaches $u$ $F(u')$ diverges to $-\infty$ because of the logarithm. However this is not a problem for us as we just want the values to be $u$ almost everywhere. This Graph clearly shows that $f(u)=\exp(\frac{\pi}{2}\sinh(u))$ is more suited for our needs as it has a steeper decrease to minus infinity. To clarify, if we would choose $f(u)=e^u$, we would have to account for the history as early as approximately $u'=0$. For the other possibility this would have to happen as late as approximately $u'=2.8$. This reduces the computational effort immensely.
+\par 
+But are these curves dependent on $u$? It could happen that $f(u)=e^u$ may be better suited for a different $u$. We will look at this behavior by calculating the intersection between $F(u')$ and the identity and plotting the y-value of this against $u$. This can be seen in figure \ref{fig:Fidffu}
 \chapter{Numerical results}
 Now we have everything we need to put our equations into a simulation. We will first introduce the framework, which handled all the calculations performed for this work. After that we will show convergence and discuss some test cases and limitations of this approach.
 \section{Software}
