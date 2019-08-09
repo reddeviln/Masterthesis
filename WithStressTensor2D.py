@@ -6,9 +6,9 @@ import mshr
 
 
 #init and mesh
-WithStressTensorSim = FEniCSSimulation(Constant(-5), Constant(0) , Constant(0), Constant(0.9))
+WithStressTensorSim = FEniCSSimulation(Constant(-5), Constant(0) , Constant(0), Constant(1))
 nCells = 40
-domain=mshr.Circle(Point(0,0),sqrt(0.9))
+domain=mshr.Circle(Point(0,0),1)
 mesh = mshr.generate_mesh(domain, nCells)
 WithStressTensorSim.mesh = mesh
 # dofs
@@ -36,6 +36,5 @@ WithStressTensorSim.impose_initial_condition(Constant((0,0,0)))
 WithStressTensorSim.form_variational_problem_full2D(1, 0, 12/12000)
 
 # run
-parameters["form_compiler"]["cpp_optimize"] = True
 WithStressTensorSim.run_simulation_full(12,12000,"output/withstress/solution.pvd")
 
