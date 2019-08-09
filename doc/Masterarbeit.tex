@@ -92,6 +92,8 @@
 \newcommand{\bfC}{\bm{C}}
 \newcommand{\bfx}{\bm{x}}
 \newcommand{\bfR}{\bm{R}}
+\newcommand{\tpne}{\tilde\phi_{n+1}}
+\newcommand{\tpn}{\tilde\phi_{n}}
 \newcommand{\D}{\mathop{}\!\mathrm{d}}
 \floatname{algorithm}{Algorithmus}
 \renewcommand{\thesubfigure}{\thefigure.\arabic{subfigure}}
@@ -1075,7 +1077,7 @@ We can now integrate over $t$ to eliminate all differentials. This leads to
 \end{equation}
 where we substituted the integration variable to $t'$ to be able to shorten the expression. We obtain
 \begin{equation}
-    \phi(t)=\phi(0)+\int_0^t[m(t')(\phi(0)-\phi(t-t'))-\phi(t)]\D t'.\label{eq:phianalytic}
+    \phi(t)=\phi(0)+\int_0^t[m(t')(\phi(0)-\phi(t-t'))-\phi(t')]\D t'.\label{eq:phianalytic}
 \end{equation}
 Now we have a pure integral equation. The next step will be to discretize the integral and $t$.
 We will use timesteps $0=t_0,\dotsc,t_N=T$, where $T$ is the end time. The timestep length is given by $h_j=t_{j+1}-t_j$, where $h_j$ does not have to be constant. For the integral we will use 
@@ -1134,11 +1136,11 @@ This is now an explicit algorithm with $\mathcal{O}(N)$ to solve the equation fo
 \subsection{Transformation of the argument}
 The reason that the last method did not work was probably due to the fact that we eliminated the history completely. So we need an algorithm with super linear runtime. The next idea one could follow is to transform $t=f(u)$ and $\tilde\phi(u)=\phi(f(u))$, where $f$ is a diffeomorphism (bijective function with differentiable inverse).  Let $u_0=f^{-1}(0)$. This is unique because $f$ is especially injective. If we recall \eqref{eq:phianalytic} and insert our transformation for $t$, we obtain
 \begin{equation}
-    \phi(f(u)) = \phi(f(u_0))+\int_{u_0}^{u}f'(u')[m(f(u'))(\phi(f(u_0))-\phi(f(u)-f(u')))-\phi(f(u))]\D u'.
+    \phi(f(u)) = \phi(f(u_0))+\int_{u_0}^{u}f'(u')[m(f(u'))(\phi(f(u_0))-\phi(f(u)-f(u')))-\phi(f(u'))]\D u'.
 \end{equation}
 Now we can transform $\phi$ to $\tilde\phi$. We still have not changed the contents of the equation but just the way it is expressed. The transformed equation reads
 \begin{equation}
-    \tilde{\phi}(u)=\tilde{\phi}(u_0) +\int_{u_0}^{u}f'(u')[\tilde{m}(u')(\tilde\phi(u_0)-\tilde{\phi}(f^{-1}(f(u)-f(u'))))-\tilde{\phi}(u)]\D u'.
+    \tilde{\phi}(u)=\tilde{\phi}(u_0) +\int_{u_0}^{u}f'(u')[\tilde{m}(u')(\tilde\phi(u_0)-\tilde{\phi}(f^{-1}(f(u)-f(u'))))-\tilde{\phi}(u')]\D u'.\label{eq:phitilde}
 \end{equation}
 The goal of this transformation is that we can use equally spaced points in $u$ and $u'$ but do not have effort $\mathcal{O}(N^2)$. The term that all depends on is $\tilde\phi(f^{-1}(f(u)-f(u')))$ because this is the only time that old timesteps effect the current one. Ideally 
 \begin{equation}
@@ -1150,9 +1152,50 @@ The goal of this transformation is that we can use equally spaced points in $u$ 
     \caption{History dependency for different $f$}
     \label{fig:Fustrich}
 \end{figure}
-almost everywhere. This would again eliminate the history completely like in the previous example. So it is unrealistic to fulfill this demands. To better understand $F(u')$, we will have a look at figure \ref{fig:Fustrich}. On the $y$-axis we have the value of $F(u')$ which we want to be $u$ as long as possible. The $x$-axis shows the different value of $u'$. As $u'$ approaches $u$ $F(u')$ diverges to $-\infty$ because of the logarithm. However this is not a problem for us as we just want the values to be $u$ almost everywhere. This Graph clearly shows that $f(u)=\exp(\frac{\pi}{2}\sinh(u))$ is more suited for our needs as it has a steeper decrease to minus infinity. To clarify, if we would choose $f(u)=e^u$, we would have to account for the history as early as approximately $u'=0$. For the other possibility this would have to happen as late as approximately $u'=2.8$. This reduces the computational effort immensely.
+almost everywhere. This would again eliminate the history completely like in the previous example. So it is unrealistic to fulfill this demands. To better understand $F(u')$, we will have a look at figure \ref{fig:Fustrich}. On the $y$-axis we have the value of $F(u')$ which we want to be $u$ as long as possible. The $x$-axis shows the different value of $u'$. As $u'$ approaches $u$ $F(u')$ diverges to $-\infty$ because of the logarithm. However this is not a problem for us as we just want the values to be $u$ almost everywhere. This graph clearly shows that $f(u)=\exp(\frac{\pi}{2}\sinh(u))$ is more suited for our needs as it has a steeper decrease to minus infinity. To clarify, if we would choose $f(u)=e^u$, we would have to account for the history as early as approximately $u'=0$. For the other possibility this would have to happen as late as approximately $u'=2.8$. This reduces the computational effort immensely.
 \par 
-But are these curves dependent on $u$? It could happen that $f(u)=e^u$ may be better suited for a different $u$. We will look at this behavior by calculating the intersection between $F(u')$ and the identity and plotting the y-value of this against $u$. This can be seen in figure \ref{fig:Fidffu}
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{Fdiffu}
+    \caption{Minimal discretization length}
+\end{figure}
+But are these curves dependent on $u$? It could happen that $f(u)=e^u$ may be better suited for a different $u$. We will look at this behavior by calculating the intersection between $F(u')$ and the identity and plotting the y-value of this against $u$. This can be seen in figure \ref{fig:Fdiffu}. The value on the left can be interpreted as the minimal discretization length. So if we choose a cell length of less then this value we have to account for the history.  We can see that $f(u)=e^u$ is always worse. Another thing to note is that the curve for $f(u)=\exp(\frac{\pi}{2}\sinh(u))$ is not constant in $u$. That means that for every timestep we have to first check, how many parts of the approximated integral need a history part. This is what we will do next.
+\par 
+Let us recall \eqref{eq:phitilde} and insert our discretization. This leads to
+\begin{equation}
+    \tilde\phi_n = \tilde\phi_0 +h\sum_{j=0}^{n-1}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi(f^{-1}(f_n-f_{j+1})))-\tilde\phi_{j+1}],
+\end{equation}
+where we used the discretization
+\begin{equation}
+    \int_{u_0}^{u_n}f(u)\D u=\sum_{j=0}^{n-1}\int_{u_j}^{u_{j+1}}f(u)\D u\approx h\sum_{j=0}^{n-1}f_{j+1}.
+\end{equation}
+As one can see we can choose equally spaced points. From our previous discussion we know that we can replace $\tilde\phi(f^{-1}(f_n-f_{j+1}))$ in the intervals which lie in $[u_0,F(u*)]$. We give the last interval that lies in there the index $k(n)$. The equation then transforms to 
+\begin{align}
+    \tilde\phi_n&=\tilde\phi_0+h\sum_{j=0}^{k(n)}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi_n)-\tilde\phi_{j+1}]-hf'(u_n)\tilde\phi_n\nonumber\\
+    &+h\sum_{j=k(n)+1}^{n-2}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi(f^{-1}(f_n-f_{j+1})))-\tilde\phi_{j+1}]
+\end{align}
+As a next step, we want to calculate the update from $\tilde\phi_n$ to $\tilde\phi_{n+1}$. We introduce $k_{max}=\max(k(n),k(n+1))$ and $k_{min}=\min(k(n),k(n+1))$. We use $(\cdot)_{n,n+1}$ to show that depending on $k_{\max}$ and $k_{\min}$ the index can either be $n$ or $n+1$. This yields
+\begin{align}
+    \tpne-\tpn&=h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}(\tpn-\tpne)\\
+    &+h\sum_{j=k_{\min} +1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi_{n,n+1})-\tilde\phi_{j+1}]\\
+    &+h(f'(u_n)\tpn-f'(u_{n+1})\tpne)\\
+    &+hf'(u_n)[\tilde{m}_n(\tilde\phi_0-\tilde\phi(f^{-1}(f_{n+1}-f_n)))-\tpn]\\
+    &\pm h\sum_{j=k_{\min}+1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi(f^{-1}(f_{n,n+1}-f_{j+1})))-\tpne]\\
+    &+h\sum_{j=k_{\max}+1}^{n-2}f'(u_{j+1})\tilde{m}_{j+1}(\tilde\phi(f^{-1}(f_n-f_{j+1}))-\tilde\phi(f^{-1}(f_{n+1}-f_{j+1}))).
+\end{align}
+Now, we can collect the terms, that are not part of a sum and factor out $\tpne$ and $\tpn$. We obtain
+\begin{align}
+    &\tpne\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}+hf'(u_{n+1})\right)=hf'(u_n)\tilde{m}_n(\tilde\phi_0-\tilde\phi(f^{-1}(f_{n+1}-f_n)))\\
+    &+\tpn\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}\right)+h\sum_{j=k_{\min}+1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi_{n,n+1})-\tilde\phi_{j+1}]\\
+    &\pm h\sum_{j=k_{\min} +1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi(f^{-1}(f_{n,n+1}-f_{j+1})))-\tilde\phi_{j+1}]\\
+    &+h\sum_{j=k_{\max}+1}^{n-2}f'(u_{j+1})\tilde{m}_{j+1}[\tilde\phi(f^{-1}(f_n-f_{j+1}))-\tilde\phi(f^{-1}(f_{n+1}-f_{j+1}))].
+\end{align}
+We see that there are two sums with the same limits. This will be dealt with now. It results
+\begin{align}
+    &\tpne\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}+hf'(u_{n+1})\right)=\tpn\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}\right)\\
+    &+h\sum_{j=k_{\min} +1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0\pm\tilde\phi_0-\tilde\phi_{n,n+1}\mp\tilde\phi(f^{-1}(f_{n,n+1}-f_{j+1})))-\tilde\phi_{j+1}\mp\tilde\phi_{j+1}]\\
+    &+h\sum_{j=k_{\max}+1}^{n-2}f'(u_{j+1})\tilde{m}_{j+1}[\tilde\phi(f^{-1}(f_n-f_{j+1}))-\tilde\phi(f^{-1}(f_{n+1}-f_{j+1}))].
+\end{align}
 \chapter{Numerical results}
 Now we have everything we need to put our equations into a simulation. We will first introduce the framework, which handled all the calculations performed for this work. After that we will show convergence and discuss some test cases and limitations of this approach.
 \section{Software}
