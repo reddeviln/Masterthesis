@@ -49,9 +49,8 @@ WithStressTensorSim.bc = [dbc1, dbc2]
 WithStressTensorSim.impose_initial_condition(Constant((0,0,0)))
 
 # variational form
-WithStressTensorSim.form_variational_problem_full2D(4, 0, 0.001)
+WithStressTensorSim.form_variational_problem_full2D(2, 0, 0.001)
 
 # run
-parameters["form_compiler"]["cpp_optimize"] = True
-WithStressTensorSim.run_simulation_full(2,2000,"output/withstressPeriodic/solution.pvd")
+WithStressTensorSim.run_simulation_full(4,4000,"output/withstressPeriodic/solution.pvd")
 
