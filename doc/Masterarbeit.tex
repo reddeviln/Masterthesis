@@ -1228,7 +1228,7 @@ The square had applications in these cases:
 \end{itemize}
 The reason why we simulated the startup flow case twice will be obvious once we compare the results. Videos of these testcases will be appended to the presentation and to the CD that accompanies this work.
 \section{Convergence}
-In this section we will use a setup to show the convergence of the implementation and the EOC. We will the unit disc as our domain. We want 
+In this section we will use a setup to show the convergence of the implementation and the order of convergence. We will use the unit disc as our domain. We want 
 \begin{equation}
     u = 0\quad\forall\bfx\in\partial\Omega.
 \end{equation}
@@ -1276,9 +1276,52 @@ The solution of this system is exactly our initial condition. This way we can ea
 Table \ref{tab:maxwellconv} shows the $\mathrm{L}^2$ error and order of convergence of this example as well as these values for the $\mathrm{L}^\infty$ norm respectively. The boundary of the domain was approximated using a polygonal chain, which increases proportionally with the number of cells. The principle of the winning least order is also applicable to the geometry. This might also explain, why in the beginning the EOC is a bit far from the expected 2. As we have 320 elements per diameter we also approximate the circle with 320 segments in the polygonal chain which, to a naked eye, is indistinguishable from a true circle. The time integration order of one is also negatively influencing the EOC. We used $\Delta t = 0.1$ and calculated until $T=1$. As the polymer viscosity we used $1$. It is typical for these kind of simulations that the $\mathrm{L}^\infty$ error is worse than $\mathrm{L}^2$. This is because it is much more sensitive for things like geometry approximations.
 \subsection{\textsc{Oldroyd-B}}
 \section{Startup flow on unit disc}
+We will now take a look at a more physically relevant example. Consider a fluid at rest that is subject to a perpendicular pressure gradient. This is basically the setup for the next two simulation cases. However, we will choose different domains and show that this leads to very different results. 
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{UnitDiscSetup}
+    \caption{Setup startup flow unit disc}
+    \label{fig:unitdiscsetup}
+\end{figure}
+The setup is shown in figure \ref{fig:unitdiscsetup}. We chose the no slip boundary condition $u=0$ on the boundary of the circle. We assumed a pressure gradient of $\partial_3 p=-5$ and a relaxation time of $\lambda=1$. 
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{UnitDiscCenterline}
+    \caption{Centerline velocity with the unit disc domain and $\mu_s=0$, $\mu_p=1$}
+    \label{fig:unitdisccenterline}
+\end{figure}
+The centerline velocity graph is shown in figure \ref{fig:unitdisccenterline}. We used the \textsc{Maxwell} model this time with $\mu_p=1$. The typical non-\textsc{Newtonian} oscillations can be seen. We calculated until $T=12$ with $\Delta t=0.001$.
 \section{Startup flow on square}
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{SquareSetup}
+    \caption{Setup of the startup flow simulation on the square domain}
+    \label{fig:squaresetup}
+\end{figure}
+Now we want to repeat this calculation but with a different domain. We will see that this will impact the result. The setup is shown in \ref{fig:squaresetup
+}. Because we want to compare the results to \cite{A.S.RDuarte2008}, we choose periodic boundary conditions on the left and right sides and no slip boundary condition $u=0$ at the top and bottom.
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{SquareCenterline}
+    \caption{Centerline velocity of the start-up flow on the square domain}
+    \label{fig:squarecenterline}
+\end{figure}
+We chose $\partial_3 p=-3$ to obtain the results from \cite{A.S.RDuarte2008} but this only effects the amplitude and not the behavior of the fluid. As one can see in figure \ref{fig:squarecenterline} we obtain a very different behavior by changing the domain.
 \section{\enquote{Ideal} rheometer}
-
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{RheometerSetup}
+    \caption{Setup for the rheometer simulation case}
+    \label{fig:rheometersetup}
+\end{figure}
+The setup for this case is shown in figure \ref{fig:rheometersetup}. The left side of the square has the no slip boundary condition $u=0$. The top and bottom side are coupled with a periodic boundary condition. The right side has the \textsc{Dirichlet} boundary condition $u=10$. This case now represents a slice from top to bottom of the rheometer. However, because we assume periodic boundary conditions on the top and bottom we take the assumption of an infinitely high rheometer. 
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{RheometerCenterline}
+    \caption{Centerline velocity in the rheometer with $\mu_s=0.1$, $\mu_p=0.9$, $\lambda=2$ }
+    \label{fig:rheomcenter}
+\end{figure} 
+\par The centerline velocity of this simulation can be seen in figure \ref{fig:rheomcenter}. We chose the \textsc{Oldroyd}-B model with $\mu_s=0.1$ and $\mu_p=0.9$. Our relaxation time was set to $\lambda=2$ and we calculated until $T=4$ with a step size of $\Delta t=0.001$. On can clearly see that we do not have a fluid that is showing \textsc{Newtonian} behavior. This would be just a monotonous function to the steady state velocity without any maximums.
 \chapter{Conclusion}
 
 \addcontentsline{toc}{chapter}{List of figures}
