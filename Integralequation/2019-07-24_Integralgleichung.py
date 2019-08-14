@@ -6,7 +6,7 @@ tau0=1.0
 v1=1.5
 v2=0.5
 
-numsteps = 20000
+numsteps = 5000
 
 diffarray = np.zeros((numsteps+1,))
 phiarray1  = np.zeros((numsteps+1,))
