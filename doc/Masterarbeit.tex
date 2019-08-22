@@ -832,7 +832,8 @@ where $\lambda$ is the material specific relaxation time, we can retrieve the \t
     &=\frac{\mu_p}{\lambda}L_{\bfb}(t,\bfx,1/\lambda) = \mu_p\bfC_{1/\lambda}.
 \end{align}
 So using this assumptions, we removed the integral term completely! In this example the stress tensor is just the scaled conformation tensor. 
-\chapter{Discretization and building the numerical scheme}
+\chapter{Simulation}
+\section{Discretization and building the numerical scheme}
 The next step will be to build a numerical scheme to solve these equations. For this, we firstly need the weak formulation. Then we will discuss the discretizations in space and time. Our equations are now given by 
 \begin{align}
     \label{eq:transfeq1}
@@ -842,7 +843,7 @@ The next step will be to build a numerical scheme to solve these equations. For 
     \partial_t\bfC_{1/\lambda}(t,\bfx) &= -\frac{1}{\lambda}\bfC_{1/\lambda}(t,\bfx)+\nabla u
     \label{eq:transfeq3}
 \end{align}
-\section{Weak formulation}
+\subsection{Weak formulation}
 To get the weak formulation for equations \eqref{eq:transfeq1} to \eqref{eq:transfeq3}, we will use the standard approach. So let $\varphi = (\varphi_1,\varphi_2)\in \mathrm{C}^\infty_0(\Omega\times\rr)$ with values in $\rr^2$ and $\psi\in \mathrm{C}^\infty_0(\Omega\times\rr)$ real-valued be testfunctions of compact support. By integrating in space, we can transform \eqref{eq:transfeq3} to 
 \begin{equation}
     \int_\Omega(\partial_t\bfC_{1/\lambda}+\frac{1}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
@@ -876,7 +877,7 @@ If we recap this section, we can give the following system of weak formulations 
      \int_\Omega \nabla u\cdot\varphi\D\Omega.
 \end{align}
 
-\section{Time discretization}
+\subsection{Time discretization}
 Our goal in this section is to discretize the time dimension in this equation. We will use the implicit Euler method for this. To be specific, we approximate 
 \begin{equation}
     \partial_t(\cdot)^{n+1}\approx\frac{(\cdot)^{n+1}-(\cdot)^n}{\Delta t},\label{eq:timestep}
@@ -892,7 +893,7 @@ To get rid of some indices we set $(\cdot)^{n+1}:=(\cdot)$ If we put \eqref{eq:t
 \end{align}
 \par 
 There are numerous possible means to solve the resulting linear system. We will discuss a few possibilities later on.
-\section{Spatial discretization}
+\subsection{Spatial discretization}
 Now that we have transformed the equation in their weak forms, we can think about how to discretize them in space. We will use the finite element method (FEM) for that. We will write the equations in the form $AU=b$. This is not necessary for solving it in FEniCS -it can do it by itself- but for understanding the problem it is nonetheless relevant. 
 \par 
 At first we have to break the problem down into the bilinear form $a(U,\phi)$ and the linear form $L_{n+1}(\phi)$. We will define 
@@ -916,7 +917,7 @@ We will now discuss, which finite elements should be used. Our software provides
     \phi\in P_1\times P_1\times P_1
 \end{equation}
 where $P_1$ is the set of all polynomials of degree less or equal to one from $\Omega$ to $\rr$. This is the least order a finite element can have. If we would only allow constants, we cannot guarantee continuity across the cell boundary. A higher order element is also not necessary because we only use a time integration scheme of order 1. In numerics \enquote{the lowest order wins}, therefore it would be a waste to use higher order elements.
-\section{Existence of a solution}
+\subsection{Existence of a solution}
 \label{sec:existence}
 We now want to proof, with the help of Theorem \ref{sa:LaxMilgram} (\textsc{Lax-Milgram}), that there exists a unique solution for our problem. Firstly, we have to identify, which \textsc{Hilbert} space we are in and which norm corresponds to it. Because $\bfC_{1/\lambda}$ has no spatial derivatives in our equations, we assume $\bfC_{1/\lambda}\in \mathrm{L}^2(\Omega)\times \mathrm{L}^2(\Omega)$. The velocity appears with a spatial derivative of order one, so we want $u\in \mathrm{H}^1(\Omega)$. This leads to 
 \begin{equation}
@@ -1024,6 +1025,131 @@ Because $\frac{\Delta t}{\lambda}$ and the absolute value are positive we obtain
     a(U,U)\ge\int\abs{U}^2+\abs{\nabla U_3}^2\D\Omega =\norm{U}_{X}^2.
 \end{equation}
 Because $U$ was arbitrary, this deduction holds $\forall U\in X(\Omega)$. This shows the existence and uniqueness of the solution for our problem with \textsc{Lax-Milgram}.
+\section{Numerical results}
+Now we have everything we need to put our equations into a simulation. We will first introduce the framework, which handled all the calculations performed for this work. After that we will show convergence and discuss some test cases and limitations of this approach.
+\subsection{Software}
+All simulations conducted for this work used the FEniCS framework (\cite{AlnaesBlechta2015a}, \cite{LoggMardalEtAl2012a}). Other components of this project are the C++ backend DOLFIN (\cite{LoggWells2010a}, \cite{LoggWellsEtAl2012a}), the compiler for the variational form FFC (\cite{KirbyLogg2006a}, \cite{LoggOlgaardEtAl2012a}, \cite{OlgaardWells2010b}), the language definition for variational forms UFL(\cite{AlnaesEtAl2012}, \cite{Alnaes2012a}) and the corresponding code generator UFC (\cite{AlnaesLoggEtAl2009a}, \cite{AlnaesLoggEtAl2012a}).
+\par 
+The advantages of using a framework at all are obvious. The less time one spends coding, the more one can assign to theoretical tasks. Another nice property is that the whole debugging process is shortened by a large bit. The software is also throughly tested so bugs are much less frequent. Literature on how to get started with FEniCS is easy to find. A nice tutorial is given by the founders of FEniCS in  \cite{Langtangen2017a}. The code, that has been written for this work, can be found in the appendix and on the CD, which accompanies this.
+\subsection{Simulation cases}
+The next sections will be all about simulations and their results. This section should give a quick overview of all the relevant cases studied. \\
+Two domains were used throughout the simulations. 
+\begin{figure}
+    \includegraphics[width=\textwidth]{meshcircle}
+    \caption{Finest mesh of the unit disc}
+    \label{fig:mesh}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=\textwidth]{meshsquare}
+    \caption{Mesh of a square with sidelength 2}
+    \label{fig:meshsquare}
+\end{figure}
+They can be seen in figures \ref{fig:mesh} and \ref{fig:meshsquare}.
+We used the unit disc for the following simulation cases:
+\begin{itemize}
+    \item Convergence of our implementation
+    \item Startup flow (fluid at rest in the beginning but perpendicular pressure)
+\end{itemize}
+The square had applications in these cases:
+\begin{itemize}
+    \item Startup flow
+    \item \enquote{ideal} rheometer cross-section
+\end{itemize}
+The reason why we simulated the startup flow case twice will be obvious once we compare the results. Videos of these testcases will be appended to the presentation and to the CD that accompanies this work.
+\subsection{Convergence}
+In this section we will use a setup to show the convergence of the implementation and the order of convergence. We will use the unit disc as our domain. We want 
+\begin{equation}
+u = 0\quad\forall\bfx\in\partial\Omega.
+\end{equation}
+We want to show the convergence for the \textsc{Maxwell} model $(\mu_s=0)$, because it is more challenging due to the missing dissipation term.
+We set the initial conditions
+\begin{equation}
+u(t=0) = e^{-\norm{x}_2-1}-1,
+\quad\bfC(t=0) = -2\bfx(e^{-(\norm{x}_2^2 -1)}-1)
+\end{equation}
+where $\bfx\in\Omega$ and $e$ the usual notation for the \textsc{Eulerian} number. This initial condition is obviously continuous at the boundary. Because the exact solution of this equation is not known, we will use the concept of \emph{manufactured solution}. This means that we modify our physical problem by adding a so called residual. By doing this we can artificially create a known solution. This becomes clearer by applying this technique for our problem step by step.\par 
+The first step in the process of creating a manufactured solution is to set a function, which should be the exact solution. In our case, we want the solutions to remain the initial condition. We could have introduced a time dependent solution here, but it only makes calculations more complex. Next, we plug these solution functions into our equations and add the residual $\bfR\colon\Omega\to\rr^3$ on the right side. It does not matter, if we use the classic or weak formulation of our problem. By using the classic formulation we get
+\begin{align}
+0 &= -\partial_3 p-2\mu_p \nabla\cdot [\bfx(e^{-(\norm{x}_2^2 -1)}-1)] +\bfR_1,\\
+-\frac{2}{\lambda}\bfx(e^{-(\norm{x}_2^2 -1)}-1)&= \nabla (e^{-(\norm{x}_2^2 -1)}-1) +\bfR_{2:3}.
+\end{align}
+Note that the time derivative evaluated to zero in both cases. Next, we solve this set of equations for $\bfR$. To do that we expand the divergence and the gradient operators to obtain
+\begin{align}
+\bfR_1 &= \partial_3 p +4\mu_p(e^{-(\norm{x}_2^2 -1)}(1-\norm{x}_2^2)-1),\\
+\bfR_{2:3} &=2\bfx\left(e^{-(\norm{x}_2^2 -1)}\left(1-\frac{1}{\lambda}\right)+\frac{1}{\lambda}\right).
+\end{align}
+To solve the equations, we have to get everything back into the weak formulation. This results in 
+\begin{align}
+\int_\Omega(u-u^n)\psi\D\Omega +\Delta t\left(\int_\Omega\partial_3 p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega-\int_\Omega \bfR_1\psi\D\Omega\right) = 0,\\
+\bfs =\mu_p\bfC_{1/\lambda},\\
+\int_\Omega(\bfC_{1/\lambda} - \bfC_{1/\lambda}^n +\frac{\Delta t}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
+\Delta t\int_\Omega \nabla u\cdot\varphi\D\Omega+\Delta t\int_{\Omega}\bfR_{2:3}\cdot\varphi\D\Omega.
+\end{align}
+The solution of this system is exactly our initial condition. This way we can easily calculate approximation errors. 
+\begin{table}
+    \centering
+    \begin{tabular}{c|c|c|c|c}
+        $\approx$ \# Elements per diameter& $\mathrm{L}^2$-error&EOC in $\mathrm{L}^2$&$\mathrm{L}^\infty$-error &EOC in $\mathrm{L}^\infty$\\
+        \hline
+        20 & 0.0797652 & - & 0.877305 & -\\
+        40 & 0.0233543 & 1.77207 & 0.195846 & 2.16336\\
+        80 & 0.00615334 & 1.92425 & 0.100548 & 0.96184\\
+        160 & 0.00163421 & 1.91278 & 0.0369229 & 1.44529\\
+        320 & 0.000433982 & 1.91288 & 0.0198643 & 0.89434
+    \end{tabular}
+    \caption{Convergence of the \textsc{Maxwell} model}
+    \label{tab:maxwellconv}
+\end{table}
+
+Table \ref{tab:maxwellconv} shows the $\mathrm{L}^2$ error and order of convergence of this example as well as these values for the $\mathrm{L}^\infty$ norm respectively. The boundary of the domain was approximated using a polygonal chain, which increases proportionally with the number of cells. The principle of the winning least order is also applicable to the geometry. This might also explain, why in the beginning the EOC is a bit far from the expected 2. As we have 320 elements per diameter we also approximate the circle with 320 segments in the polygonal chain which, to a naked eye, is indistinguishable from a true circle. The time integration order of one is also negatively influencing the EOC. We used $\Delta t = 0.1$ and calculated until $T=1$. As the polymer viscosity we used $1$. It is typical for these kind of simulations that the $\mathrm{L}^\infty$ error is worse than $\mathrm{L}^2$. This is because it is much more sensitive for things like geometry approximations.
+
+\subsection{Startup flow on unit disc}
+We will now take a look at a more physically relevant example. Consider a fluid at rest that is subject to a perpendicular pressure gradient. This is basically the setup for the next two simulation cases. However, we will choose different domains and show that this leads to very different results. 
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{UnitDiscSetup}
+    \caption{Setup startup flow unit disc}
+    \label{fig:unitdiscsetup}
+\end{figure}
+The setup is shown in figure \ref{fig:unitdiscsetup}. We chose the no slip boundary condition $u=0$ on the boundary of the circle. We assumed a pressure gradient of $\partial_3 p=-5$ and a relaxation time of $\lambda=1$. 
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{UnitDiscCenterline}
+    \caption{Centerline velocity with the unit disc domain and $\mu_s=0$, $\mu_p=1$}
+    \label{fig:unitdisccenterline}
+\end{figure}
+The centerline velocity graph is shown in figure \ref{fig:unitdisccenterline}. We used the \textsc{Maxwell} model this time with $\mu_p=1$. The typical non-\textsc{Newtonian} oscillations can be seen. We calculated until $T=12$ with $\Delta t=0.001$.
+\subsection{Startup flow on square}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{SquareSetup}
+    \caption{Setup of the startup flow simulation on the square domain}
+    \label{fig:squaresetup}
+\end{figure}
+Now we want to repeat this calculation but with a different domain. We will see that this will impact the result. The setup is shown in \ref{fig:squaresetup
+}. Because we want to compare the results to \cite{A.S.RDuarte2008}, we choose periodic boundary conditions on the left and right sides and no slip boundary condition $u=0$ at the top and bottom.
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{SquareCenterline}
+    \caption{Centerline velocity of the start-up flow on the square domain}
+    \label{fig:squarecenterline}
+\end{figure}
+We chose $\partial_3 p=-3$ to obtain the results from \cite{A.S.RDuarte2008} but this only effects the amplitude and not the behavior of the fluid. As one can see in figure \ref{fig:squarecenterline} we obtain a very different behavior by changing the domain.
+\subsection{\enquote{Ideal} rheometer}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{RheometerSetup}
+    \caption{Setup for the rheometer simulation case}
+    \label{fig:rheometersetup}
+\end{figure}
+The setup for this case is shown in figure \ref{fig:rheometersetup}. The left side of the square has the no slip boundary condition $u=0$. The top and bottom side are coupled with a periodic boundary condition. The right side has the \textsc{Dirichlet} boundary condition $u=10$. This case now represents a slice from top to bottom of the rheometer. However, because we assume periodic boundary conditions on the top and bottom we take the assumption of an infinitely high rheometer. 
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{RheometerCenterline}
+    \caption{Centerline velocity in the rheometer with $\mu_s=0.1$, $\mu_p=0.9$, $\lambda=2$ }
+    \label{fig:rheomcenter}
+\end{figure} 
+\par The centerline velocity of this simulation can be seen in figure \ref{fig:rheomcenter}. We chose the \textsc{Oldroyd}-B model with $\mu_s=0.1$ and $\mu_p=0.9$. Our relaxation time was set to $\lambda=2$ and we calculated until $T=4$ with a step size of $\Delta t=0.001$. On can clearly see that we do not have a fluid that is showing \textsc{Newtonian} behavior. This would be just a monotonous function to the steady state velocity without any maximums.
 \chapter{Different approaches for the integral equation}
 In chapter \ref{ch:model} we could eliminate the integral from the equation completely by taking sensible assumptions on the memory function $G$. However, this is a very specific case and the more complex physical models do not have this nice feature. In this chapter we will discuss possibilities for a more general approach. 
 \section{Linear combination of relaxation times}
@@ -1134,17 +1260,17 @@ We introduce $\beta_n=2^{-n}s_n$. We obtain
 \end{figure}
 This is now an explicit algorithm with $\mathcal{O}(N)$ to solve the equation for $\phi$. However as one can see in figure \ref{fig:phifalse}, it does not converge to the correct solution. Moreover it is unclear if for $h\to 0$ the error would become better as it would lead to $h_N\to T$. This means that this method is not suitable for our problem and we need to find a new approach.
 \subsection{Transformation of the argument}
-The reason that the last method did not work was probably due to the fact that we eliminated the history completely. So we need an algorithm with super linear runtime. The next idea one could follow is to transform $t=f(u)$ and $\tilde\phi(u)=\phi(f(u))$, where $f$ is a diffeomorphism (bijective function with differentiable inverse).  Let $u_0=f^{-1}(0)$. This is unique because $f$ is especially injective. If we recall \eqref{eq:phianalytic} and insert our transformation for $t$, we obtain
+The reason that the last method did not work was probably due to the fact that we eliminated the history completely. So we need an algorithm with super linear runtime. The next idea one could follow is to transform $t=f(u)$ and $\tilde\phi(u)=\phi(f(u))$, where $f$ is a diffeomorphism (bijective function with differentiable inverse).  Let $u_{-1}=f^{-1}(0)$. This is unique because $f$ is especially injective. If we recall \eqref{eq:phianalytic} and insert our transformation for $t$, we obtain
 \begin{equation}
-    \phi(f(u)) = \phi(f(u_0))+\int_{u_0}^{u}f'(u')[m(f(u'))(\phi(f(u_0))-\phi(f(u)-f(u')))-\phi(f(u'))]\D u'.
+    \phi(f(u)) = \phi(f(u_{-1}))+\int_{u_{-1}}^{u}f'(u')[m(f(u'))(\phi(f(u_{-1}))-\phi(f(u)-f(u')))-\phi(f(u'))]\D u'.
 \end{equation}
 Now we can transform $\phi$ to $\tilde\phi$. We still have not changed the contents of the equation but just the way it is expressed. The transformed equation reads
 \begin{equation}
-    \tilde{\phi}(u)=\tilde{\phi}(u_0) +\int_{u_0}^{u}f'(u')[\tilde{m}(u')(\tilde\phi(u_0)-\tilde{\phi}(f^{-1}(f(u)-f(u'))))-\tilde{\phi}(u')]\D u'.\label{eq:phitilde}
+    \tilde{\phi}(u)=\tilde{\phi}(u_{-1}) +\int_{u_{-1}}^{u}f'(u')[\tilde{m}(u')(\tilde\phi(u_{-1})-\tilde{\phi}(f^{-1}(f(u)-f(u'))))-\tilde{\phi}(u')]\D u'.\label{eq:phitilde}
 \end{equation}
 The goal of this transformation is that we can use equally spaced points in $u$ and $u'$ but do not have effort $\mathcal{O}(N^2)$. The term that all depends on is $\tilde\phi(f^{-1}(f(u)-f(u')))$ because this is the only time that old timesteps effect the current one. Ideally 
 \begin{equation}
-    F(u'):=f^{-1}(f(u)-f(u'))=u,\quad u'\in[u_0,u]
+    F(u'):=f^{-1}(f(u)-f(u'))=u,\quad u'\in(u_{-1},u]
 \end{equation}
 \begin{figure}
     \centering
@@ -1152,133 +1278,101 @@ The goal of this transformation is that we can use equally spaced points in $u$ 
     \caption{History dependency for different $f$}
     \label{fig:Fustrich}
 \end{figure}
-almost everywhere. This would again eliminate the history completely like in the previous example. In figure \ref{fig:Fustrich} $F(u')$ is shown for a fixed $u$. We can see that for both functions $f$ we have a long interval, in which $u=F(u')$ is a good approximation. 
-\chapter{Numerical results}
-Now we have everything we need to put our equations into a simulation. We will first introduce the framework, which handled all the calculations performed for this work. After that we will show convergence and discuss some test cases and limitations of this approach.
-\section{Software}
-All simulations conducted for this work used the FEniCS framework (\cite{AlnaesBlechta2015a}, \cite{LoggMardalEtAl2012a}). Other components of this project are the C++ backend DOLFIN (\cite{LoggWells2010a}, \cite{LoggWellsEtAl2012a}), the compiler for the variational form FFC (\cite{KirbyLogg2006a}, \cite{LoggOlgaardEtAl2012a}, \cite{OlgaardWells2010b}), the language definition for variational forms UFL(\cite{AlnaesEtAl2012}, \cite{Alnaes2012a}) and the corresponding code generator UFC (\cite{AlnaesLoggEtAl2009a}, \cite{AlnaesLoggEtAl2012a}).
-\par 
-The advantages of using a framework at all are obvious. The less time one spends coding, the more one can assign to theoretical tasks. Another nice property is that the whole debugging process is shortened by a large bit. The software is also throughly tested so bugs are much less frequent. Literature on how to get started with FEniCS is easy to find. A nice tutorial is given by the founders of FEniCS in  \cite{Langtangen2017a}. The code, that has been written for this work, can be found in the appendix and on the CD, which accompanies this.
-\section{Simulation cases}
-The next sections will be all about simulations and their results. This section should give a quick overview of all the relevant cases studied. \\
-Two domains were used throughout the simulations. 
-\begin{figure}
-    \includegraphics[width=\textwidth]{meshcircle}
-    \caption{Finest mesh of the unit disc}
-    \label{fig:mesh}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=\textwidth]{meshsquare}
-    \caption{Mesh of a square with sidelength 2}
-    \label{fig:meshsquare}
-\end{figure}
-They can be seen in figures \ref{fig:mesh} and \ref{fig:meshsquare}.
-We used the unit disc for the following simulation cases:
-\begin{itemize}
-    \item Convergence of our implementation
-    \item Startup flow (fluid at rest in the beginning but perpendicular pressure)
-\end{itemize}
-The square had applications in these cases:
-\begin{itemize}
-    \item Startup flow
-    \item \enquote{ideal} rheometer cross-section
-\end{itemize}
-The reason why we simulated the startup flow case twice will be obvious once we compare the results. Videos of these testcases will be appended to the presentation and to the CD that accompanies this work.
-\section{Convergence}
-In this section we will use a setup to show the convergence of the implementation and the order of convergence. We will use the unit disc as our domain. We want 
+almost everywhere. This would again eliminate the history completely like in the previous example. In figure \ref{fig:Fustrich} $F(u')$ is shown for a fixed $u$. We can see that for both functions $f$ we have a long interval, in which $u=F(u')$ is a good approximation. \par 
+Now let $f(u)=e^u$. We choose this because $F(u,u')$ is qualitatively the same function for every $u$ just translated. This will help us immensely later on. We then have $u_{-1}=-\infty$. Obviously we cannot start our calculation at $-\infty$ so we introduce $u_0$ where $\abs{f(u_0)-f(-\infty)}$ is negligible. From there we introduce a discretization for $u$ as
 \begin{equation}
-    u = 0\quad\forall\bfx\in\partial\Omega.
+    u_i = u_0+ih,\quad\forall i=0,\dotsc,N
 \end{equation}
-\subsection{\textsc{Maxwell}}
-We want to show the convergence for the \textsc{Maxwell} model $(\mu_s=0)$ first, because it is more challenging due to the missing dissipation term.
-We set the initial conditions
+where $h = \frac{\log(T) -u_0}{N}$ is a fixed interval length and we stop at $u_N=\log(T)$ with $T$ our end time and $N$ our given number of steps. Our goal now is to get values for all $\tilde\phi(u_i)$. We take the assumption that $\forall i=0\dotsc,N$
 \begin{equation}
-    u(t=0) = e^{-\norm{x}_2-1}-1,
-    \quad\bfC(t=0) = -2\bfx(e^{-(\norm{x}_2^2 -1)}-1)
+    \tilde\phi(u) \equiv \tilde\phi(u_i), \quad\forall u\in(u_{i-1},u_i].
 \end{equation}
-where $\bfx\in\Omega$ and $e$ the usual notation for the \textsc{Eulerian} number. This initial condition is obviously continuous at the boundary. Because the exact solution of this equation is not known, we will use the concept of \emph{manufactured solution}. This means that we modify our physical problem by adding a so called residual. By doing this we can artificially create a known solution. This becomes clearer by applying this technique for our problem step by step.\par 
-The first step in the process of creating a manufactured solution is to set a function, which should be the exact solution. In our case, we want the solutions to remain the initial condition. We could have introduced a time dependent solution here, but it only makes calculations more complex. Next, we plug these solution functions into our equations and add the residual $\bfR\colon\Omega\to\rr^3$ on the right side. It does not matter, if we use the classic or weak formulation of our problem. By using the classic formulation we get
+Let us now take a look back at \eqref{eq:phitilde} and look at the integral part by part. Let us assume we know the values for each $\tilde\phi(u_i)$ for $i\le n$ and want to calculate $\tilde\phi(u_{n+1})$. For the first part we get
+\begin{equation}
+    I_1:=\int_{-\infty}^{u_{n+1}}f'(u')\tilde{m}(u')\tilde\phi(-\infty)\D u'=\tilde\phi(-\infty)\sum_{i=0}^{n+1}\int_{u_{i-1}}^{u_i}f'(u')\tilde{m}(u')\D u'
+\end{equation}
+Now we know that $\tilde{m}$ is piecewise constant. The jump is on each integral boundary so we just get
+\begin{equation}
+    I_1 = \tilde{\phi}(-\infty)\sum_{i=0}^{n+1}\tilde{m}(u_i)\int_{u_{i-1}}^{u_i}f'(u')\D u' = \tilde{\phi}(-\infty)\sum_{i=0}^{n+1}\tilde{m}(u_i)[f(u_i)-f(u_{i-1})].
+\end{equation}
+We set 
+\begin{equation}
+    I_1 = \tilde\phi(-\infty)[S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]].
+\end{equation}
+This way we can perform an update for $S(n+1) = S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]$ and get only linear effort for this part. The summand for $n+1$ will have to be regarded separately because it is implicitly depending on the value of $\tilde\phi$ we are trying to calculate. We will actually discover later on that we can get a cubic problem in $\tilde\phi(u_{n+1})$ at worst which we will solve using \textsc{Newton's} method.
+\par After we now handled the first part successfully we will take a look at the third part because the second will be the most challenging. Consider
+\begin{equation}
+    I_3:=-\int_{u_{-1}}^{u_{n+1}}f'(u')\tilde\phi(u')\D u' = -\sum_{i=0}^{n+1}\int_{u_{i-1}}^{u_i}f'(u')\tilde\phi(u')\D u'.
+\end{equation} Using the same arguments as for $I_1$ we obtain
+\begin{equation}
+    I_3 = -\sum_{i=0}^{n+1}\tilde\phi(u_i)[f(u_i)-f(u_{i-1})] = -M(n) -\tilde\phi(u_{n+1})[f(u_{n+1})-f(u_{n})],
+\end{equation}
+with the update rule 
+\begin{equation}
+    M(n+1) = M(n) + \tilde\phi(u_{n+1})[f(u_{n+1})-f(u_{n})].
+\end{equation}
+For understanding the second part we will first rename the integration variable to avoid confusion
+\begin{equation}
+    I_2:=\int_{u_{-1}}^{u_{n+1}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v.
+\end{equation}
+Now let us recall the behavior of $F(u,v)$ in figure \ref{fig:Fustrich}. We can see that in the beginning we can set $\tilde\phi(F(u_{n+1},v))=\tilde\phi(u_{n+1})$. But what do we do with the remaining interval? To answer this question we have to see that $F$ is its own inverse in the second argument. Let $x = F(u,v)$. We want to find a $v$ for a given $u$ to solve this. We get
+\begin{equation}
+    f(x)=f(u)-f(v)\quad\Rightarrow f(v)=f(u)-f(x)\quad\Rightarrow v= F(u,x).
+\end{equation}
+The remaining discretization will be built on this fact. Specifically we set $w_i^n=F(u_n,u_i)$. This ensures that 
+\begin{equation}
+    \tilde\phi(F(u_{n+1},w^{n+1}_i))=\tilde{\phi}(u_j),
+\end{equation}
+for some $j=0,\dotsc,n$. Note that the $w_i^n$ are decreasing as $i$ increases for a fixed $n$. The lowest value of $w_i^n$ will be $w_{n-1}^n$. Our discretization $I_2$ will be 
+\begin{equation}
+    \{v'_i\}_i=\text{sort}(\{u_i\}_i\cup \{w_i^n\}_i),
+\end{equation}
+so it will differ each timestep. One might be tempted to think that this will at least result in an $\mathcal{O}(N^2)$ algorithm because we have to sort every timestep, but we will solve this issue later on.
+\par An important thing to know during the simulation, is the first index $j$ so that $v'_j\in\{w_i^n\}$ for each $n$. Because we know that $v'_j = w_{n-1}^n$ we can calculate this directly. We introduce 
+\begin{equation}
+    l*:=\left\lceil  \frac{u_n -w_{n}^{n+1}}{h}\right\rceil.
+\end{equation}
+This is constant in $n$ and equals the number of intervals, which the $w_i^n$ spread. Therefore we know that all interval until $u_{n-l*+1}$ do not contain any points $w_i^{n+1}$. So we will divide the integral $I_2$ to become
+\begin{equation}
+    I_2 = \int_{-\infty}^{u_{n-l*+1}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v + \int_{u_{n-l* +1}}^{u_{n+1}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v.
+\end{equation}
+We will assume that \begin{equation}
+    \tilde\phi(F(u_{n+1},v))=\tilde\phi(u_{n+1})
+\end{equation}
+in the first part of this integral. So we get 
+\begin{equation}
+    I_2 = \tilde\phi(u_{n+1})\int_{-\infty}^{u_{n-l*+1}}f'(v)\tilde{m}(v)\D v+ \int_{u_{n-l* +1}}^{u_{n+1}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v.
+\end{equation}
+By using similar argument to $I_1$ and $I_3$ we can simplify this to 
+\begin{equation}
+    I_2 = \tilde{\phi}(u_{n+1})\sum_{i=0}^{n+1-l*}\tilde{m}(u_i)[f(u_i)-f(u_{i-1})]+ \int_{u_{n-l* +1}}^{u_{n+1}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v.
+\end{equation}
+We will denote the remaining integral by $I_{2,2}$. Let us introduce $j*$ as the index of $w_i^{n}$ so that $w_{l*-i}^{n+1}\in[u_n,u_{n+1}],\quad\forall i\ge j*$. This can also be calculated in the preprocessing of the calculation by using the problem: Find $j*$ such that
+\begin{equation}
+    \frac{u_{l*}-w_{l*-j*}^{l*}}{h}\le 1 \quad \text{and} \quad\frac{u_{l*}-w_{l*-j*+1}^{l*}}{h}\g 1.
+\end{equation}
+This is a well-defined problem because such $j*$ always exists at timestep $l*$. We can now divide $I_{2,2}$ to obtain
+\begin{equation}
+    I_{2,2}= \int_{u_{n-l*+1}}^{w^{n+1}_{n+1-j*}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v + \int_{w^{n+1}_{n+1-j*}}^{u_{n+1}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v.
+\end{equation}
+But because the second integral lies completely within $[u_n,u_{n+1}]$ we get 
 \begin{align}
-    0 &= -\partial_3 p-2\mu_p \nabla\cdot [\bfx(e^{-(\norm{x}_2^2 -1)}-1)] +\bfR_1,\\
-    -\frac{2}{\lambda}\bfx(e^{-(\norm{x}_2^2 -1)}-1)&= \nabla (e^{-(\norm{x}_2^2 -1)}-1) +\bfR_{2:3}.
+    I_{2,2}&=\int_{u_{n-l*+1}}^{w^{n+1}_{n+1-j*}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v \\&+\tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\int_{w^{n+1}_{n+1-j*-i}}^{w^{n+1}_{n+1-j*-i-1}}f'(v)\tilde{\phi}(F(u_{n+1},v))\D v.
 \end{align}
-Note that the time derivative evaluated to zero in both cases. Next, we solve this set of equations for $\bfR$. To do that we expand the divergence and the gradient operators to obtain
+But be wanted that $\tilde\phi$ is constant on each interval. Therefore we want $\tilde\phi(F(u_{n+1},v))$ to be $\tilde\phi(u_{n+1-j*-i-1})$. We then get
 \begin{align}
-   \bfR_1 &= \partial_3 p +4\mu_p(e^{-(\norm{x}_2^2 -1)}(1-\norm{x}_2^2)-1),\\
-   \bfR_{2:3} &=2\bfx\left(e^{-(\norm{x}_2^2 -1)}\left(1-\frac{1}{\lambda}\right)+\frac{1}{\lambda}\right).
+I_{2,2}&=\int_{u_{n-l*+1}}^{w^{n+1}_{n+1-j*}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v \\&+\tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\tilde\phi(u_{n+1-j*-i-1})[f(w^{n+1}_{n+1-j*-i-1})-f(w_{n+1-j*-i}^{n+1})]
 \end{align}
-To solve the equations, we have to get everything back into the weak formulation. This results in 
+If recall the definition of $w$ we can simplify the expression to
 \begin{align}
-\int_\Omega(u-u^n)\psi\D\Omega +\Delta t\left(\int_\Omega\partial_3 p\psi\D\Omega + \int_\Omega\bfs\cdot\nabla\psi\D\Omega-\int_\Omega \bfR_1\psi\D\Omega\right) = 0,\\
-\bfs =\mu_p\bfC_{1/\lambda},\\
-\int_\Omega(\bfC_{1/\lambda} - \bfC_{1/\lambda}^n +\frac{\Delta t}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
-\Delta t\int_\Omega \nabla u\cdot\varphi\D\Omega+\Delta t\int_{\Omega}\bfR_{2:3}\cdot\varphi\D\Omega.
+I_{2,2}&=\int_{u_{n-l*+1}}^{w^{n+1}_{n+1-j*}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v \\&+\tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\tilde\phi(u_{n+1-j*-i-1})[f(u_{n+1-j*-i})-f(u_{n+1-j*-i-1})].
 \end{align}
-The solution of this system is exactly our initial condition. This way we can easily calculate approximation errors. 
-\begin{table}
-    \centering
-    \begin{tabular}{c|c|c|c|c}
-        $\approx$ \# Elements per diameter& $\mathrm{L}^2$-error&EOC in $\mathrm{L}^2$&$\mathrm{L}^\infty$-error &EOC in $\mathrm{L}^\infty$\\
-        \hline
-        20 & 0.0797652 & - & 0.877305 & -\\
-        40 & 0.0233543 & 1.77207 & 0.195846 & 2.16336\\
-        80 & 0.00615334 & 1.92425 & 0.100548 & 0.96184\\
-        160 & 0.00163421 & 1.91278 & 0.0369229 & 1.44529\\
-        320 & 0.000433982 & 1.91288 & 0.0198643 & 0.89434
-    \end{tabular}
-\caption{Convergence of the \textsc{Maxwell} model}
-\label{tab:maxwellconv}
-\end{table}
-
-Table \ref{tab:maxwellconv} shows the $\mathrm{L}^2$ error and order of convergence of this example as well as these values for the $\mathrm{L}^\infty$ norm respectively. The boundary of the domain was approximated using a polygonal chain, which increases proportionally with the number of cells. The principle of the winning least order is also applicable to the geometry. This might also explain, why in the beginning the EOC is a bit far from the expected 2. As we have 320 elements per diameter we also approximate the circle with 320 segments in the polygonal chain which, to a naked eye, is indistinguishable from a true circle. The time integration order of one is also negatively influencing the EOC. We used $\Delta t = 0.1$ and calculated until $T=1$. As the polymer viscosity we used $1$. It is typical for these kind of simulations that the $\mathrm{L}^\infty$ error is worse than $\mathrm{L}^2$. This is because it is much more sensitive for things like geometry approximations.
-\subsection{\textsc{Oldroyd-B}}
-\section{Startup flow on unit disc}
-We will now take a look at a more physically relevant example. Consider a fluid at rest that is subject to a perpendicular pressure gradient. This is basically the setup for the next two simulation cases. However, we will choose different domains and show that this leads to very different results. 
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{UnitDiscSetup}
-    \caption{Setup startup flow unit disc}
-    \label{fig:unitdiscsetup}
-\end{figure}
-The setup is shown in figure \ref{fig:unitdiscsetup}. We chose the no slip boundary condition $u=0$ on the boundary of the circle. We assumed a pressure gradient of $\partial_3 p=-5$ and a relaxation time of $\lambda=1$. 
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{UnitDiscCenterline}
-    \caption{Centerline velocity with the unit disc domain and $\mu_s=0$, $\mu_p=1$}
-    \label{fig:unitdisccenterline}
-\end{figure}
-The centerline velocity graph is shown in figure \ref{fig:unitdisccenterline}. We used the \textsc{Maxwell} model this time with $\mu_p=1$. The typical non-\textsc{Newtonian} oscillations can be seen. We calculated until $T=12$ with $\Delta t=0.001$.
-\section{Startup flow on square}
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{SquareSetup}
-    \caption{Setup of the startup flow simulation on the square domain}
-    \label{fig:squaresetup}
-\end{figure}
-Now we want to repeat this calculation but with a different domain. We will see that this will impact the result. The setup is shown in \ref{fig:squaresetup
-}. Because we want to compare the results to \cite{A.S.RDuarte2008}, we choose periodic boundary conditions on the left and right sides and no slip boundary condition $u=0$ at the top and bottom.
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{SquareCenterline}
-    \caption{Centerline velocity of the start-up flow on the square domain}
-    \label{fig:squarecenterline}
-\end{figure}
-We chose $\partial_3 p=-3$ to obtain the results from \cite{A.S.RDuarte2008} but this only effects the amplitude and not the behavior of the fluid. As one can see in figure \ref{fig:squarecenterline} we obtain a very different behavior by changing the domain.
-\section{\enquote{Ideal} rheometer}
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{RheometerSetup}
-    \caption{Setup for the rheometer simulation case}
-    \label{fig:rheometersetup}
-\end{figure}
-The setup for this case is shown in figure \ref{fig:rheometersetup}. The left side of the square has the no slip boundary condition $u=0$. The top and bottom side are coupled with a periodic boundary condition. The right side has the \textsc{Dirichlet} boundary condition $u=10$. This case now represents a slice from top to bottom of the rheometer. However, because we assume periodic boundary conditions on the top and bottom we take the assumption of an infinitely high rheometer. 
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{RheometerCenterline}
-    \caption{Centerline velocity in the rheometer with $\mu_s=0.1$, $\mu_p=0.9$, $\lambda=2$ }
-    \label{fig:rheomcenter}
-\end{figure} 
-\par The centerline velocity of this simulation can be seen in figure \ref{fig:rheomcenter}. We chose the \textsc{Oldroyd}-B model with $\mu_s=0.1$ and $\mu_p=0.9$. Our relaxation time was set to $\lambda=2$ and we calculated until $T=4$ with a step size of $\Delta t=0.001$. On can clearly see that we do not have a fluid that is showing \textsc{Newtonian} behavior. This would be just a monotonous function to the steady state velocity without any maximums.
+By reordering the sum we obtain
+\begin{equation}
+    I_{2,2}=\int_{u_{n-l*+1}}^{w^{n+1}_{n+1-j*}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v +
+    \tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\tilde\phi(u_{i-1})[f(u_i)-f(u_{i-1})].
+\end{equation}
+So what remains of the integral is the part, where the two discretizations overlap. 
 \chapter{Conclusion}
 
 \addcontentsline{toc}{chapter}{List of figures}
