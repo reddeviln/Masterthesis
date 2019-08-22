@@ -1126,7 +1126,7 @@ We introduce $\beta_n=2^{-n}s_n$. We obtain
      \phi_{n+1}(2^{-n}+h+\beta_n) &= \phi_n(2^{-n}+\beta-\frac{h}{2}m_n)+\frac{h}{2}m_n\phi_0,\\
      \beta_{n+1} &= 2^{-n-1}s_{n+1}=\frac{1}{2}(\beta_n+\frac{h}{2}m_n) .
 \end{align}
-\begin{figure}[htb]
+\begin{figure}
     \centering
     \includegraphics[width=\textwidth]{Phidiff}
     \caption{Both $\phi$ with $h=\Delta t=0.01$ and $v_1=1.5,~v_2=0.5$}
@@ -1146,56 +1146,13 @@ The goal of this transformation is that we can use equally spaced points in $u$ 
 \begin{equation}
     F(u'):=f^{-1}(f(u)-f(u'))=u,\quad u'\in[u_0,u]
 \end{equation}
-\begin{figure}[hbt]
+\begin{figure}
     \centering
     \includegraphics[width=\textwidth]{HistoryF}
     \caption{History dependency for different $f$}
     \label{fig:Fustrich}
 \end{figure}
-almost everywhere. This would again eliminate the history completely like in the previous example. So it is unrealistic to fulfill this demands. To better understand $F(u')$, we will have a look at figure \ref{fig:Fustrich}. On the $y$-axis we have the value of $F(u')$ which we want to be $u$ as long as possible. The $x$-axis shows the different value of $u'$. As $u'$ approaches $u$ $F(u')$ diverges to $-\infty$ because of the logarithm. However this is not a problem for us as we just want the values to be $u$ almost everywhere. This graph clearly shows that $f(u)=\exp(\frac{\pi}{2}\sinh(u))$ is more suited for our needs as it has a steeper decrease to minus infinity. To clarify, if we would choose $f(u)=e^u$, we would have to account for the history as early as approximately $u'=0$. For the other possibility this would have to happen as late as approximately $u'=2.8$. This reduces the computational effort immensely.
-\par 
-\begin{figure}[htb]
-    \centering
-    \includegraphics[width=\textwidth]{Fdiffu}
-    \caption{Minimal discretization length}
-\end{figure}
-But are these curves dependent on $u$? It could happen that $f(u)=e^u$ may be better suited for a different $u$. We will look at this behavior by calculating the intersection between $F(u')$ and the identity and plotting the y-value of this against $u$. This can be seen in figure \ref{fig:Fdiffu}. The value on the left can be interpreted as the minimal discretization length. So if we choose a cell length of less then this value we have to account for the history.  We can see that $f(u)=e^u$ is always worse. Another thing to note is that the curve for $f(u)=\exp(\frac{\pi}{2}\sinh(u))$ is not constant in $u$. That means that for every timestep we have to first check, how many parts of the approximated integral need a history part. This is what we will do next.
-\par 
-Let us recall \eqref{eq:phitilde} and insert our discretization. This leads to
-\begin{equation}
-    \tilde\phi_n = \tilde\phi_0 +h\sum_{j=0}^{n-1}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi(f^{-1}(f_n-f_{j+1})))-\tilde\phi_{j+1}],
-\end{equation}
-where we used the discretization
-\begin{equation}
-    \int_{u_0}^{u_n}f(u)\D u=\sum_{j=0}^{n-1}\int_{u_j}^{u_{j+1}}f(u)\D u\approx h\sum_{j=0}^{n-1}f_{j+1}.
-\end{equation}
-As one can see we can choose equally spaced points. From our previous discussion we know that we can replace $\tilde\phi(f^{-1}(f_n-f_{j+1}))$ in the intervals which lie in $[u_0,F(u*)]$. We give the last interval that lies in there the index $k(n)$. The equation then transforms to 
-\begin{align}
-    \tilde\phi_n&=\tilde\phi_0+h\sum_{j=0}^{k(n)}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi_n)-\tilde\phi_{j+1}]-hf'(u_n)\tilde\phi_n\nonumber\\
-    &+h\sum_{j=k(n)+1}^{n-2}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi(f^{-1}(f_n-f_{j+1})))-\tilde\phi_{j+1}]
-\end{align}
-As a next step, we want to calculate the update from $\tilde\phi_n$ to $\tilde\phi_{n+1}$. We introduce $k_{max}=\max(k(n),k(n+1))$ and $k_{min}=\min(k(n),k(n+1))$. We use $(\cdot)_{n,n+1}$ to show that depending on $k_{\max}$ and $k_{\min}$ the index can either be $n$ or $n+1$. This yields
-\begin{align}
-    \tpne-\tpn&=h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}(\tpn-\tpne)\\
-    &+h\sum_{j=k_{\min} +1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi_{n,n+1})-\tilde\phi_{j+1}]\\
-    &+h(f'(u_n)\tpn-f'(u_{n+1})\tpne)\\
-    &+hf'(u_n)[\tilde{m}_n(\tilde\phi_0-\tilde\phi(f^{-1}(f_{n+1}-f_n)))-\tpn]\\
-    &\pm h\sum_{j=k_{\min}+1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi(f^{-1}(f_{n,n+1}-f_{j+1})))-\tpne]\\
-    &+h\sum_{j=k_{\max}+1}^{n-2}f'(u_{j+1})\tilde{m}_{j+1}(\tilde\phi(f^{-1}(f_n-f_{j+1}))-\tilde\phi(f^{-1}(f_{n+1}-f_{j+1}))).
-\end{align}
-Now, we can collect the terms, that are not part of a sum and factor out $\tpne$ and $\tpn$. We obtain
-\begin{align}
-    &\tpne\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}+hf'(u_{n+1})\right)=hf'(u_n)\tilde{m}_n(\tilde\phi_0-\tilde\phi(f^{-1}(f_{n+1}-f_n)))\\
-    &+\tpn\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}\right)+h\sum_{j=k_{\min}+1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi_{n,n+1})-\tilde\phi_{j+1}]\\
-    &\pm h\sum_{j=k_{\min} +1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi(f^{-1}(f_{n,n+1}-f_{j+1})))-\tilde\phi_{j+1}]\\
-    &+h\sum_{j=k_{\max}+1}^{n-2}f'(u_{j+1})\tilde{m}_{j+1}[\tilde\phi(f^{-1}(f_n-f_{j+1}))-\tilde\phi(f^{-1}(f_{n+1}-f_{j+1}))].
-\end{align}
-We see that there are two sums with the same limits. This will be dealt with now. It results
-\begin{align}
-    &\tpne\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}+hf'(u_{n+1})\right)=\tpn\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}\right)\\
-    &+h\sum_{j=k_{\min} +1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0\pm\tilde\phi_0-\tilde\phi_{n,n+1}\mp\tilde\phi(f^{-1}(f_{n,n+1}-f_{j+1})))-\tilde\phi_{j+1}\mp\tilde\phi_{j+1}]\\
-    &+h\sum_{j=k_{\max}+1}^{n-2}f'(u_{j+1})\tilde{m}_{j+1}[\tilde\phi(f^{-1}(f_n-f_{j+1}))-\tilde\phi(f^{-1}(f_{n+1}-f_{j+1}))].
-\end{align}
+almost everywhere. This would again eliminate the history completely like in the previous example. In figure \ref{fig:Fustrich} $F(u')$ is shown for a fixed $u$. We can see that for both functions $f$ we have a long interval, in which $u=F(u')$ is a good approximation. 
 \chapter{Numerical results}
 Now we have everything we need to put our equations into a simulation. We will first introduce the framework, which handled all the calculations performed for this work. After that we will show convergence and discuss some test cases and limitations of this approach.
 \section{Software}
@@ -1277,14 +1234,14 @@ Table \ref{tab:maxwellconv} shows the $\mathrm{L}^2$ error and order of converge
 \subsection{\textsc{Oldroyd-B}}
 \section{Startup flow on unit disc}
 We will now take a look at a more physically relevant example. Consider a fluid at rest that is subject to a perpendicular pressure gradient. This is basically the setup for the next two simulation cases. However, we will choose different domains and show that this leads to very different results. 
-\begin{figure}[htb]
+\begin{figure}
     \centering
     \includegraphics[width=\textwidth]{UnitDiscSetup}
     \caption{Setup startup flow unit disc}
     \label{fig:unitdiscsetup}
 \end{figure}
 The setup is shown in figure \ref{fig:unitdiscsetup}. We chose the no slip boundary condition $u=0$ on the boundary of the circle. We assumed a pressure gradient of $\partial_3 p=-5$ and a relaxation time of $\lambda=1$. 
-\begin{figure}[htb]
+\begin{figure}
     \centering
     \includegraphics[width=\textwidth]{UnitDiscCenterline}
     \caption{Centerline velocity with the unit disc domain and $\mu_s=0$, $\mu_p=1$}
@@ -1292,7 +1249,7 @@ The setup is shown in figure \ref{fig:unitdiscsetup}. We chose the no slip bound
 \end{figure}
 The centerline velocity graph is shown in figure \ref{fig:unitdisccenterline}. We used the \textsc{Maxwell} model this time with $\mu_p=1$. The typical non-\textsc{Newtonian} oscillations can be seen. We calculated until $T=12$ with $\Delta t=0.001$.
 \section{Startup flow on square}
-\begin{figure}[htb]
+\begin{figure}
     \centering
     \includegraphics[width=\textwidth]{SquareSetup}
     \caption{Setup of the startup flow simulation on the square domain}
@@ -1300,7 +1257,7 @@ The centerline velocity graph is shown in figure \ref{fig:unitdisccenterline}. W
 \end{figure}
 Now we want to repeat this calculation but with a different domain. We will see that this will impact the result. The setup is shown in \ref{fig:squaresetup
 }. Because we want to compare the results to \cite{A.S.RDuarte2008}, we choose periodic boundary conditions on the left and right sides and no slip boundary condition $u=0$ at the top and bottom.
-\begin{figure}[htb]
+\begin{figure}
     \centering
     \includegraphics[width=\textwidth]{SquareCenterline}
     \caption{Centerline velocity of the start-up flow on the square domain}
@@ -1308,14 +1265,14 @@ Now we want to repeat this calculation but with a different domain. We will see 
 \end{figure}
 We chose $\partial_3 p=-3$ to obtain the results from \cite{A.S.RDuarte2008} but this only effects the amplitude and not the behavior of the fluid. As one can see in figure \ref{fig:squarecenterline} we obtain a very different behavior by changing the domain.
 \section{\enquote{Ideal} rheometer}
-\begin{figure}[htb]
+\begin{figure}
     \centering
     \includegraphics[width=\textwidth]{RheometerSetup}
     \caption{Setup for the rheometer simulation case}
     \label{fig:rheometersetup}
 \end{figure}
 The setup for this case is shown in figure \ref{fig:rheometersetup}. The left side of the square has the no slip boundary condition $u=0$. The top and bottom side are coupled with a periodic boundary condition. The right side has the \textsc{Dirichlet} boundary condition $u=10$. This case now represents a slice from top to bottom of the rheometer. However, because we assume periodic boundary conditions on the top and bottom we take the assumption of an infinitely high rheometer. 
-\begin{figure}[htb]
+\begin{figure}
     \centering
     \includegraphics[width=\textwidth]{RheometerCenterline}
     \caption{Centerline velocity in the rheometer with $\mu_s=0.1$, $\mu_p=0.9$, $\lambda=2$ }
@@ -1343,4 +1300,48 @@ Köln, \today
 \\[2\bigskipamount]
 Nils Dornbusch
 \end{otherlanguage}
+% So it is unrealistic to fulfill this demands. To better understand $F(u')$, we will have a look at figure \ref{fig:Fustrich}. On the $y$-axis we have the value of $F(u')$ which we want to be $u$ as long as possible. The $x$-axis shows the different value of $u'$. As $u'$ approaches $u$ $F(u')$ diverges to $-\infty$ because of the logarithm. However this is not a problem for us as we just want the values to be $u$ almost everywhere. This graph clearly shows that $f(u)=\exp(\frac{\pi}{2}\sinh(u))$ is more suited for our needs as it has a steeper decrease to minus infinity. To clarify, if we would choose $f(u)=e^u$, we would have to account for the history as early as approximately $u'=0$. For the other possibility this would have to happen as late as approximately $u'=2.8$. This reduces the computational effort immensely.
+%\par 
+%\begin{figure}
+%    \centering
+%    \includegraphics[width=\textwidth]{Fdiffu}
+%    \caption{Minimal discretization length}
+%\end{figure}
+%But are these curves dependent on $u$? It could happen that $f(u)=e^u$ may be better suited for a different $u$. We will look at this behavior by calculating the intersection between $F(u')$ and the identity and plotting the y-value of this against $u$. This can be seen in figure \ref{fig:Fdiffu}. The value on the left can be interpreted as the minimal discretization length. So if we choose a cell length of less then this value we have to account for the history.  We can see that $f(u)=e^u$ is always worse. Another thing to note is that the curve for $f(u)=\exp(\frac{\pi}{2}\sinh(u))$ is not constant in $u$. That means that for every timestep we have to first check, how many parts of the approximated integral need a history part. This is what we will do next.
+%\par 
+%Let us recall \eqref{eq:phitilde} and insert our discretization. This leads to
+%\begin{equation}
+%\tilde\phi_n = \tilde\phi_0 +h\sum_{j=0}^{n-1}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi(f^{-1}(f_n-f_{j+1})))-\tilde\phi_{j+1}],
+%\end{equation}
+%where we used the discretization
+%\begin{equation}
+%\int_{u_0}^{u_n}f(u)\D u=\sum_{j=0}^{n-1}\int_{u_j}^{u_{j+1}}f(u)\D u\approx h\sum_{j=0}^{n-1}f_{j+1}.
+%\end{equation}
+%As one can see we can choose equally spaced points. From our previous discussion we know that we can replace $\tilde\phi(f^{-1}(f_n-f_{j+1}))$ in the intervals which lie in $[u_0,F(u*)]$. We give the last interval that lies in there the index $k(n)$. The equation then transforms to 
+%\begin{align}
+%\tilde\phi_n&=\tilde\phi_0+h\sum_{j=0}^{k(n)}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi_n)-\tilde\phi_{j+1}]-hf'(u_n)\tilde\phi_n\nonumber\\
+%&+h\sum_{j=k(n)+1}^{n-2}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi(f^{-1}(f_n-f_{j+1})))-\tilde\phi_{j+1}]
+%\end{align}
+%As a next step, we want to calculate the update from $\tilde\phi_n$ to $\tilde\phi_{n+1}$. We introduce $k_{max}=\max(k(n),k(n+1))$ and $k_{min}=\min(k(n),k(n+1))$. We use $(\cdot)_{n,n+1}$ to show that depending on $k_{\max}$ and $k_{\min}$ the index can either be $n$ or $n+1$. This yields
+%\begin{align}
+%\tpne-\tpn&=h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}(\tpn-\tpne)\\
+%&+h\sum_{j=k_{\min} +1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi_{n,n+1})-\tilde\phi_{j+1}]\\
+%&+h(f'(u_n)\tpn-f'(u_{n+1})\tpne)\\
+%&+hf'(u_n)[\tilde{m}_n(\tilde\phi_0-\tilde\phi(f^{-1}(f_{n+1}-f_n)))-\tpn]\\
+%&\pm h\sum_{j=k_{\min}+1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi(f^{-1}(f_{n,n+1}-f_{j+1})))-\tpne]\\
+%&+h\sum_{j=k_{\max}+1}^{n-2}f'(u_{j+1})\tilde{m}_{j+1}(\tilde\phi(f^{-1}(f_n-f_{j+1}))-\tilde\phi(f^{-1}(f_{n+1}-f_{j+1}))).
+%\end{align}
+%Now, we can collect the terms, that are not part of a sum and factor out $\tpne$ and $\tpn$. We obtain
+%\begin{align}
+%&\tpne\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}+hf'(u_{n+1})\right)=hf'(u_n)\tilde{m}_n(\tilde\phi_0-\tilde\phi(f^{-1}(f_{n+1}-f_n)))\\
+%&+\tpn\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}\right)+h\sum_{j=k_{\min}+1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi_{n,n+1})-\tilde\phi_{j+1}]\\
+%&\pm h\sum_{j=k_{\min} +1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi(f^{-1}(f_{n,n+1}-f_{j+1})))-\tilde\phi_{j+1}]\\
+%&+h\sum_{j=k_{\max}+1}^{n-2}f'(u_{j+1})\tilde{m}_{j+1}[\tilde\phi(f^{-1}(f_n-f_{j+1}))-\tilde\phi(f^{-1}(f_{n+1}-f_{j+1}))].
+%\end{align}
+%We see that there are two sums with the same limits. This will be dealt with now. It results
+%\begin{align}
+%&\tpne\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}+hf'(u_{n+1})\right)=\tpn\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}\right)\\
+%&+h\sum_{j=k_{\min} +1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0\pm\tilde\phi_0-\tilde\phi_{n,n+1}\mp\tilde\phi(f^{-1}(f_{n,n+1}-f_{j+1})))-\tilde\phi_{j+1}\mp\tilde\phi_{j+1}]\\
+%&+h\sum_{j=k_{\max}+1}^{n-2}f'(u_{j+1})\tilde{m}_{j+1}[\tilde\phi(f^{-1}(f_n-f_{j+1}))-\tilde\phi(f^{-1}(f_{n+1}-f_{j+1}))].
+%\end{align}
 \end{document}
