@@ -1396,11 +1396,11 @@ Because the $u_i$ are equally spaced, we know that
 \end{equation}
 We can therefore in the loop just add $u_{n+1-l*}$ and obtain the current position of these $w$s. For each $n$ we know that the points $u_{n+1-l*},\dotsc,u_n$ overlap. By applying the shift backwards we find that the $w$ as above overlap with 
 \begin{equation}
-    u_i,\quad\forall i=0,l*-1.
+    u_i,\quad\forall i=1,\dotsc,l^*-1.
 \end{equation}
 This way we can define the overlapping points 
 \begin{equation}
-    \tilde{u}= \bigcup\left(\bigcup_{i=0}^{l*-1}u_i\bigcup_{j=1}^{j*}w^{l*}_{l*-j}\right).
+    \tilde{u}= \bigcup\left(\bigcup_{i=1}^{l*-1}u_i\bigcup_{j=1}^{j*}w^{l*}_{l*-j}\right).
 \end{equation}
 We can sort these in preprocessing. If we keep the permutation array that resulted during the sorting process, we can later recall, from which discretization the point came. We introduce two new variables
 \begin{equation}
@@ -1409,7 +1409,7 @@ We can sort these in preprocessing. If we keep the permutation array that result
 \end{equation}
 Now we gathered all the information we need in preprocessing, we can get back to $I_{2,2}$. With the new defined variables inserted we obtain
 \begin{align}
-    I_{2,2}&= \sum_{i=1}^{l*+j*}\tilde{m}(u_{n+2-l*+q_{i-1}})\tilde{\phi}(u_{n+1-y_{i-1}})[f(u_{n+1-l*}+\tilde{u_i})-f(u_{n+1-l*}+\tilde{u}_{i-1})]\\&+\tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\tilde\phi(u_{i-1})[f(u_i)-f(u_{i-1})] \\&+ \tilde\phi(u_{n+1})\tilde{m}(u_{n-l*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l*+1})].
+    I_{2,2}&= \sum_{i=1}^{l*+j*-1}\tilde{m}(u_{n+2-l*+q_{i-1}})\tilde{\phi}(u_{n+1-y_{i-1}})[f(u_{n+1-l*}+\tilde{u_i})-f(u_{n+1-l*}+\tilde{u}_{i-1})]\\&+\tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\tilde\phi(u_{i-1})[f(u_i)-f(u_{i-1})] \\&+ \tilde\phi(u_{n+1})\tilde{m}(u_{n-l*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l*+1})].
 \end{align}
 Every term of \eqref{eq:phitilde} has been discretized. The whole discretization is obtained by calculating
 \begin{equation}
@@ -1417,7 +1417,7 @@ Every term of \eqref{eq:phitilde} has been discretized. The whole discretization
 \end{equation}
 This computation yields
 \begin{align}
-    \tilde\phi(u_{n+1})&=\tilde\phi(-\infty) +\tilde\phi(-\infty)[S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]]\label{eq:discphit1}\\&-M(n)\label{eq:discphit2} -\tilde\phi(u_{n+1})[f(u_{n+1})-f(u_{n})]  -\tilde{\phi}(u_{n+1})\sum_{i=0}^{n+1-l*}\tilde{m}(u_i)[f(u_i)-f(u_{i-1})]\\&- \tilde\phi(u_{n+1})\tilde{m}(u_{n-l*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l*+1})] \\&\label{eq:discphit3}-\sum_{i=1}^{l*+j*}\tilde{m}(u_{n+2-l*+q_{i-1}})\tilde{\phi}(u_{n+1-y_{i-1}})[f(u_{n+1-l*}+\tilde{u_i})-f(u_{n+1-l*}+\tilde{u}_{i-1})]\\&\label{eq:discphit4}-\tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\tilde\phi(u_{i-1})[f(u_i)-f(u_{i-1})],
+    \tilde\phi(u_{n+1})&=\tilde\phi(-\infty) +\tilde\phi(-\infty)[S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]]\label{eq:discphit1}\\&-M(n)\label{eq:discphit2} -\tilde\phi(u_{n+1})[f(u_{n+1})-f(u_{n})]  -\tilde{\phi}(u_{n+1})\sum_{i=0}^{n+1-l*}\tilde{m}(u_i)[f(u_i)-f(u_{i-1})]\\&- \tilde\phi(u_{n+1})\tilde{m}(u_{n-l*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l*+1})] \\&\label{eq:discphit3}-\sum_{i=1}^{l*+j*}\tilde{m}(u_{n+2-l*+q_{i-1}})\tilde{\phi}(u_{n+1-y_{i-1}})[f(u_{n+1-l*}+\tilde{u_i})-f(u_{n+1-l*}+\tilde{u}_{i-1})]\\&\label{eq:discphit4}-\tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\tilde\phi(u_{i})[f(u_i)-f(u_{i-1})],
 \end{align}
 where we have
 \begin{equation}
@@ -1455,7 +1455,7 @@ Q(n)= \tilde{\phi}(-\infty)[f(u_0+(n+2-j^*)h)-f(u_0+(n+1-j^*)h)]
 for $n<l^*-1$ and $n<j*-1$ respectively.
 Putting $O$ and $Q$ into \eqref{eq:discphit1} to \eqref{eq:discphit4} yields
 \begin{align}
-    \tilde\phi(u_{n+1})&=\tilde\phi(-\infty) +\tilde\phi(-\infty)[S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]]\\&-M(n) -\tilde\phi(u_{n+1})[f(u_{n+1})-f(u_{n})] -\tilde{\phi}(u_{n+1})O(n)-\tilde{m}(u_{n+1})Q(n)\\&-\tilde\phi(u_{n+1})\tilde{m}(u_{n-l*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l*+1})] \\&-\sum_{i=1}^{l*+j*}\tilde{m}(u_{n+2-l*+q_{i-1}})\tilde{\phi}(u_{n+1-y_{i-1}})[f(u_{n+1-l*}+\tilde{u_i})-f(u_{n+1-l*}+\tilde{u}_{i-1})].
+    \tilde\phi(u_{n+1})&=\tilde\phi(-\infty) +\tilde\phi(-\infty)[S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]]\\&-M(n) -\tilde\phi(u_{n+1})[f(u_{n+1})-f(u_{n})] -\tilde{\phi}(u_{n+1})O(n)-\tilde{m}(u_{n+1})Q(n)\\&-\tilde\phi(u_{n+1})\tilde{m}(u_{n-l*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l*+1})] \\&-\sum_{i=1}^{l*+j*-1}\tilde{m}(u_{n+2-l*+q_{i-1}})\tilde{\phi}(u_{n+1-y_{i-1}})[f(u_{n+1-l*}+\tilde{u_i})-f(u_{n+1-l*}+\tilde{u}_{i-1})].
 \end{align}
 One can observe that $l^*=1$ is a special case because then we obtain a cubic problem in $\tilde\phi$. Otherwise the problem becomes quadratic. In the code this problem will be solved using \textsc{Newton's} method.
 \chapter{Conclusion}
