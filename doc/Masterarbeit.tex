@@ -84,6 +84,7 @@
 \newcommand{\de}{\mathrm{d}}
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 \newcommand{\lpnorm}[1]{\left(\int\abs{#1}^2\D\Omega \right)^{1/2}}
+\newcommand{\ltnorm}[1]{\norm{#1}_{\mathrm{L}^2}}
 \newcommand{\bfu}{\bm{u}}
 \newcommand{\bff}{\bm{f}}
 \newcommand{\bfB}{\bm{B}}
@@ -260,7 +261,7 @@ From now on let $\Omega$ be an open and bounded subset of $\rr^n$.
 \begin{defn}
     A complete vector space with an inner product is called a \emph{\textsc{Hilbert} space}.
 \end{defn}
-\begin{sa}[\textsc{Schwarz} inequality]
+\begin{sa}[\textsc{Cauchy-Schwarz} inequality]
     \label{sa:Schwarz}
     Let $V$ be a vector space. Then 
     \begin{equation}
@@ -907,6 +908,7 @@ At first we have to break the problem down into the bilinear form $a(U,\phi)$ an
 \end{equation}
 Note that these vectors have three entries each. Because we choose $\varphi$ entry-wise and $\psi$ linear independent, we can write the whole system as a sum of every term inside. Putting our new defined variables in results in the equation
 \begin{align}
+\label{eq:sumcon}
     &\int_\Omega[U\cdot\phi+\Delta t((\mu_pU_{1:2}+\mu_s\nabla U_3)\cdot\nabla\phi_3)+\frac{\Delta t}{\lambda}U_{1:2}\cdot\phi_{1:2}-\Delta t\nabla U_3\cdot\phi_{1:2}]\D\Omega\\
     &=\int_\Omega [U^n\cdot\phi-\Delta t\partial_3 p\phi_3]\D\Omega.
 \end{align}
@@ -926,109 +928,109 @@ We now want to proof, with the help of Theorem \ref{sa:LaxMilgram} (\textsc{Lax-
 \begin{equation}
     \langle U,\phi\rangle_X = \langle U_1,\phi_1\rangle_{\mathrm{L}^2} +  \langle U_2,\phi_2\rangle_{\mathrm{L}^2} +\langle U_3,\phi_3\rangle_{\mathrm{H}^1},
 \end{equation}
-where we use the inner products as defined in \ref{sec:funcana}. This inner product induces a norm on $X$ which we will use to show the existence of a solution. We will omit the subscript on the integral because it is obviously just $\Omega$ everywhere. We begin with
-\begin{align}
-   \abs{a(U,\phi)}^2&=\left(\int\left\vert U\cdot\phi+U_{1:2}\cdot\left(\Delta t\mu_p\nabla\phi_3+\frac{\Delta t}{\lambda}\phi_{1:2}\right)\right.\right.\\&+\left.\left.\nabla U_3\cdot\left(\Delta t\mu_s\nabla\phi_3-\Delta t\phi_{1:2}\right)\right\vert\D\Omega\right)^2.
-\end{align}
-$U_{1:2}$ does not suite us very well, so we will transform it to $U$ and pay attention to the dimension. We can put this term together with the original $U$ term and obtain
-\begin{align}
-    &\le \left(\int\left\vert U\cdot\left(\Delta t\mu_p\begin{pmatrix}
-        \nabla\phi_3\\0
-        \end{pmatrix}+\left(1+\frac{\Delta t}{\lambda}\right)\phi\right)\right.\right.\\&+\left.\left.\begin{pmatrix}
-       \nabla U_3\\0
-        \end{pmatrix}\cdot\left(\Delta t \mu_s\begin{pmatrix}
-        \nabla\phi_3\\0
-        \end{pmatrix}+\left(1+\Delta t\right)\phi\right)\right\vert\D\Omega\right)^2.
-\end{align}
-This transformation is an inequality because we added $\frac{\Delta t}{\lambda}\phi_3U_3$ to the equation to make it look nicer. The second term was also adjusted so that the second factor in each summand is, apart from the different $\mu$s, the same. We now introduce 
+where we use the inner products as defined in \ref{sec:funcana}. This inner product induces a norm on $X$ which we will use to show the existence of a solution. We will omit the subscript on the integral because it is obviously just $\Omega$ everywhere.
+\begin{sa}
+    Let $X=\mathrm{L}^2\times\mathrm{L}^2\times \mathrm{H}^1$ be a \textsc{Hilbert} space, $\mu_s\neq 0$ and $\mu_s(\frac{1}{\Delta t}+\frac{1}{\lambda})\g \frac{1}{4}(\mu_p-1)^2$.
+    Then the problem in \eqref{eq:sumcon} has unique solution  in $X$.
+\end{sa}
+\begin{proof}
+    We will use theorem \ref{sa:LaxMilgram}(\textsc{Lax-Milgram}) to show this theorem. Therefore we have to show $\abs{a(U,\phi)}\le \beta\norm{U}_X\norm{\phi}_X$ for all $U,\phi\in X$ and for $\beta >0$ (continuity) . Secondly we have to show coercivity so $a(U,U)\ge \alpha\norm{U}^2_X$ for all $U\in X$. \par 
+    Let us consider the continuity inequality first. Because $a$ is a bilinear form it is sufficient to show 
+    \begin{equation}
+        a(U,\phi)\le\beta\norm{U}_X\norm{\phi}_X.
+    \end{equation}
+    The bilinear form $a$ is given by
+    \begin{equation}
+        a(U,\phi)=\int U\cdot\phi +\Delta t(\nabla\phi_3(\mu_pU_{1:2}+\mu_s\nabla U_3))+\frac{\Delta t}{\lambda}U_{1:2}\phi_{1:2}-\Delta t\nabla U_3\cdot \phi_{1:2}\D\Omega.
+    \end{equation}
+    By expanding all terms we obtain
+    \begin{equation}
+        a(U,\phi)=\int U\cdot\phi +\Delta t\mu_pU_{1:2}\nabla\phi_3+\Delta t\mu_s\nabla \phi_3\cdot\nabla U_3+\frac{\Delta t}{\lambda}U_{1:2}\phi_{1:2}-\Delta t\nabla U_3\cdot\phi_{1:2}\D\Omega.
+    \end{equation}
+    Using the linearity of the integral and the positivity of a norm, it yields
+    \begin{align}
+        a(U,\phi)&\le \left(1+\frac{\Delta t}{\lambda}\right)\ltnorm{U_{1:2}}\ltnorm{\phi_{1:2}}+\Delta t\mu_p\ltnorm{U_{1:2}}\ltnorm{\phi_{1:2}}\\&+\Delta t\mu_s\ltnorm{\nabla\phi_3}\ltnorm{\nabla U_3}+\ltnorm{U_3}\ltnorm{\phi_3}+\Delta t\ltnorm{\nabla U_3}\ltnorm{\phi_{1:2}}.
+    \end{align}
+    To deal with the constant factors, we introduce 
+    \begin{equation}
+        \beta=2\max\left(1+\frac{\Delta t}{\lambda}, \Delta t\mu_p,\Delta t\mu_s,\Delta t\right).
+    \end{equation}
+    That way we obtain
+    \begin{align}
+        a(U,\phi)&\le \frac{\beta}{2}\big(\ltnorm{U_{1:2}}\ltnorm{\phi_{1:2}}+\ltnorm{U_{1:2}}\ltnorm{\nabla\phi_3}+\ltnorm{U_3}\ltnorm{\phi_3}\\&+\ltnorm{\nabla U_3}\ltnorm{\nabla\phi_3}+\ltnorm{\nabla U_3}\ltnorm{\phi_{1:2}}\big).
+    \end{align}
+    One can observe that the last equation can be interpreted as an inner product of the $\rr^5$. This reinterpretation yields
+    \begin{equation}
+        a(U,\phi)\le \frac{\beta}{2}\left(\begin{pmatrix}
+        \ltnorm{U_{1:2}}\\\ltnorm{U_{1:2}}\\\ltnorm{U_{3}}\\\ltnorm{\nabla U_{3}}\\\ltnorm{\nabla U_{3}}
+        \end{pmatrix}\cdot \begin{pmatrix}
+        \ltnorm{\phi_{1:2}}\\\ltnorm{\nabla\phi_{3}}\\\ltnorm{\phi_{3}}\\\ltnorm{\nabla \phi_{3}}\\\ltnorm{\phi_{1:2}}
+        \end{pmatrix}\right).
+    \end{equation}
+    Using \textsc{Cauchy-Schwarz} (theorem \ref{sa:Schwarz}) we obtain
+    \begin{equation}
+        a(U,\phi)\le\frac{\beta}{2}\bigg(2\ltnorm{U_{1:2}}^2+\ltnorm{U_3}^2+2\ltnorm{\nabla U_3}^2
+        \bigg)^{1/2}\bigg(2\ltnorm{\phi_{1:2}}^2+\ltnorm{\phi_3}^2+2\ltnorm{\nabla \phi_3}^2\bigg)^{1/2}.
+    \end{equation}
+    Because the square root is monotonous we can also write
+    \begin{align}
+        a(U,\phi)&\le\beta\bigg(\ltnorm{U_{1:2}}^2+\ltnorm{U_3}^2+\ltnorm{\nabla U_3}^2
+        \bigg)^{1/2}\bigg(\ltnorm{\phi_{1:2}}^2+\ltnorm{\phi_3}^2+\ltnorm{\nabla \phi_3}^2\bigg)^{1/2}\\&=\beta\norm{U}_X\norm{\phi}_X,
+    \end{align}
+    which is exactly the continuity constraint. 
+    \par The next thing to show is the coercivity. At the beginning will use \textsc{Young's}\footnote{add reference} inequality 
+    \begin{equation}
+        \norm{a}\norm{b}\ge\frac{\gamma}{2}\norm{a}^2+\frac{1}{2\gamma}\norm{b}^2,
+    \end{equation} where $a,b$ are in some normed space and $\gamma\in\rr^+$.
+    Using the \textsc{Cauchy-Schwarz} inequality and taking care regarding the sign of $\mu_p-1$ yields
+    \begin{equation}
+        \Delta t(\mu_p-1)U_{1:2}\cdot \nabla U_3\ge -\Delta t\abs{\mu_p -1}\ltnorm{U_{1:2}}\ltnorm{\nabla U_3}.
+    \end{equation}
+    We can now use the above mentioned \textsc{Young's} inequality to obtain
+    \begin{equation}
+        \Delta t(\mu_p-1)U_{1:2}\cdot \nabla U_3\ge -\Delta t\abs{\mu_p-1}\big(\frac{\gamma}{2}\ltnorm{U_{1:2}}^2+\frac{1}{2\gamma}\ltnorm{\nabla U_3}^2\big),
+    \end{equation}with some $\gamma\in\rr^+$. Plugging this inequality into the formula for $a$ results in
+    \begin{align}
+        a(U,U)&\ge \left(1+\frac{\Delta t}{\lambda}\right)\ltnorm{U_{1:2}}^2+\ltnorm{U_3}^2+\Delta t\mu_s\ltnorm{\nabla U_3}^2\\&-\Delta t\abs{\mu_p-1}\left(\frac{\gamma}{2}\ltnorm{U_{1:2}}+\frac{1}{2\gamma}\ltnorm{\nabla U_3}^2\right).
+    \end{align}
+    If collect the terms with same factors we obtain
+    \begin{equation}
+        a(U,U)\ge \left(1+\frac{\Delta t}{\lambda}-\Delta t\abs{\mu_p-1}\frac{\gamma}{2}\right)\ltnorm{U_{1:2}}^2+\ltnorm{U_3}^2+\left(\Delta t\mu_s-\frac{\Delta t\abs{\mu_p -1}}{2\gamma}\right)\ltnorm{\nabla U_3}^2.
+    \end{equation}
+    We want to choose $\gamma$ such that 
+    \begin{equation}
+        1+\frac{\Delta t}{\lambda}-\Delta t\abs{\mu_p-1}\frac{\gamma}{2}>0 \quad\text{and}\quad\Delta t\mu_s-\frac{\Delta t\abs{\mu_p -1}}{2\gamma}>0.
+    \end{equation}
+    It is also possible to express the conditions on $\gamma$ as
+    \begin{equation}
+        \frac{\abs{\mu_p-1} }{2\mu_s}<\gamma<2\frac{1+\frac{\Delta t}{\lambda}}{\Delta t\abs{\mu_p -1}}.
+    \end{equation}
+    To know if such a $\gamma$ exists we check if
+    \begin{equation}
+       \frac{\abs{\mu_p-1} }{2\mu_s}<2\frac{1+\frac{\Delta t}{\lambda}}{\Delta t\abs{\mu_p -1}}
+    \end{equation}
+    holds. This can also be written as
+    \begin{equation}
+        \mu_s\left(\frac{1}{\Delta t}+\frac{1}{\lambda}\right)>\frac{1}{4}(\mu_p-1)^2.
+    \end{equation}
+    But this is exactly one of the requirements of the theorem. We can define 
+    \begin{equation}
+        \alpha:=\min(1+\frac{\Delta t}{\lambda}-\Delta t\abs{\mu_p-1}\frac{\gamma}{2},1,\Delta t\mu_s-\frac{\Delta t\abs{\mu_p -1}}{2\gamma}).
+    \end{equation}
+    Using the new variable yields
+    \begin{equation}
+        a(U,U)\ge \alpha(\ltnorm{U}^2+\ltnorm{\nabla U_3}^2)=\alpha\norm{U}_X.
+    \end{equation}
+    Continuity and coercitivity implies the statement of the theorem as mentioned at the beginning of the proof.
+\end{proof}
+The condition 
 \begin{equation}
-    \tilde\beta:=\max\left(\Delta t\mu_p,\Delta t\mu_s,\left(1+\frac{\Delta t}{\lambda}\right), (1+\Delta t)\right).
-\end{equation}
-This way we will get rid of the constant factors in the integral. It results
-\begin{align}
-&\le \tilde\beta^2\left(\int \abs{U\cdot\left(\begin{pmatrix}
-\nabla\phi_3\\0
-\end{pmatrix}+\phi\right)+\begin{pmatrix}
-\nabla U_3\\0
-\end{pmatrix}\cdot\left(\begin{pmatrix}
-\nabla\phi_3\\0
-\end{pmatrix}+\phi\right)}\D\Omega\right)^2.
-\end{align}
-Our goal is to rewrite everything in the integral as a big dot product of vectors, which entries should be $U$ and $\nabla U$ or $\phi$ and $\nabla \phi$ respectively. When we apply theorem \ref{sa:Schwarz} (\textsc{Schwarz} inequality) to it, we will get the desired results. So we transform the inequality to read
-\begin{equation}
-    = \tilde\beta^2\left(\int\abs{\begin{pmatrix}
-        U\\ \nabla U_3\\0
-        \end{pmatrix}\cdot\begin{pmatrix}
-        \begin{pmatrix}
-        \nabla\phi_3\\0\end{pmatrix}+\phi
-        \\\begin{pmatrix}
-        \nabla\phi_3\\0\end{pmatrix}+\phi
-        \end{pmatrix}}\D\Omega\right)^2.
-\end{equation}
-Note that the vectors have six entries each so this transformation is well defined. In fact we can further reduce this to
-\begin{equation}
-    =\tilde\beta^2\left(\int\abs{\begin{pmatrix}
-        U\\\nabla U_3\\0\\U\\\nabla U_3\\0
-        \end{pmatrix}\cdot\begin{pmatrix}
-        \nabla\phi_3\\0\\\nabla\phi_3\\0\\\phi\\\phi
-        \end{pmatrix}}\D\Omega\right)^2.
-\end{equation}
-The interested reader can by simply multiplying everything verify that this is in fact exactly the same. Let us apply \ref{sa:Schwarz} to the dot product inside the integral. This variant is also known as \textsc{Cauchy-Schwarz}. This results in 
-\begin{equation}
-   \le\tilde\beta^2\left(\int\abs{\begin{pmatrix}
-       U\\\nabla U_3\\0\\U\\\nabla U_3\\0
-       \end{pmatrix}}\abs{\begin{pmatrix}
-   \nabla\phi_3\\0\\\nabla\phi_3\\0\\\phi\\\phi
-\end{pmatrix}}\D\Omega\right)^2.
-\end{equation} 
-Let us insert the definition of the absolute value of a vector. We then get
-\begin{equation}
-    =\tilde\beta^2\left(\int \sqrt{2\abs{U}^2+2\abs{\nabla U_3}^2}\sqrt{2\abs{\nabla\phi_3}^2+2\abs{\phi}^2}\D\Omega\right)^2.
-\end{equation}
-We can now use \ref{sa:hoelder} with $f$ and $g$ the left and right factors respectively. Note that we can omit the absolute value of the product since both factors are positive. We use $p=q=2$ and therefore obtain
-\begin{equation}
-    \abs{a(U,\phi)}\le\beta\left(\int\abs{U}^2+\abs{\nabla U_3}^2\D\Omega \right)\left(\int\abs{\phi}^2+\abs{\nabla\phi_3}^2\D\Omega\right),
-\end{equation} 
-where we define $\beta=\frac{\tilde\beta^2}{2}$. Now we will rewrite this to show that we indeed have reached our goal
-\begin{align}
-    &=\beta\left(\int\abs{U_1}^2\D\Omega +\int\abs{U_2}^2\D\Omega +\int\abs{U_3}^2+\abs{\nabla U_3}^2\D\Omega \right)\\ &\cdot\left(\int\abs{\phi_1}^2\D\Omega +\int\abs{\phi_2}^2\D\Omega +\int\abs{\phi_3}^2+\abs{\nabla \phi_3}^2\D\Omega \right)\\
-    &=\beta \langle U,U\rangle_X \langle \phi,\phi\rangle_X,
-\end{align} which shows that $a(U,\phi)$ is continuous. What remains to show is that there exists an $\alpha>0$ for that $a(U,U)\ge \alpha\langle U,U\rangle_X$ for all $U$. Let us begin with
-\begin{align}
-    a(U,U)&=\int U\cdot U+U_{1:2}\cdot\left(\Delta t\mu_p\nabla U_3+\frac{\Delta t}{\lambda}U_{1:2}\right)\\
-    &+\nabla U_3\cdot\left(\Delta t\mu_s\nabla U_3 -\Delta tU_{1:2}\right)\D\Omega.
-\end{align}
-The dot product follows the distributive law. This way we can expand the parenthesis. We get
-\begin{equation}
-    =\int\abs{U}^2+\frac{\Delta t}{\lambda}\abs{U_{1:2}}^2+\Delta t\mu_p U_{1:2}\cdot\nabla U_3
-    +\Delta t\mu_s\abs{\nabla U_3}^2-\Delta t\nabla U_3\cdot U_{1:2}\D\Omega.
-\end{equation} 
-We need $\abs{\nabla U_3}^2$ without a coefficient and the other terms need to be greater than 0. This way we can just leave them out. For this we add $(+1-1+\Delta t\mu_s -\Delta t\mu_s)\abs{\nabla U_3}^2=0$ to the equation. This results in 
-\begin{equation}
-     =\int\abs{U}^2+\abs{\nabla U_3}^2+\frac{\Delta t}{\lambda}\abs{U_{1:2}}^2+(\Delta t\mu_p-\Delta t) U_{1:2}\cdot\nabla U_3
-    +(\Delta t\mu_s-1)\abs{\nabla U_3}^2\D\Omega,
-\end{equation} 
-where we used the symmetry of the inner product. As a preparation, we factor out $\frac{\Delta t}{\lambda}$ as follows 
-\begin{equation}
-    =\int\abs{U}^2+\abs{\nabla U_3}^2+\frac{\Delta t}{\lambda}\left(\abs{U_{1:2}}^2+(\lambda\mu_p-\lambda)U_{1:2}\cdot\nabla U_3+(\lambda\mu_s-\frac{\lambda}{\Delta t})\abs{\nabla U_3}^2 \right)\D\Omega.\label{eq:ref1}
-\end{equation}
-Because for any dot product it holds that
-\begin{equation}
-    \langle a+b,a+b\rangle=\langle a,a\rangle+2\langle a,b\rangle + \langle b,b\rangle,
-\end{equation}
-we can observe that the part in parenthesis of \eqref{eq:ref1} looks like the right hand side of the equation above. However, there are some constant factors in \eqref{eq:ref1} that need to be dealt with. We define $\beta:=\min\{\sqrt{(\mu_s-\frac{1}{\Delta t})\lambda},\frac{\lambda\mu_p-\lambda}{2}\}$. Plugging this into \eqref{eq:ref1} yields
-\begin{equation}
-    a(U,U)\ge \int\abs{U}^2+\abs{\nabla U_3}^2+\frac{\Delta t}{\lambda}\abs{U_{1:2}+\beta\nabla U_3}^2\D\Omega.
-\end{equation}
-Because $\frac{\Delta t}{\lambda}$ and the absolute value are positive we obtain
-\begin{equation}
-    a(U,U)\ge\int\abs{U}^2+\abs{\nabla U_3}^2\D\Omega =\norm{U}_{X}^2.
-\end{equation}
-Because $U$ was arbitrary, this deduction holds $\forall U\in X(\Omega)$. This shows the existence and uniqueness of the solution for our problem with \textsc{Lax-Milgram}.
+\mu_s\left(\frac{1}{\Delta t}+\frac{1}{\lambda}\right)>\frac{1}{4}(\mu_p-1)^2.
+\end{equation} needs some discussion. Does it not impose a strong restriction? Consider a given set of $\lambda,\mu_s$ and $\mu_p$. We can always find a $\Delta t$ small enough that the inequality holds. To put it in terms of numerics, we find that we can only guarantee the existence and uniqueness of the solution if the time step size is small enough. Such a constraint reminds one of the \textsc{CFL} condition \footnote{reference?}for Finite Volume schemes. 
 \section{Numerical results}
 Now we have everything we need to put our equations into a simulation. We will first introduce the framework, which handled all the calculations performed for this work. After that we will show convergence and discuss some test cases and limitations of this approach.
 \subsection{Software}
-All simulations conducted for this work used the FEniCS framework (\cite{AlnaesBlechta2015a}, \cite{LoggMardalEtAl2012a}). Other components of this project are the C++ backend DOLFIN (\cite{LoggWells2010a}, \cite{LoggWellsEtAl2012a}), the compiler for the variational form FFC (\cite{KirbyLogg2006a}, \cite{LoggOlgaardEtAl2012a}, \cite{OlgaardWells2010b}), the language definition for variational forms UFL(\cite{AlnaesEtAl2012}, \cite{Alnaes2012a}) and the corresponding code generator UFC (\cite{AlnaesLoggEtAl2009a}, \cite{AlnaesLoggEtAl2012a}).
+Most of the simulations conducted for this work used the FEniCS framework (\cite{AlnaesBlechta2015a}, \cite{LoggMardalEtAl2012a}). Other components of this project are the C++ backend DOLFIN (\cite{LoggWells2010a}, \cite{LoggWellsEtAl2012a}), the compiler for the variational form FFC (\cite{KirbyLogg2006a}, \cite{LoggOlgaardEtAl2012a}, \cite{OlgaardWells2010b}), the language definition for variational forms UFL(\cite{AlnaesEtAl2012}, \cite{Alnaes2012a}) and the corresponding code generator UFC (\cite{AlnaesLoggEtAl2009a}, \cite{AlnaesLoggEtAl2012a}).
 \par 
 The advantages of using a framework at all are obvious. The less time one spends coding, the more one can assign to theoretical tasks. Another nice property is that the whole debugging process is shortened by a large bit. The software is also throughly tested so bugs are much less frequent. Literature on how to get started with FEniCS is easy to find. A nice tutorial is given by the founders of FEniCS in  \cite{Langtangen2017a}. The code, that has been written for this work, can be found in the appendix and on the CD, which accompanies this.
 \subsection{Simulation cases}
@@ -1359,20 +1361,103 @@ But because the second integral lies completely within $[u_n,u_{n+1}]$ we get
 \begin{align}
     I_{2,2}&=\int_{u_{n-l*+1}}^{w^{n+1}_{n+1-j*}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v \\&+\tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\int_{w^{n+1}_{n+1-j*-i}}^{w^{n+1}_{n+1-j*-i-1}}f'(v)\tilde{\phi}(F(u_{n+1},v))\D v.
 \end{align}
-But be wanted that $\tilde\phi$ is constant on each interval. Therefore we want $\tilde\phi(F(u_{n+1},v))$ to be $\tilde\phi(u_{n+1-j*-i-1})$. We then get
+But be wanted that $\tilde\phi$ is constant on each interval. Therefore we want $\tilde\phi(F(u_{n+1},v))$ to be $\tilde\phi(u_{n+1-j*-i})$. We then get
 \begin{align}
-I_{2,2}&=\int_{u_{n-l*+1}}^{w^{n+1}_{n+1-j*}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v \\&+\tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\tilde\phi(u_{n+1-j*-i-1})[f(w^{n+1}_{n+1-j*-i-1})-f(w_{n+1-j*-i}^{n+1})]
+I_{2,2}&=\int_{u_{n-l*+1}}^{w^{n+1}_{n+1-j*}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v \\&+\tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\tilde\phi(u_{n+1-j*-i})[f(w^{n+1}_{n+1-j*-i-1})-f(w_{n+1-j*-i}^{n+1})]
 \end{align}
-If recall the definition of $w$ we can simplify the expression to
+If we recall the definition of $w$ we can simplify the expression to
 \begin{align}
-I_{2,2}&=\int_{u_{n-l*+1}}^{w^{n+1}_{n+1-j*}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v \\&+\tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\tilde\phi(u_{n+1-j*-i-1})[f(u_{n+1-j*-i})-f(u_{n+1-j*-i-1})].
+I_{2,2}&=\int_{u_{n-l*+1}}^{w^{n+1}_{n+1-j*}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v \\&+\tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\tilde\phi(u_{n+1-j*-i})[f(u_{n+1-j*-i})-f(u_{n+1-j*-i-1})].
 \end{align}
 By reordering the sum we obtain
 \begin{equation}
     I_{2,2}=\int_{u_{n-l*+1}}^{w^{n+1}_{n+1-j*}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v +
-    \tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\tilde\phi(u_{i-1})[f(u_i)-f(u_{i-1})].
+    \tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\tilde\phi(u_{i})[f(u_i)-f(u_{i-1})].
 \end{equation}
-So what remains of the integral is the part, where the two discretizations overlap. 
+We can directly identify how the integral over the interval $[u_{n+1-l*},w^{n+1}_{n}]$ should be calculated. We obtain 
+\begin{equation}
+    \int_{u_{n-l*+1}}^{w^{n+1}_n}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v = \tilde\phi(u_{n+1})\tilde{m}(u_{n-l*+2})[f(w^{n+1}_n)-f(u_{n-l*+1})].
+\end{equation}
+But it holds
+\begin{equation}
+    f(w^{n+1}_n)=f(u_{n+1})-f(u_n).
+\end{equation}
+So it yields
+\begin{align}
+     \int_{u_{n-l*+1}}^{w^{n+1}_n}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v = \tilde\phi(u_{n+1})\tilde{m}(u_{n-l*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l*+1})].
+\end{align}
+So what remains of the integral is the part, where the two discretizations overlap. We also have to discuss how we can eliminate the sorting process from the main loop as this would result in $\mathcal{O}(n^2\log(n))$ effort. We know that after calculating $l*$ time steps we have the first appearance of a $w$ which is larger than $u_0$ and therefore needs consideration. But this is independent of $n$ and can be calculated in advance as a result. The part of $w$ which overlaps is exactly the part that is not entirely in the interval $[u_n,u_{n+1}]$. So it is given by
+\begin{equation}
+    w^{l*}_{l*-i},\quad\forall i=1,\dotsc,j*.
+\end{equation}
+Because the $u_i$ are equally spaced, we know that
+\begin{equation}
+    u_{n+1}=u_{l*}+u_{n+1-l*}.
+\end{equation}
+We can therefore in the loop just add $u_{n+1-l*}$ and obtain the current position of these $w$s. For each $n$ we know that the points $u_{n+1-l*},\dotsc,u_n$ overlap. By applying the shift backwards we find that the $w$ as above overlap with 
+\begin{equation}
+    u_i,\quad\forall i=0,l*-1.
+\end{equation}
+This way we can define the overlapping points 
+\begin{equation}
+    \tilde{u}= \bigcup\left(\bigcup_{i=0}^{l*-1}u_i\bigcup_{j=1}^{j*}w^{l*}_{l*-j}\right).
+\end{equation}
+We can sort these in preprocessing. If we keep the permutation array that resulted during the sorting process, we can later recall, from which discretization the point came. We introduce two new variables
+\begin{equation}
+    q_i:=\abs{\{u_j\colon u_j\in\tilde{u} \text{ and }u_j\le\tilde{u_i} \}},\quad
+    y_i:=\abs{\{w^{l*}_j\colon w^{l*}_j\in\tilde{u} \text{ and }w^{l*}_j\le\tilde{u_i} \}}.
+\end{equation}
+Now we gathered all the information we need in preprocessing, we can get back to $I_{2,2}$. With the new defined variables inserted we obtain
+\begin{align}
+    I_{2,2}&= \sum_{i=1}^{l*+j*}\tilde{m}(u_{n+2-l*+q_{i-1}})\tilde{\phi}(u_{n+1-y_{i-1}})[f(u_{n+1-l*}+\tilde{u_i})-f(u_{n+1-l*}+\tilde{u}_{i-1})]\\&+\tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\tilde\phi(u_{i-1})[f(u_i)-f(u_{i-1})] \\&+ \tilde\phi(u_{n+1})\tilde{m}(u_{n-l*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l*+1})].
+\end{align}
+Every term of \eqref{eq:phitilde} has been discretized. The whole discretization is obtained by calculating
+\begin{equation}
+    \tilde\phi(u_{n+1})=\tilde\phi(-\infty) + I_1 -I_2 +I_3.
+\end{equation}
+This computation yields
+\begin{align}
+    \tilde\phi(u_{n+1})&=\tilde\phi(-\infty) +\tilde\phi(-\infty)[S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]]\label{eq:discphit1}\\&-M(n)\label{eq:discphit2} -\tilde\phi(u_{n+1})[f(u_{n+1})-f(u_{n})]  -\tilde{\phi}(u_{n+1})\sum_{i=0}^{n+1-l*}\tilde{m}(u_i)[f(u_i)-f(u_{i-1})]\\&- \tilde\phi(u_{n+1})\tilde{m}(u_{n-l*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l*+1})] \\&\label{eq:discphit3}-\sum_{i=1}^{l*+j*}\tilde{m}(u_{n+2-l*+q_{i-1}})\tilde{\phi}(u_{n+1-y_{i-1}})[f(u_{n+1-l*}+\tilde{u_i})-f(u_{n+1-l*}+\tilde{u}_{i-1})]\\&\label{eq:discphit4}-\tilde{m}(u_{n+1})\sum_{i=0}^{n+1-j*}\tilde\phi(u_{i-1})[f(u_i)-f(u_{i-1})],
+\end{align}
+where we have
+\begin{equation}
+    S(n+1) = S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]
+\end{equation}
+and 
+\begin{equation}
+    M(n+1) = M(n) + \tilde\phi(u_{n+1})[f(u_{n+1})-f(u_{n})].
+\end{equation}
+As initial condition we set $S(-1)=M(-1)=0$. However due to the sums in \eqref{eq:discphit2} and \eqref{eq:discphit4}, we still have quadratic effort. But this can be avoided by introducing 
+\begin{equation}
+    O(n):=\sum_{i=0}^{n+1-l*}\tilde{m}(u_i)[f(u_i)-f(u_{i-1})]
+\end{equation}
+and 
+\begin{equation}
+    Q(n):=\sum_{i=0}^{n+1-j*}\tilde\phi(u_{i})[f(u_i)-f(u_{i-1})]
+\end{equation}
+with the update rules
+\begin{equation}
+O(n+1) = O(n)+\tilde{m}(u_{n+2-l*})[f(u_{n+2-l*})-f(u_{n+1-l*})]
+\end{equation}
+and 
+\begin{equation}
+Q(n+1) = Q(n) + \tilde\phi(u_{n+2-j*})[f(u_{n+2-j*})-f(u_{n+1-j*})].
+\end{equation}
+The variables $O$ and $Q$ are well defined because $l*$ and $j*$ are at least 1. 
+We set 
+\begin{equation}
+    O(n)= \tilde{m}(-\infty)[f(u_0+(n+2-l^*)h)-f(u_0+(n+1-l^*)h]
+\end{equation}
+and 
+\begin{equation}
+Q(n)= \tilde{\phi}(-\infty)[f(u_0+(n+2-j^*)h)-f(u_0+(n+1-j^*)h)]
+\end{equation}
+for $n<l^*-1$ and $n<j*-1$ respectively.
+Putting $O$ and $Q$ into \eqref{eq:discphit1} to \eqref{eq:discphit4} yields
+\begin{align}
+    \tilde\phi(u_{n+1})&=\tilde\phi(-\infty) +\tilde\phi(-\infty)[S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]]\\&-M(n) -\tilde\phi(u_{n+1})[f(u_{n+1})-f(u_{n})] -\tilde{\phi}(u_{n+1})O(n)-\tilde{m}(u_{n+1})Q(n)\\&-\tilde\phi(u_{n+1})\tilde{m}(u_{n-l*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l*+1})] \\&-\sum_{i=1}^{l*+j*}\tilde{m}(u_{n+2-l*+q_{i-1}})\tilde{\phi}(u_{n+1-y_{i-1}})[f(u_{n+1-l*}+\tilde{u_i})-f(u_{n+1-l*}+\tilde{u}_{i-1})].
+\end{align}
+One can observe that $l^*=1$ is a special case because then we obtain a cubic problem in $\tilde\phi$. Otherwise the problem becomes quadratic. In the code this problem will be solved using \textsc{Newton's} method.
 \chapter{Conclusion}
 
 \addcontentsline{toc}{chapter}{List of figures}
