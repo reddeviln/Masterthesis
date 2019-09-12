@@ -38,7 +38,7 @@ for n in range(1,numsteps+1):
 
 
 pyplot.plot(tarray,phiarray)
-pyplot.plot(deltat*np.arange(20001),phiarray1)
+pyplot.plot(deltat*np.arange(5001),phiarray1)
 pyplot.title("Approximations of $\phi$")
 pyplot.xlabel("t")
 pyplot.legend(["$\phi$ using new algorithm","$\phi$ using $\mathcal{O}(n^2)$ algorithm"])
