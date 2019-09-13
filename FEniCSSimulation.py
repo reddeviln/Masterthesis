@@ -83,52 +83,58 @@ class FEniCSSimulation:
     def form_variational_problem_full2D(self, Lambda, residualon, dt):
         """define the variational problem for the equations with stress tensor"""
         t = 0
-        Lambda = Constant(Lambda)
-        self.U = TrialFunction(self.V[0])
-        C1, C2, u = split(self.U)
-        CV1, CV2, v = TestFunctions(self.V[0])
-        un1, un2, un3 = split(self.u_n)
+        if len(Lambda) ==1 :
+            Lambda = Constant(Lambda)
+            self.U = TrialFunction(self.V[0])
+            C1, C2, u = split(self.U)
+            CV1, CV2, v = TestFunctions(self.V[0])
+            un1, un2, un3 = split(self.u_n)
 
-        if residualon == 1:
-            self.F = u * v * dx - un3 * v * dx + dt*(self.gradP * v * dx + self.residual(t, Lambda, CV1, CV2, v) \
-                + dot(self.mup*as_vector([C1, C2]), grad(v)) * dx\
-                + Constant(self.mu) * dot(grad(u), grad(v)) * dx) \
-                + (C1 - un1 + dt / Lambda * C1) * CV1 * dx\
-                + (C2 - un2 + dt / Lambda * C2) * CV2 * dx \
-                - dt * dot(grad(u), as_vector([CV1, CV2])) * dx
-        elif residualon == 0:
-            self.F = u * v * dx - un3 * v * dx + dt * (self.gradP * v * dx \
-                     + dot(self.mup * as_vector([C1, C2]), grad(v)) * dx \
-                     + Constant(self.mu) * dot(grad(u), grad(v)) * dx) \
-                     + (C1 - un1 + dt / Lambda * C1) * CV1 * dx \
-                     + (C2 - un2 + dt / Lambda * C2) * CV2 * dx \
-                     - dt * (u.dx(0) * CV1 * dx \
-                     + u.dx(1) * CV2 * dx)
+            if residualon == 1:
+                self.F = u * v * dx - un3 * v * dx + dt*(self.gradP * v * dx + self.residual(t, Lambda, CV1, CV2, v)*dx\
+                    + dot(self.mup*as_vector([C1, C2]), grad(v)) * dx\
+                    + Constant(self.mu) * dot(grad(u), grad(v)) * dx) \
+                    + (C1 - un1 + dt / Lambda * C1) * CV1 * dx\
+                    + (C2 - un2 + dt / Lambda * C2) * CV2 * dx \
+                    - dt * dot(grad(u), as_vector([CV1, CV2])) * dx
+            elif residualon == 0:
+                self.F = u * v * dx - un3 * v * dx + dt * (self.gradP * v * dx \
+                         + dot(self.mup * as_vector([C1, C2]), grad(v)) * dx \
+                         + Constant(self.mu) * dot(grad(u), grad(v)) * dx) \
+                         + (C1 - un1 + dt / Lambda * C1) * CV1 * dx \
+                         + (C2 - un2 + dt / Lambda * C2) * CV2 * dx \
+                         - dt * (u.dx(0) * CV1 * dx \
+                         + u.dx(1) * CV2 * dx)
+            else:
+                raise ValueError('residualon needs to be 0 or 1 but it was ', residualon)
         else:
-            raise ValueError('residualon needs to be 0 or 1 but it was ', residualon)
-
-
-
-    def form_variational_problem_UCM_DG(self, Lambda):
-        """define the variational problem for UCM with DG for stability"""
-
-        dt = Constant(0.1)
-        self.n =FacetNormal(self.mesh)
-        self.U =TrialFunction(self.V[0])
-        self.C1, self.C2, self.u = split(self.U)
-        self.phi = TestFunction(self.V[0])
-        self.CV1, self.CV2, self.v = split(self.phi)
-        un1, un2 , un3 = split(self.u_n)
-        Flux = as_tensor([[- self.mup * self.C1, -self.mup * self.C2], [-1/Lambda * self.u, 0], [0, -1/Lambda * self.u]])
-        jumpu = as_tensor([jump(self.U), jump(self.U)])
-        ubnd  = as_tensor([self.U, self.U])
-        numFlux = avg(Flux) - sqrt(self.mup) / ( 2 * sqrt(Lambda)) * jumpu.T
-        numFluxbnd = Flux - sqrt(self.mup) / (2 * sqrt(Lambda)) * ubnd.T
-        self.F = dot(self.U, self.phi) * dx - dot(self.u_n, self.phi) * dx + dt * (-inner(Flux, grad(self.phi)) * dx
-                + (self.gradP * self.v + 1 / Lambda * (self.C1) * self.CV1 + 1 / Lambda * (self.C2) * self.CV2) * dx
-                + dot(numFlux[0,:], jump(self.v, self.n)) * dS +  dot(numFlux[1,:], jump(self.CV1, self.n)) * dS
-                + dot(numFlux[2,:], jump(self.CV2, self.n)) * dS + dot(numFluxbnd[0,:], self.v * self.n) * ds
-                + dot(numFluxbnd[1,:], self.CV1 * self.n) * ds + dot(numFluxbnd[2,:], self.CV2 * self.n) * ds)
+            numRel=len(Lambda)
+            self.U = TrialFunction(self.V[0])
+            variables = split(self.U)
+            u = variables[-1]
+            testvar = TestFunctions(self.V[0])
+            v = testvar[-1]
+            previous = split(self.u_n)
+            if residualon == 1:
+                self.F = u * v * dx - previous[-1] * v * dx + dt*self.gradP * v * dx + dt * Constant(self.mu) * dot(grad(u), grad(v)) * dx
+                for C1 in variables[0:numRel]:
+                    i = variables.index(C1)
+                    self.F += dt*self.residual(t, Lambda[i], testvar[i], testvar[i+numRel], v)*dx
+                    self.F += dt*dot(self.mup*as_vector([C1, variables[i+numRel]]), grad(v)) * dx
+                    self.F += (C1 - previous[i] + dt / Lambda[i] * C1) * testvar[i] * dx
+                    self.F += (variables[i+numRel] - previous[i+numRel] + dt / Lambda[i] * variables[i+numRel]) * testvar[i] * dx
+                    self.F += - dt * dot(grad(u), as_vector([testvar[i], testvar[i+numRel]])) * dx
+            elif residualon == 0:
+                self.F = u * v * dx - previous[-1] * v * dx + dt * self.gradP * v * dx + dt * Constant(self.mu) * dot(
+                    grad(u), grad(v)) * dx
+                for C1 in variables[0:numRel]:
+                    i = variables.index(C1)
+                    self.F += dt * dot(self.mup * as_vector([C1, variables[i + numRel]]), grad(v)) * dx
+                    self.F += (C1 - previous[i] + dt / Lambda[i] * C1) * testvar[i] * dx
+                    self.F += (variables[i + numRel] - previous[i+numRel] + dt / Lambda[i] * variables[i + numRel]) * testvar[i+numRel] * dx
+                    self.F += - dt * dot(grad(u), as_vector([testvar[i], testvar[i + numRel]])) * dx
+            else:
+                raise ValueError('residualon needs to be 0 or 1 but it was ', residualon)
 
     def run_simulation(self, T_end, num_steps,filename):
         """runs the actual simulation"""
@@ -160,7 +166,7 @@ class FEniCSSimulation:
         L = rhs(self.F)
         A = assemble(a)
         U.assign(self.u_n)
-        vtkfile << (U.sub(2), t)
+        vtkfile << (U.sub(4), t)
         [bcu.apply(A) for bcu in self.bc]
         for n in range(num_steps):
             t += dt
@@ -169,7 +175,7 @@ class FEniCSSimulation:
             solve(A, U.vector(), b)
             print("time: ",t)
             if n % 10 == 0:
-                vtkfile << (U.sub(2), t)
+                vtkfile << (U.sub(4), t)
             self.u_n.assign(U)
         self.result = U
 
