@@ -565,20 +565,7 @@ Until now, our work was in no way specific to the problem, which we want to solv
 Many books have been written about the \textsc{Navier-Stokes} equations. We will use some ideas from \cite{Lukaszewicz2016} and \cite{White2006} to outline the main facts. Just the incompressible variant of the equations will be considered and the density is normalized to one and therefore will be omitted.
 \subsection{Basics of fluid dynamics}
 To understand fluid dynamics one must consider two coordinate systems. At first, there is the usual fixed \textsc{Eulerian} coordinate system (spatial coordinates) that is stationary. Secondly, there is the \textsc{Lagrangian} coordinate system (material coordinates) that follows one particle in the flow. 
-\begin{defn}
-    Let the position of some particle in the fluid be denoted in the \textsc{Eulerian} grid. At time $t=0$ it occupies position $X$. Suppose that $x$ is the position of the said particle at a finite time $t$. This new position is then a function of its position at $t=0$ and time. So we introduce
-    \begin{equation}
-        x=x(X,t).
-    \end{equation}
-\end{defn}
-We want this transformation to be continuous and invertible with the inverse $X=X(x,t)$, with $X$ and $x$ sufficiently smooth functions. 
-\begin{defn}
-    For a function $x$ as above we define the \textsc{Jacobian} as
-    \begin{equation}
-        J(X,t)= \det\left(\frac{\partial x_i}{\partial X_j}\right).
-    \end{equation}
-\end{defn}
-The \textsc{Jacobian} is finite and positive with the assumptions that $x$ is invertible and sufficiently smooth. We use $u$ for the velocity, $p$ for the pressure with their normal physical interpretations.
+We use $u$ for the velocity, $p$ for the pressure with their normal physical interpretations.
 \begin{defn}[material derivative]
     If we want to take the derivative of a quantity $f(x,t)$ in the fluid flow direction we get the \emph{material derivative}, which is given by 
     \begin{equation}
