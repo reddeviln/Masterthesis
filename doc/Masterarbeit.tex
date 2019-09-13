@@ -21,6 +21,7 @@
 \usepackage[german]{fancyref}
 \usepackage{listings}
 \usepackage{color}
+\usepackage{pdfpages}
 \definecolor{mygreen}{RGB}{28,172,0} % Define colour
 \definecolor{mylilas}{RGB}{170,55,241}
 \usepackage{graphicx} % Graphiken und Bilder können eingebunden werden
@@ -134,7 +135,7 @@
 \HRule \\[1cm]
 \textsc{\Large Master's thesis}\\[2mm]
 \textsc{\today}\\[10mm]
-\textsc{in cooperation with the German Aerospace Center}\\[1.0cm]
+\textsc{in cooperation with the German Aerospace Center (SC-HPC)}\\[1.0cm]
 \includegraphics[width=0.45\textwidth]{DLR-Logo-full}\\[1.0cm]
 
 
@@ -154,10 +155,9 @@
   
 
 \chapter*{Danksagung}
-\lipsum[1]
-%Ich möchte mich bei Herrn Professor Gassner und seiner Arbeitsgruppe ganz herzlich für die kompetente und umfangreiche Betreuung bedanken. Insbesondere bei Herrn Lucas Friedrich für sein außerordentliches Engagement, das weit über Sprechstundenzeiten hinaus ging. 
-%\par Zusätzlich bedanke ich mich noch bei meiner Familie, meinen Freunden und Kommilitonen und meiner Freundin für ihre Geduld und ihr Verständnis.
-%\\[1cm]
+Als Erstes möchte ich mich bei Herrn Professor Gassner für die gute Betreuung und die Flexibilität bedanken, dass ich in Kooperation mit dem Deutschen Zentrum für Luft- und Raumfahrt meine Masterarbeit anfertigen konnte. Darüber hinaus gilt mein Dank Herrn Dr. Basermann für Möglichkeit der Beschäftigung in der Abteilung High-Performance Computing (SC-HPC). Genau dieser Abteilung möchte ich vom ganzen Herzen für die tolle kollegiale Zusammenarbeit schon vor Beginn meiner Masterarbeit und die vielfältige Unterstützung bedanken. Insbesondere Herrn Dr. Kontak und Herrn Dr. Knechtges gilt meine große Wertschätzung für die viele Zeit, das Engagement und die große fachliche und menschliche Unterstützung in dieser Zeit. Natürlich möchte ich mich in diesem Zuge auch bei Herrn Professor Sperl für die Beschäftigung in der zweiten Hälfte meiner Masterarbeit und die Bereitstellung des Themas bedanken. \par
+Zusätzlich bedanke ich mich noch bei meiner Familie, meinen Freunden und Kommilitonen und meiner Freundin für ihre Geduld und ihr Verständnis.
+\\[1cm]
 Köln, \today 
 \\[1cm]
 Nils Dornbusch
@@ -166,9 +166,14 @@ Nils Dornbusch
 \tableofcontents
 \newpage
 \chapter{Introduction}
-\lipsum[1]
-%This work aims to provides an analysis of the Integro-Differential-equations which occur when modeling the behaviour of non-Newtonian fluids. The motivation arises in Physics when studying for example liquid glass or granule. This is often needed in space applications. I will reference the relevant physical phenomena which the interested reader can follow to learn more about as this is not the main focus of this work.\\
-%The main focus will actually lie in the numerical challenges, which the equations present. We will also touch upon issues regarding the implementation.
+This work aims to provides an analysis of the Integro-Differential-equations which occur while modeling the behavior of non-\textsc{Newtonian} fluids. The motivation arises in Physics when studying for example liquid glass or granular flow. This is often needed in space applications. This work should be seen as a first step in studying these governing equations. The long term goal is to develop a method to simulate an arbitrary non-\textsc{Newtonian} fluid in three spatial dimensions. Such a method does not exist as of now. An approach taken in \cite{Hulsen2001} and \cite{Hulsen2018} is the deformation fields method, which we will follow in part. However, not the whole method is suited for our needs. This is due to the fact that this method would result in the calculation of an integral each timestep even if the timesteps are chosen carefully. What is even worse is that the more timesteps one calculates the more expensive the integral becomes. As the full system of equations is five-dimensional, one can imagine that this is not efficient for a reasonable number of degrees of freedom. This works aims to provide a possibility to reduce the calculation effort. However, as this is a master's thesis only a reduced three-dimensional system will be considered. To achieve this reduction, sensible assumptions will be taken.
+\\
+\par 
+The goal is that every reader that is proficient in Mathematics on a master's level is able to follow the arguments given in this work. To achieve this, some basic mathematical facts will be given in the beginning of this work. We will also introduce some notation that will be used. The second chapter will deal with the Physics behind the governing equation. As this is a mathematical work most of the time we will only discuss ideas rather then discussing the whole physical theory. After that we will reduce the system of equations from three to two spatial dimensions. The elimination of a second time variable will take place in chapter 4, where we will use the \textsc{Laplace} transform. The following chapter will deal with all aspects of numerics. At first we will discretize the continuous equations from chapter 4 in space and time. After we have built the numerical scheme we will study the convergence and other properties of the algorithm. Some aspects regarding the implementation will also be discussed.\\
+\par
+The next chapter will take a look at a different equation. It can be found in \cite{Goetze1995}. As it turns out we can only deduce a better algorithm under the assumptions we took to reduce the five-dimensional system of equations. The equation from \cite{Goetze1995} is easier in the sense that is does not have a spatial component or multiple variables but it is as complex as the full system regarding the calculation of the integral. Therefore it is much easier to study the simpler equation and try out different ideas, which can then be transfered back to the original problem. This will we done in chapter 5. 
+In the end we will conclude all results and give an outlook on what could be next sensible points to consider.\\
+\par
 %\par 
 %The biggest problem when trying to implement these equation lies in the Integral over older timesteps and the appearence of another time dimension, which we call the \enquote{age dimension}. But more on that later on.\\
 %We will take the following steps to study said equations:
@@ -187,8 +192,24 @@ In this chapter, various definitions and theorems are presented, which will be u
 \section{Basics and notation}
 In the beginning, we will quickly state basic mathematical facts and introduce some notation, which we will use throughout this work. Most of this should be self-explanatory.
 \begin{notation}
-    We will use $\nn$ as the natural numbers starting from 1, $\nn_0$ represent the natural numbers starting from 0. $\rr,\cc,\qq$ denote the real, complex and rational numbers. With $\kk$ we denote a field, which can be $\rr$ or $\cc$. . $\rr^+_0$ shall denote $[0,\infty)$.
+    We will use $\nn$ as the natural numbers starting from 1, $\nn_0$ represent the natural numbers starting from 0. $\rr,\cc,\qq$ denote the real, complex and rational numbers. With $\kk$ we denote a field, which can be $\rr$ or $\cc$. $\rr^+_0$ shall denote $[0,\infty)$.
 \end{notation} 
+\begin{defn}[Essential supremum]
+    Let $X\subset\rr^n$ for $n\in\nn$ and $f\colon X\to \rr$ be a function. 
+    We call 
+    \begin{equation}
+        \esssup_{x\in X}f(x):=a\in\rr\quad\text{where}\quad f(x)\le a\quad\text{almost everywhere}
+    \end{equation}
+    the essential supermum of $f$. We allow $f(x)>a$ for $x\in N\subset X$, where $N$ denotes a set of zero measure.
+\end{defn}
+\begin{notation}
+    We use $\nabla f$ to denote the spatial gradient of $f$. For the \textsc{Laplacian} operator we use the standard symbol $\Delta$. 
+\end{notation}
+\begin{notation}[Multi-index notation]
+    To generalize the idea of an integer index, we will consider $\alpha=(a_1,\dotsc,a_n)$, where $a_i\in\nn_0$ for all $i=1,\dotsc,n$. We call $\alpha$ a multi-index. We define $\abs{\alpha}=\sum_{i=1}^na_i$. Later on $\sum_{\abs{\alpha}\le n}$ will appear for a fixed $n\in\nn$. By this we denote the sum over all possible $\alpha$. We will also encounter $D^\alpha$, where $D$ is the standard differential operator. We define \begin{equation}
+        D^\alpha=\frac{\partial^{\abs{\alpha}}}{\partial x_1^{a_1}\dotsb\partial x_n^{a_n}}.
+    \end{equation}
+\end{notation}
 \section{Functional analysis}
 \label{sec:funcana}
 Here, we cover some basics of functional analysis that are necessary for this work and especially the finite element method. We will follow \cite{Ganesan2017} for this.
@@ -539,7 +560,7 @@ We can give a relationship between the \textsc{Laplace} and \textsc{Fourier} tra
 In this chapter, we gathered all the important general mathematical background information, which we will use heavily from now on. 
 \chapter{Modeling}
 \label{ch:model}
-Until now, our work was in no way specific to the problem, which we want to solve. In this chapter, we will be more specific. For this, we will give a (short) introduction into the physics behind non-\textsc{Newtonian} fluids. The introduction for this will, however, be intentionally vague as this work is more focused on mathematics then the physics behind it. After that, we will use some assumptions to make the problem accessible for a master's thesis.
+Until now, our work was in no way specific to the problem, which we want to solve. In this chapter, we will be more specific. For this, we will give a (short) introduction into the macroscopic modeling of  non-\textsc{Newtonian} fluids. The introduction for this will, however, be intentionally vague as this work is more focused on mathematical than the physical aspects. After that, we will use some assumptions to make the problem accessible for a master's thesis.
 \section{\textsc{Navier-Stokes} Equation}
 Many books have been written about the \textsc{Navier-Stokes} equations. We will use some ideas from \cite{Lukaszewicz2016} and \cite{White2006} to outline the main facts. Just the incompressible variant of the equations will be considered and the density is normalized to one and therefore will be omitted.
 \subsection{Basics of fluid dynamics}
@@ -631,42 +652,44 @@ where $p$ is the pressure and $I$ the corresponding identity matrix. Plugging th
     \partial_t u + u\cdot \nabla u = -\nabla p + f + \nabla\cdot\sigma.
 \end{equation}
 Note that this equation is not complete. One has to give a model for the so-called stress tensor $\sigma$ and for the pressure $p$. This however, is very fluid dependent. The next section will deal with the derivation of such models for $\sigma,p$ for non-\textsc{Newtonian} fluids.
-\section{\textsc{Maxwell/Oldroyd-B} model}
+\section{Non-\textsc{Newtonian} fluids}
 \label{sec:physics}
 
 Before we start discussing the two related models used to model the stress tensor, we will give a short introduction into non-\textsc{Newtonian} fluids. A nice general introduction is given in \cite{Ouellette2013}.
 \subsection{What is a non-\textsc{Newtonian} fluid and why is it relevant?}
 Generally speaking, a non-\textsc{Newtonian} fluid differs from a \textsc{Newton} fluid in the behavior of the viscosity. \textsc{Newton} formulated several laws, which an ideal fluid should obey. One of them was that the viscosity should be independent of the stress that the fluid encounters. All fluids, which obey this law, are called \textsc{Newtonian} fluids and the others are called non-\textsc{Newtonian}. Non-\textsc{Newtonian} fluids are far more spread as one would imagine: from ketchup to honey and toothpaste to the famous water-cornstarch mixture that jumps on loudspeakers; these types of fluids are everywhere. Even granular movement in space and liquid plastic in 3D printers behaves that way. So there are plenty of reasons to care about the difficult task of modeling these fluids. \par 
 There are many different types of non-\textsc{Newtonian} behavior. Ketchup for example has a so called \emph{pseudoplastic} behavior, that means that the viscosity decreases with increased stress. In this work we will cover the fluids that have the so-called \emph{viscoelastic} behavior. That means that elastic and viscous effects are working together as a linear combination. Liquid plastic and granular flows often show this type of non-\textsc{Newtonian} behavior.
-\subsection{Upper-Convected \textsc{Maxwell} model}
-The Upper-convected \textsc{Maxwell} model is often used to describe these viscoelastic fluids. It is obtained by combining dampers and springs and model them with known physical laws. The easiest case is shown in Figure \ref{fig:maxwell}.
-\subsection{\textsc{Oldroyd-B} model}
-The governing equation in this equation is the same as in the previous subsection. However, the \textsc{Maxwell} model sets $\mu_s=0$ and eliminates the diffusion term in the equations. The \textsc{Oldroyd-B} model includes the full \textsc{Navier-Stokes} equations.
+\subsection{\textsc{Maxwell} and \textsc{Oldroyd-B} models}
 \begin{figure}
     \centering
-    
-    \def\svgwidth{0.5\textwidth}
-    \input{Maxwell_diagram.pdf_tex}
-    \caption[\textsc{Maxwell} model]{\textsc{Maxwell} model adopted from \cite{Pekaje}}
+    \includegraphics[width=\textwidth]{Maxwell_diagram.pdf}
+    \caption{Illustration of the Maxwell model (from \cite{Pekaje})}
     \label{fig:maxwell}
-    
 \end{figure}
-\textsc{Hooke}'s law is used for the spring $E$ and the damper acts as a \textsc{Newtonian} fluid of viscosity $\mu$. 
-The resulting governing equations for the deformation tensor or Finger tensor reads
+The \textsc{Maxwell} model is pone of the easiest models used to describe these viscoelastic fluids. It is obtained by combining dampers and springs and model them with known physical laws. The easiest case is shown in Figure \ref{fig:maxwell}. For more information see \cite{Owens2002} The stress tensor $\sigma$ is given by
 \begin{equation}
-    \partial_t B + (u\cdot\nabla)B-(\nabla u)B-B(\nabla u)^T =0.
+    \sigma(t)=c\partial_t \bfB(t),
 \end{equation}
-The stress tensor is given by integration of the finger tensor over the old times. However, the older the time the less relevant it is. To model this decay a \emph{memory function} is used. So we get
+where $B$ is the strain at time $t$ and $c\in\rr^+$ some fluid parameter. The \textsc{Maxwell} model states that
 \begin{equation}
-     \sigma(t,x) = \int_{-\infty}^t-\partial_{t'}B(t,t',x)G(t,t')\D t',
+    \frac{1}{\mu_p}\partial_t\sigma +\frac{1}{c}\sigma = \partial_t B,
 \end{equation}
-where 
+where $\mu_p\in\rr$ is the polymer viscosity. If we solve this ordinary differential equation for $\sigma$ and set $\lambda = \frac{c}{\mu_p}$ as the relaxation time, we obtain
 \begin{equation}
-    G(t,t')=\mu_p\cdot e^{-(t-t')/\lambda},
+    \sigma(t)=\int_{-\infty}^{t}-\mu_p\exp\left(-\frac{t-t'}{\lambda}\right)\partial_{t'} B(t,t')\D t'.
 \end{equation}
-with $\mu_p$ the polymer viscosity. The integral can be interpreted as the influence of the history of deformations. So the new deformation consists of a weighted summation of the previous ones. The longer one goes back in the history the less relevant the deformation is for the current calculation.
+We now deduced a model for $\sigma$. However, it is unclear how $B$ should be calculated.
+\textsc{Oldroyd} proposed to use the upper-convected time derivate to obtain an ordinary differential equation for $B$. This leads to the governing equation
+\begin{equation}
+    \partial_t \bfB  + (\bfu\cdot \nabla)\bfB-(\nabla \bfu)\bfB-\bfB(\nabla\bfu)^T=0,
+\end{equation}
+where we have the velocity field $\bfu$. The difference between the Upper-convected \textsc{Maxwell} model (UCM) and the \textsc{Oldroyd-B} model (both introduced by James G. \textsc{Oldroyd}) lies in the solvent viscosity. The UCM model calculates the flow using the \textsc{Euler's} equations and the \textsc{Oldroyd-B} model uses the \textsc{Navier-Stokes} equations. Note, that one can extend the formula for $\sigma$ by allowing
+\begin{equation}
+    \sigma(t)=\int_{-\infty}^{t}-\partial_{t'}\bfB(t,t')G(t,t')\D t',
+\end{equation}
+where $G$ is the so called \emph{relaxation modulus}. This opens the possibility for more advanced models. The whole integral for $\sigma$ can be interpreted as a history dependency. Every past timestep effect the current one. The relaxation modulus can be seen as a weight function in this context. We want the more a past timesteps lies in the history the less relevant it is for the current calculation.
 \section{Dimension reduction}
-After we have discussed a bit of physics in the previous sections, we will now focus on making these equations easier to handle. To provide better readability we will omit the arguments of the arising functions, where it is obvious. We start from the well-known \textsc{Navier-Stokes} equations
+After we have discussed the physical aspects in the previous sections, we will now focus on making these equations easier to handle. To provide better readability we will omit the arguments of the arising functions, where it is obvious. We start from the well-known \textsc{Navier-Stokes} equations
 \begin{align}
 \label{eq:NS3Dbegin}
     \frac{\partial \bfu}{\partial t}+(\bfu\cdot \nabla)\bfu &= \bff +\nabla\cdot\sigma +\mu_s\Delta\bfu-\nabla p,\\
@@ -1057,7 +1080,7 @@ Now we have everything we need to put our equations into a simulation. We will f
 \subsection{Software}
 Most of the simulations conducted for this work used the FEniCS framework (\cite{AlnaesBlechta2015a}, \cite{LoggMardalEtAl2012a}). Other components of this project are the C++ backend DOLFIN (\cite{LoggWells2010a}, \cite{LoggWellsEtAl2012a}), the compiler for the variational form FFC (\cite{KirbyLogg2006a}, \cite{LoggOlgaardEtAl2012a}, \cite{OlgaardWells2010b}), the language definition for variational forms UFL(\cite{AlnaesEtAl2012}, \cite{Alnaes2012a}) and the corresponding code generator UFC (\cite{AlnaesLoggEtAl2009a}, \cite{AlnaesLoggEtAl2012a}).
 \par 
-The advantages of using a framework at all are obvious. The less time one spends coding, the more one can assign to theoretical tasks. Another nice property is that the whole debugging process is shortened by a large bit. The software is also throughly tested so bugs are much less frequent. The responsibility of the user is to implement all properties of the finite element approach, one wants to use. This includes the finite element spaces, the weak formulation and the time discretization. Literature on how to get started with FEniCS is easy to find. A nice tutorial is given by the founders of FEniCS in  \cite{Langtangen2017a}. The code, that has been written for this work, can be found in the appendix and on the CD, which accompanies this. 
+The advantages of using a framework at all are obvious. The less time one spends coding, the more one can assign to theoretical tasks. Another nice property is that the whole debugging process is shortened by a large bit. The software is also throughly tested so bugs are much less frequent. The responsibility of the user is to implement all properties of the finite element approach, one wants to use. This includes the finite element spaces, the weak formulation and the time discretization. Literature on how to get started with FEniCS is easy to find. A nice tutorial is given by the founders of FEniCS in  \cite{Langtangen2017a}. The code, that has been written for this work, can be found on the CD, which accompanies this. 
 \subsection{Simulation cases}
 The next sections will deal with simulations and their results. This subsection should give a quick overview of all the relevant cases studied. \\
 Two domains were used throughout the simulations. 
@@ -1071,7 +1094,7 @@ Two domains were used throughout the simulations.
     \caption{Mesh of a square with sidelength 2}
     \label{fig:meshsquare}
 \end{figure}
-They can be seen in figures \ref{fig:mesh} and \ref{fig:meshsquare}.
+They can be seen in figures \ref{fig:mesh} and \ref{fig:meshsquare}. The boundary of the unit disc is approximated using a polygonal chain. It is interesting to observe that even for the square the mesh generator returns an unstructured mesh.
 We used the unit disc for the following simulation cases:
 \begin{itemize}
     \item Convergence of our implementation
@@ -1295,7 +1318,7 @@ We introduce $\beta_n=2^{-n}s_n$. We obtain
 \end{figure}
 This is now an explicit algorithm with $\mathcal{O}(N)$ to solve the equation for $\phi$. However as one can see in figure \ref{fig:phifalse}, it does not converge to the correct solution. Moreover it is unclear if for $h\to 0$ the error would become better as it would lead to $T-t_{N-1}\to T$. This means that this method is not suitable for our problem and we need to find a new approach.
 \subsection{Transformation of the argument}
-The reason that the previous method did not work was probably due to the fact that we eliminated the history completely. So we need an algorithm with runtime between $\mathcal{O}(n)$ and $\mathcal{O}(n^2)$. The next idea one could follow is to transform $t=f(u)$ and $\tilde\phi(u)=\phi(f(u))$ (and $m$ accordingly), where $f$ is a diffeomorphism (bijective function with differentiable inverse).  Let $u_{-1}=f^{-1}(0)$, which is unique because $f$ is especially injective. If we recall \eqref{eq:phianalytic} and insert the transformation for $t$, we obtain
+The reason that the previous method did not work was probably due to the fact that we eliminated the effect of the history completely. So we need an algorithm with runtime between $\mathcal{O}(n)$ and $\mathcal{O}(n^2)$. The next idea one could follow is to transform $t=f(u)$ and $\tilde\phi(u)=\phi(f(u))$ (and $m$ accordingly), where $f$ is a diffeomorphism (bijective function with differentiable inverse).  Let $u_{-1}=f^{-1}(0)$, which is unique because $f$ is especially injective. If we recall \eqref{eq:phianalytic} and insert the transformation for $t$, we obtain
 \begin{equation}
     \phi(f(u)) = \phi(f(u_{-1}))+\int_{u_{-1}}^{u}f'(u')[m(f(u'))(\phi(f(u_{-1}))-\phi(f(u)-f(u')))-\phi(f(u'))]\D u'.
 \end{equation}
@@ -1305,7 +1328,7 @@ Now we can replace $\phi$ by $\tilde\phi$. The transformed equation reads
 \end{equation}
 The goal of this transformation is that we can use equally spaced points in $u$ and $u'$ but do not have effort $\mathcal{O}(N^2)$. The important term is $\tilde\phi(f^{-1}(f(u)-f(u')))$ because this is the only time that old timesteps effect the current one. Ideally 
 \begin{equation}
-    F(u'):=f^{-1}(f(u)-f(u'))=u,\quad u'\in(u_{-1},u]
+    F(u,u'):=f^{-1}(f(u)-f(u'))=u,\quad u'\in(u_{-1},u]
 \end{equation}
 \begin{figure}
     \centering
@@ -1313,16 +1336,16 @@ The goal of this transformation is that we can use equally spaced points in $u$ 
     \caption{History dependency for different $f$}
     \label{fig:Fustrich}
 \end{figure}
-almost everywhere. This would again eliminate the history completely like in the previous example. In figure \ref{fig:Fustrich} $F(u')$ is shown for a fixed $u$. We can see that for both functions $f$ we have a long interval, in which $u=F(u')$ is a good approximation. \par 
+almost everywhere. This would again eliminate the history completely like in the previous example. In figure \ref{fig:Fustrich} $F(u')$ is shown for a fixed $u$. We can see that for both functions $f$ we have a long interval, in which $u=F(u,u')$ is a good approximation. \par 
 Now let $f(u)=e^u$. We choose this because $F(u,u')$ is qualitatively the same function for every $u$ just translated. This will help us immensely later on. We then have $u_{-1}=-\infty$. Obviously we cannot start our calculation at $-\infty$ so we introduce an arbitrary $u_0$ where $\abs{f(u_0)-f(-\infty)}$ is negligible. From there we introduce a discretization for $u$ as
 \begin{equation}
     u_i = u_0+ih,\quad\forall i=0,\dotsc,N
 \end{equation}
-where $h = \frac{\log(T) -u_0}{N}$ is a fixed interval length and we stop at $u_N=\log(T)$, where $T$ is the end time and $N$ the given number of steps. Our goal now is to get values for all $\tilde\phi(u_i)$. We assume that for all $i=0\dotsc,N$ we have
+where $h = \frac{\log(T) -u_0}{N}$ is a fixed interval length and we stop at $u_N=\log(T)$, where $T$ is the end time and $N$ the given number of steps. Our goal now is to calculate values for all $\tilde\phi(u_i)$. We assume that for all $i=0\dotsc,N$ we have
 \begin{equation}
     \tilde\phi(u) \equiv \tilde\phi(u_i), \quad\forall u\in(u_{i-1},u_i].
 \end{equation}
-Let us now take a look back at \eqref{eq:phitilde} and look at the integral part by part. Let us assume we know the values for each $\tilde\phi(u_i)$ for $i\le n$ and want to calculate $\tilde\phi(u_{n+1})$. For the first part we get
+This is where we introduce the discretization error. The integral evaluation will be exact under this assumption. Let us now take a look back at \eqref{eq:phitilde} and look at the integral part by part. Let us assume we know the values for each $\tilde\phi(u_i)$ for $i\le n$ and want to calculate $\tilde\phi(u_{n+1})$. For the first part we get
 \begin{equation}
     I_1:=\int_{-\infty}^{u_{n+1}}f'(u')\tilde{m}(u')\tilde\phi(-\infty)\D u'=\tilde\phi(-\infty)\sum_{i=0}^{n+1}\int_{u_{i-1}}^{u_i}f'(u')\tilde{m}(u')\D u'
 \end{equation}
@@ -1334,7 +1357,7 @@ We set
 \begin{equation}
     I_1 = \tilde\phi(-\infty)[S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]].
 \end{equation}
-This way we can perform an update for $S(n+1) = S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]$ and get only linear effort for this part. The summand for $n+1$ will have to be regarded separately because it is implicitly depending on the value of $\tilde\phi$ we are trying to calculate. We will actually discover later on that we can get a cubic problem in $\tilde\phi(u_{n+1})$ at worst which we will solve using \textsc{Newton's} method.
+This way we can perform an update for $S(n+1) = S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]$ and  only use linear effort for this part. The summand for $n+1$ will have to be regarded separately because it is implicitly depending on the value of $\tilde\phi$ we are trying to calculate. We will actually discover later on that we can at worst obtain a cubic problem in $\tilde\phi(u_{n+1})$, which we will solve using \textsc{Newton's} method.
 \par After we now handled the first part successfully we will take a look at the third part because the second will be the most challenging. Consider
 \begin{equation}
     I_3:=-\int_{u_{-1}}^{u_{n+1}}f'(u')\tilde\phi(u')\D u' = -\sum_{i=0}^{n+1}\int_{u_{i-1}}^{u_i}f'(u')\tilde\phi(u')\D u'.
@@ -1373,8 +1396,8 @@ so it will differ in each timestep. One might be tempted to think that this will
     \caption{Visualization of discretization for $I_2$, where $n=3$}
     \label{fig:vis1}
 \end{figure}
- This is constant in $n$ and equals the number of intervals, which the $w_i^{n+1}$ spread. Therefore we know that all interval until $u_{n-l^*+1}$ do not contain any points $w_i^{n+1}$.
- Figure \ref{fig:vis1} shows the discretization of $I_2$, where $n=3$. Both lines represent $[u_0,u_4]$. The top line shows the equal distant discretization used for $\tilde{m}$. The value below the respective lines denote the discretization points. Above the respective lines one can see the values of the factors $\tilde{m}$ and $\tilde\phi(F(u_4,v))$ for that specific interval. In the case shown $l^*=1$. So we will divide the integral $I_2$ to become
+ This is constant in $n$ and equals the number of intervals, which the $w_i^{n+1}$ spread. Therefore we know that all intervals until $u_{n-l^*+1}$ do not contain any points $w_i^{n+1}$.
+ Figure \ref{fig:vis1} shows the discretization of $I_2$, where $n=3$. Both lines represent $[u_0,u_4]$. The top line shows the equal distant discretization used for $\tilde{m}$ and the bottom line shows the discretization for $\tilde\phi(F(u_{4},v))$ The value below the respective lines denote the discretization points. Above the respective lines one can see the values of the factors $\tilde{m}$ and $\tilde\phi(F(u_4,v))$ for that specific interval. In the case shown above we have $l^*=1$. As a next step, we will divide the integral $I_2$ to become
 \begin{equation}
     I_2 = \int_{-\infty}^{u_{n-l^*+1}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v + \int_{u_{n-l^* +1}}^{u_{n+1}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v.
 \end{equation}
@@ -1434,7 +1457,7 @@ Because the $u_i$ are equally spaced, we know that
 \begin{equation}
     u_{n+1}=u_{l^*}+u_{n+1-l^*}.
 \end{equation}
-We can therefore in the loop just add $u_{n+1-l^*}$ and obtain the current position of these $w$s. For each $n$ we know that the points $u_{n+1-l^*},\dotsc,u_n$ overlap. By applying the shift backwards we find that the $w$ as above overlap with 
+We can therefore add $u_{n+1-l^*}$ each timestep and obtain the current position of these $w$s. For each $n$ we know that the points $u_{n+1-l^*},\dotsc,u_n$ overlap. By applying the shift backwards we find that the $w$ as above overlap with 
 \begin{equation}
     u_i,\quad\forall i=1,\dotsc,l^*-1.
 \end{equation}
@@ -1442,12 +1465,12 @@ This way we can define the overlapping points
 \begin{equation}
     \tilde{u}= \bigcup\left(\bigcup_{i=1}^{l^*-1}u_i\bigcup_{j=1}^{j^*}w^{l^*}_{l^*-j}\right).
 \end{equation}
-We can sort these in preprocessing. If we keep the permutation array that resulted during the sorting process, we can later recall, from which discretization the point came. We introduce two new variables
+We can sort these in preprocessing. If we keep the permutation array that resulted during the sorting process, we can later recall, from which discretization each point came. We introduce two new variables
 \begin{equation}
     q_i:=\abs{\{u_j\colon u_j\in\tilde{u} \text{ and }u_j\le\tilde{u_i} \}},\quad
     y_i:=\abs{\{w^{l^*}_j\colon w^{l^*}_j\in\tilde{u} \text{ and }w^{l^*}_j\le\tilde{u_i} \}}.
 \end{equation}
-Now we gathered all the information we need in preprocessing, we can get back to $I_{2,2}$. With the new defined variables inserted we obtain
+Now we gathered all the information we need in preprocessing, we can get back to $I_{2,2}$. With the new defined variables inserted, we obtain
 \begin{align}
     I_{2,2}&= \sum_{i=1}^{l^*+j^*-1}\tilde{m}(u_{n+2-l^*+q_{i-1}})\tilde{\phi}(u_{n+1-y_{i-1}})[f(u_{n+1-l^*}+\tilde{u_i})-f(u_{n+1-l^*}+\tilde{u}_{i-1})]\\&+\tilde{m}(u_{n+1})\sum_{i=0}^{n-j^*}\tilde\phi(u_{i-1})[f(u_i)-f(u_{i-1})] \\&+ \tilde\phi(u_{n+1})\tilde{m}(u_{n-l^*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l^*+1})].
 \end{align}
@@ -1532,10 +1555,26 @@ One can observe that $l^*=1$ is a special case because then we obtain a cubic pr
 The last thing to consider is the computational effort of this method. One might be tempted to think of linear runtime. However, $l^*$ and $j^*$ increase as $n$ increases. A priori we cannot give a formula for this so we will empirically take a look at this relationship in figure \ref{fig:runtime}. This clearly shows a linear relationship in $l^*$. This leads to a $\mathcal{O}(n^2)$ algorithm. However, every time step within one discretization is equally fast. The brute force algorithm on the other hand slows down from time step to time step. In the last chapter we will discuss possibilities, which could improve the newly developed algorithm.
 
 \chapter{Conclusion and Outlook}
-
+In this chapter we will wrap up all results we obtained throughout this work and give an idea for future research in this topic. \par 
+In the introduction we formulated the goal to be the development of an efficient method to simulate the governing equations for non-\textsc{Newtonian} fluids in two spatial dimensions. This was achieved using the \textsc{Laplace} transform to eliminate the bothering integral from the governing equations completely. The resulting algorithm is as efficient as a normal CFD simulation. We could simulate the cross section of a rheometer, which has practical value. Theoretical existence and uniqueness of the solution to the governing equation could be shown for a sensible set of parameters. Even though this could not be shown for $\mu_s=0$ we saw empirical convergence in the numerical experiments. \par 
+The second thing we looked at was the possibility to solve the integral from the governing equations without the \textsc{Laplace} transform to be able to loosen some of the necessary assumptions. Three approaches have been considered:
+\begin{itemize}
+    \item brute force
+    \item exponentially increasing time intervals
+    \item transformation of the argument
+\end{itemize}
+However, all of them were perfectly suited. The first and third approach have a computational effort of $\mathcal{O}(n^2)$ and are therefore not appropriate for the five-dimensional system of equations with a sensible number of degrees of freedom. The second approach did unfortunately not lead to a correct solution as the calculation error was to great. \\
+\par 
+For future research it might be worth to take a look at our newly developed algorithm from the third approach again. In it current state in timestep $n\to n+1$ n history points are considered. Maybe one could carefully choose a subset of them and still obtain a good approximation? Another point to consider could be the difficulties that arise by introducing nonlinearity into the equations by either increasing the spatial dimension or allowing more flow directions. The theoretical existence of a solution might be interesting to study for this case. Another possibility to enhance the newly developed algorithm could lie in the choice of $f$. We have shown that $f(u)=\exp(\pi/2\sinh(u))$ has better properties regarding the history dependency. However, $F(u,u')$ then becomes heavily dependent on $u$ and introduces new effort each timestep.\\
+\par 
+All in all, one can say that for a spatial two-dimensional problem with one flow direction and a memory function of special form we could present an efficient algorithm. For a more general case, we studied some approaches that can be a good starting point for further studies.
 \addcontentsline{toc}{chapter}{List of figures}
 \setcounter{lofdepth}{2}
 \listoffigures
+\newpage
+\addcontentsline{toc}{chapter}{List of figures}
+\setcounter{lofdepth}{2}
+\listoftables
 \newpage
 \addcontentsline{toc}{chapter}{References}
 \bibliographystyle{amsplain}
@@ -1552,48 +1591,5 @@ Köln, \today
 \\[2\bigskipamount]
 Nils Dornbusch
 \end{otherlanguage}
-% So it is unrealistic to fulfill this demands. To better understand $F(u')$, we will have a look at figure \ref{fig:Fustrich}. On the $y$-axis we have the value of $F(u')$ which we want to be $u$ as long as possible. The $x$-axis shows the different value of $u'$. As $u'$ approaches $u$ $F(u')$ diverges to $-\infty$ because of the logarithm. However this is not a problem for us as we just want the values to be $u$ almost everywhere. This graph clearly shows that $f(u)=\exp(\frac{\pi}{2}\sinh(u))$ is more suited for our needs as it has a steeper decrease to minus infinity. To clarify, if we would choose $f(u)=e^u$, we would have to account for the history as early as approximately $u'=0$. For the other possibility this would have to happen as late as approximately $u'=2.8$. This reduces the computational effort immensely.
-%\par 
-%\begin{figure}
-%    \centering
-%    \includegraphics[width=\textwidth]{Fdiffu}
-%    \caption{Minimal discretization length}
-%\end{figure}
-%But are these curves dependent on $u$? It could happen that $f(u)=e^u$ may be better suited for a different $u$. We will look at this behavior by calculating the intersection between $F(u')$ and the identity and plotting the y-value of this against $u$. This can be seen in figure \ref{fig:Fdiffu}. The value on the left can be interpreted as the minimal discretization length. So if we choose a cell length of less then this value we have to account for the history.  We can see that $f(u)=e^u$ is always worse. Another thing to note is that the curve for $f(u)=\exp(\frac{\pi}{2}\sinh(u))$ is not constant in $u$. That means that for every timestep we have to first check, how many parts of the approximated integral need a history part. This is what we will do next.
-%\par 
-%Let us recall \eqref{eq:phitilde} and insert our discretization. This leads to
-%\begin{equation}
-%\tilde\phi_n = \tilde\phi_0 +h\sum_{j=0}^{n-1}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi(f^{-1}(f_n-f_{j+1})))-\tilde\phi_{j+1}],
-%\end{equation}
-%where we used the discretization
-%\begin{equation}
-%\int_{u_0}^{u_n}f(u)\D u=\sum_{j=0}^{n-1}\int_{u_j}^{u_{j+1}}f(u)\D u\approx h\sum_{j=0}^{n-1}f_{j+1}.
-%\end{equation}
-%As one can see we can choose equally spaced points. From our previous discussion we know that we can replace $\tilde\phi(f^{-1}(f_n-f_{j+1}))$ in the intervals which lie in $[u_0,F(u*)]$. We give the last interval that lies in there the index $k(n)$. The equation then transforms to 
-%\begin{align}
-%\tilde\phi_n&=\tilde\phi_0+h\sum_{j=0}^{k(n)}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi_n)-\tilde\phi_{j+1}]-hf'(u_n)\tilde\phi_n\nonumber\\
-%&+h\sum_{j=k(n)+1}^{n-2}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi(f^{-1}(f_n-f_{j+1})))-\tilde\phi_{j+1}]
-%\end{align}
-%As a next step, we want to calculate the update from $\tilde\phi_n$ to $\tilde\phi_{n+1}$. We introduce $k_{max}=\max(k(n),k(n+1))$ and $k_{min}=\min(k(n),k(n+1))$. We use $(\cdot)_{n,n+1}$ to show that depending on $k_{\max}$ and $k_{\min}$ the index can either be $n$ or $n+1$. This yields
-%\begin{align}
-%\tpne-\tpn&=h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}(\tpn-\tpne)\\
-%&+h\sum_{j=k_{\min} +1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi_{n,n+1})-\tilde\phi_{j+1}]\\
-%&+h(f'(u_n)\tpn-f'(u_{n+1})\tpne)\\
-%&+hf'(u_n)[\tilde{m}_n(\tilde\phi_0-\tilde\phi(f^{-1}(f_{n+1}-f_n)))-\tpn]\\
-%&\pm h\sum_{j=k_{\min}+1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi(f^{-1}(f_{n,n+1}-f_{j+1})))-\tpne]\\
-%&+h\sum_{j=k_{\max}+1}^{n-2}f'(u_{j+1})\tilde{m}_{j+1}(\tilde\phi(f^{-1}(f_n-f_{j+1}))-\tilde\phi(f^{-1}(f_{n+1}-f_{j+1}))).
-%\end{align}
-%Now, we can collect the terms, that are not part of a sum and factor out $\tpne$ and $\tpn$. We obtain
-%\begin{align}
-%&\tpne\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}+hf'(u_{n+1})\right)=hf'(u_n)\tilde{m}_n(\tilde\phi_0-\tilde\phi(f^{-1}(f_{n+1}-f_n)))\\
-%&+\tpn\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}\right)+h\sum_{j=k_{\min}+1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0-\tilde\phi_{n,n+1})-\tilde\phi_{j+1}]\\
-%&\pm h\sum_{j=k_{\min} +1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi(f^{-1}(f_{n,n+1}-f_{j+1})))-\tilde\phi_{j+1}]\\
-%&+h\sum_{j=k_{\max}+1}^{n-2}f'(u_{j+1})\tilde{m}_{j+1}[\tilde\phi(f^{-1}(f_n-f_{j+1}))-\tilde\phi(f^{-1}(f_{n+1}-f_{j+1}))].
-%\end{align}
-%We see that there are two sums with the same limits. This will be dealt with now. It results
-%\begin{align}
-%&\tpne\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}+hf'(u_{n+1})\right)=\tpn\left(1+h\sum_{j=0}^{k_{\min}}f'(u_{j+1})\tilde{m}_{j+1}\right)\\
-%&+h\sum_{j=k_{\min} +1}^{k_{\max}}f'(u_{j+1})[\tilde{m}_{j+1}(\tilde\phi_0\pm\tilde\phi_0-\tilde\phi_{n,n+1}\mp\tilde\phi(f^{-1}(f_{n,n+1}-f_{j+1})))-\tilde\phi_{j+1}\mp\tilde\phi_{j+1}]\\
-%&+h\sum_{j=k_{\max}+1}^{n-2}f'(u_{j+1})\tilde{m}_{j+1}[\tilde\phi(f^{-1}(f_n-f_{j+1}))-\tilde\phi(f^{-1}(f_{n+1}-f_{j+1}))].
-%\end{align}
+
 \end{document}
