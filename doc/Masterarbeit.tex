@@ -166,14 +166,13 @@ Nils Dornbusch
 \tableofcontents
 \newpage
 \chapter{Introduction}
-This work aims to provides an analysis of the Integro-Differential-equations which occur while modeling the behavior of non-\textsc{Newtonian} fluids. The motivation arises in Physics when studying for example liquid glass or granular flow. This is often needed in space applications. This work should be seen as a first step in studying these governing equations. The long term goal is to develop a method to simulate an arbitrary non-\textsc{Newtonian} fluid in three spatial dimensions. Such a method does not exist as of now. An approach taken in \cite{Hulsen2001} and \cite{Hulsen2018} is the deformation fields method, which we will follow in part. However, not the whole method is suited for our needs. This is due to the fact that this method would result in the calculation of an integral each timestep even if the timesteps are chosen carefully. What is even worse is that the more timesteps one calculates the more expensive the integral becomes. As the full system of equations is five-dimensional, one can imagine that this is not efficient for a reasonable number of degrees of freedom. This works aims to provide a possibility to reduce the calculation effort. However, as this is a master's thesis only a reduced three-dimensional system will be considered. To achieve this reduction, sensible assumptions will be taken.
+This work aims to provides an analysis of the integro-differential equations which occur while modeling the behavior of non-\textsc{Newtonian} fluids. The motivation to model these fluids arises when studying for example liquid glass or granular flow. This is often needed in space applications. This work should be seen as a first step in studying these governing equations. The long term goal is to develop a method to simulate an arbitrary non-\textsc{Newtonian} fluid in three spatial dimensions. Such a method does not exist as of now. An approach taken in \cite{Hulsen2001} and \cite{Hulsen2018} is the deformation fields method, which we will follow in part. However, not the whole method is suited for our needs. This is due to the fact that this method would result in the calculation of an integral in each timestep even if the timesteps are chosen carefully. What is even worse is that the more timesteps one calculates the more expensive the integral becomes. As the full system of equations is five-dimensional, one can imagine that this is not efficient for a reasonable number of degrees of freedom. This works aims to provide a possibility to reduce the calculation effort. However, as this is a master's thesis only a reduced three-dimensional system will be considered. To obtain this reduction, sensible assumptions will be taken.
 \\
 \par 
-The goal is that every reader that is proficient in Mathematics on a master's level is able to follow the arguments given in this work. To achieve this, some basic mathematical facts will be given in the beginning of this work. We will also introduce some notation that will be used. The second chapter will deal with the Physics behind the governing equation. As this is a mathematical work most of the time we will only discuss ideas rather then discussing the whole physical theory. After that we will reduce the system of equations from three to two spatial dimensions. The elimination of a second time variable will take place in chapter 4, where we will use the \textsc{Laplace} transform. The following chapter will deal with all aspects of numerics. At first we will discretize the continuous equations from chapter 4 in space and time. After we have built the numerical scheme we will study the convergence and other properties of the algorithm. Some aspects regarding the implementation will also be discussed.\\
+The goal is that every reader that is proficient in Mathematics on a master's level is able to follow the arguments given in this work. To achieve this, some basic mathematical facts will be given in the beginning of this work. We will also introduce some notation that will be used. The second chapter will deal with the Physics behind the governing equation. As this is a mathematical work most of the time we will only discuss ideas rather than discussing the whole physical theory. After that we will reduce the system of equations from three to two spatial dimensions. The elimination of a second time variable will take place in chapter 4, where we will use the \textsc{Laplace} transform. Chapter 4 will deal with all aspects of numerics. At first we will discretize the continuous equations from chapter 3 in space and time. After we have built the numerical scheme we will study the convergence and other properties of the algorithm. Some aspects regarding the implementation will also be discussed.\\
 \par
-The next chapter will take a look at a different equation. It can be found in \cite{Goetze1995}. As it turns out we can only deduce a better algorithm under the assumptions we took to reduce the five-dimensional system of equations. The equation from \cite{Goetze1995} is easier in the sense that is does not have a spatial component or multiple variables but it is as complex as the full system regarding the calculation of the integral. Therefore it is much easier to study the simpler equation and try out different ideas, which can then be transfered back to the original problem. This will we done in chapter 5. 
-In the end we will conclude all results and give an outlook on what could be next sensible points to consider.\\
-\par
+Chapter 5 will mostly take a look at a different integro-differential equation. It can be found in \cite{Goetze1995}. The equation from \cite{Goetze1995} is easier in the sense that is does not have a spatial component or multiple variables but it is as complex as the full system regarding the calculation of the integral. Therefore it is much easier to study the simpler equation and try out different ideas, which can then be transfered back to the original problem. This is necessary, because it turns out that we can only deduce a better algorithm under the assumptions we took to reduce the five-dimensional system of equations. \par
+In the last chapter we will conclude all results and give an outlook on what could be next sensible points to consider.
 %\par 
 %The biggest problem when trying to implement these equation lies in the Integral over older timesteps and the appearence of another time dimension, which we call the \enquote{age dimension}. But more on that later on.\\
 %We will take the following steps to study said equations:
@@ -198,9 +197,9 @@ In the beginning, we will quickly state basic mathematical facts and introduce s
     Let $X\subset\rr^n$ for $n\in\nn$ and $f\colon X\to \rr$ be a function. 
     We call 
     \begin{equation}
-        \esssup_{x\in X}f(x):=a\in\rr\quad\text{where}\quad f(x)\le a\quad\text{almost everywhere}
+        \esssup_{x\in X}f(x):=\inf\{a\in\rr\colon f(x)\le a\quad\text{almost everywhere}\}
     \end{equation}
-    the essential supermum of $f$. We allow $f(x)>a$ for $x\in N\subset X$, where $N$ denotes a set of zero measure.
+    the essential supremum of $f$. 
 \end{defn}
 \begin{notation}
     We use $\nabla f$ to denote the spatial gradient of $f$. For the \textsc{Laplacian} operator we use the standard symbol $\Delta$. 
@@ -229,16 +228,16 @@ Here, we cover some basics of functional analysis that are necessary for this wo
 \begin{defn}[\textsc{Cauchy} sequence]
     A sequence $(x_n)_{n\in\nn}$ is called \emph{\textsc{Cauchy} sequence} if
     \begin{equation}
-         \forall\varepsilon>0 \exists n_0(\varepsilon)\in\nn\colon \forall m,n>n_0\colon\norm{x_m-x_n}<\varepsilon.
+         \forall\varepsilon>0~\exists n_0(\varepsilon)\in\nn\colon \forall m,n>n_0\colon\norm{x_m-x_n}<\varepsilon.
     \end{equation}
 \end{defn}
 \begin{defn}[Convergence]
     A sequence $(x_n)_{n\in\nn}$ converges to $x\in X$ if 
     \begin{equation}
-        \forall\varepsilon>0 \exists n_0(\varepsilon)\colon \forall n>n_0 \colon \norm{x_n -x}<\varepsilon.
+        \forall\varepsilon>0~\exists n_0(\varepsilon)\colon \forall n>n_0 \colon \norm{x_n -x}<\varepsilon.
     \end{equation}
 \end{defn}
-It it well-known that a \textsc{Cauchy} sequence does not converge in general. The class of spaces, for which this is true, is given in the following definition.
+It is well-known that a \textsc{Cauchy} sequence does not converge in general. The class of spaces, for which this is true, is given in the following definition.
 \begin{defn}
     A normed space $(X, \norm{\cdot})$ is called \emph{complete} if every \textsc{Cauchy} sequence in $X$ converges in $X$. A complete normed space is also called a \textsc{Banach} \emph{space}.
 \end{defn}
@@ -299,13 +298,6 @@ From now on let $\Omega$ be an open and bounded subset of $\rr^n$, with $n\in\nn
         \abs{\dotp{u}{v}}\le\norm{u}_V\norm{v}_V\quad \forall u,v\in V.
     \end{equation}
 \end{sa}
-\begin{sa}[\textsc{Hölder's} inequality]
-    \label{sa:hoelder}
-    Let $f\in \mathrm{L}^p$ and $g\in\mathrm{L}^q$ be functions and $\frac{1}{p}+\frac{1}{q}=1$. It holds
-    \begin{equation}
-        \norm{fg}_{1}\le\norm{f}_p\norm{g}_q
-    \end{equation}
-\end{sa}
 
 \begin{notation}
     We write $\mathrm{C}^k(\Omega)$, $k\in\nn\cup\{\infty\}$, for the space of $k$-times differentiable functions on $\Omega$. $\mathrm{C}^0(\Omega)$ shall be the space of continuous functions on $\Omega$.
@@ -319,7 +311,7 @@ From now on let $\Omega$ be an open and bounded subset of $\rr^n$, with $n\in\nn
 \begin{notation}
     In the following we will often use functions with compact support, so we introduce the notation
     \begin{equation}
-        \mathrm{C}^k_0(\Omega)=\{f\in \mathrm{C}^k(\Omega)\colon \supp f \text{ is compact} \},
+        \mathrm{C}^k_0(\Omega)=\{f\in \mathrm{C}^k(\Omega)\colon \supp f \text{ is compact in }\Omega \},
     \end{equation}
     where we mean \enquote{compact} in the topological sense, so in our cases bounded and closed.
 \end{notation}
@@ -335,11 +327,11 @@ From now on let $\Omega$ be an open and bounded subset of $\rr^n$, with $n\in\nn
     as the space of \emph{locally integrable functions}.
 \end{defn}
 \begin{bsp}
-    The space $\mathrm{L}^1_\mathrm{loc}$ is a true superset of $\mathrm{L}^1$. Consider $f(x)=\frac{1}{x}$ on $(-1,1)$. $f$ belongs to $\mathrm{L}^1_\mathrm{loc}(-1,1)$, but not to $\mathrm{L}^1(-1,1)$. 
+    The space $\mathrm{L}^1_\mathrm{loc}$ is a true superset of $\mathrm{L}^1$. Consider $f(x)=\frac{1}{x}$ on $(0,1)$. $f$ belongs to $\mathrm{L}^1_\mathrm{loc}(0,1)$, but not to $\mathrm{L}^1(0,1)$. 
 \end{bsp}
 \begin{defn}
     \label{defn:weakderivative}
-    Let $\alpha\in\nn^n_0$ be a multi index. A function $f\in \mathrm{L}^1_{\mathrm{loc}}(\Omega)$ has a \emph{weak derivative} $\nu=D^\alpha f\in \mathrm{L}^1_\mathrm{loc}(\Omega)$ if $\forall \varphi\in \mathrm{C}_0^\infty$
+    Let $\alpha\in\nn^n_0$ be a multi index. A function $f\in \mathrm{L}^1_{\mathrm{loc}}(\Omega)$ has a \emph{weak derivative} $\nu$, which is denoted by $D^\alpha f\in \mathrm{L}^1_\mathrm{loc}(\Omega)$ if $\forall \varphi\in \mathrm{C}_0^\infty$
     \begin{equation}
         \int_\Omega\nu\varphi\D\Omega = (-1)^{\abs{\alpha}}\int_\Omega fD^\alpha\varphi \D\Omega,
     \end{equation}
@@ -370,7 +362,7 @@ From now on let $\Omega$ be an open and bounded subset of $\rr^n$, with $n\in\nn
     is a \textsc{Hilbert} space.
 \end{sa}
 \begin{rem}
-    The $\mathrm{H}^m$ spaces are very important for many numerical methods because of their property that they are \textsc{Hilbert} spaces. The whole theory, which follows hereafter, relies heavily on this assumption. We will also use $\mathrm{H}_0^m$ to denote functions in $\mathrm{H}^m$ with compact support.
+    The spaces $\mathrm{H}^m$ are very important for many numerical methods because of the property that they are \textsc{Hilbert} spaces. The whole theory, which follows hereafter, relies heavily on this assumption. We will also use $\mathrm{H}_0^m$ to denote the closure of $\mathrm{C}^\infty_0$ with respect to $\norm{\cdot}_{\mathrm{H}^m}$. Further explanation on this process is given in \cite{Jost2013}
 \end{rem}
 
 \section{The finite element method}
@@ -415,14 +407,14 @@ classical formulation. We only need $u,\varphi\in\mathrm{H}^1(\Omega)$ to satisf
     \end{equation}
 \end{sa}
 \begin{rem}
-    Why is this relevant to us? At the first glance it is not obvious what this theorem has to do with numerical approximations. It turns out that any linear partial differential equation (linear PDE) in weak formulation can be written in the form \eqref{eq:generellinPDE} , where $u$ are the unknowns and $v$ is a test function.
+    Why is this relevant to us? At the first glance it is not obvious what this theorem has to do with numerical approximations. It turns out that any linear partial differential equation (linear PDE) in weak formulation can be written in the form \eqref{eq:generellinPDE}, where $u$ are the unknowns and $v$ is a test function.
 \end{rem}
 \begin{bsp}
     Let us revisit \eqref{eq:laplace}. We can see that we can rewrite it in terms of $a$ and $F$ by setting 
     \begin{equation}
         a(u,v):=\int_\Omega \nabla u\cdot \nabla v\D\Omega
     \end{equation}
-    and $F(v)=\int fv\D\Omega$ for $u,v\in \mathrm{H}^1(\Omega)$. Note, that $a$ is not coercive on $\mathrm{H}^1(\Omega)$. Consider $u\equiv c$ for $c\in\rr$ constant. Then $a(u,u)=0$ but $u$ is not necessarily zero. However, on $\mathrm{H}^1_0(\Omega)$ $a$ is an inner product and, thus, coercive, so we can still deduce that the weak formulation \eqref{eq:laplace} has a unique solution for zero boundary conditions.
+    and $F(v)=\int fv\D\Omega$ for $u,v\in \mathrm{H}^1(\Omega)$. Note, that $a$ is not coercive on $\mathrm{H}^1(\Omega)$. Consider $u\equiv c$ for $c\in\rr$ constant. Then $a(u,u)=0$ but $u$ is not necessarily zero. However, on $\mathrm{H}^1_0(\Omega)$ $a$ is an inner product and, thus, coercive (\textsc{Poincaré} inequality), so we can still deduce that the weak formulation \eqref{eq:laplace} has a unique solution for zero boundary conditions.
 \end{bsp}
 \subsection{Standard \textsc{Galerkin} method}
  Recall that we require $u\in \mathrm{H}^1_0(\Omega)$ in our example earlier. The problem is that $\mathrm{H}^1(\Omega)$ is a space of infinite dimension. Because no computer can handle infinitely many cases, we have to reduce the problem somehow. Thus we use finite dimensional subspaces of the solution space and calculate the best approximation in this subspace. How these spaces can be constructed, will be explained later on. 
@@ -459,7 +451,7 @@ This already looks like a matrix-vector multiplication. If we define $a_{i,j}=a(
     \begin{equation}
         F(u_h, \varphi_i) = 0 \quad \forall i=1,\dotsc,n,
     \end{equation}
-    to obtain a discrete solution $u_h\in V_h$. This would then be plugged into a non-linear solver. However, the existence or even uniqueness of a solution cannot be guaranteed and must often be assessed on a case-by-case basis. This is an open research topic. There exist some approaches to this problem, which can be found in ...\footnote{find reference}
+    to obtain a discrete solution $u_h\in V_h$. This would then be plugged into a non-linear solver. However, the existence or even uniqueness of a solution cannot be guaranteed and must often be assessed on a case-by-case basis. This is an open research topic. There exist some approaches to this problem, which can be found in \cite{Girault1986}
 \end{rem}
 \subsection{Finite element spaces}
 \label{subsec:finitelem}
@@ -473,11 +465,11 @@ For now, we handled the problem with an arbitrary subspace $V_h$. But how would 
 \end{notation}
 We will construct a mesh by starting with a decomposition $\mathcal{T}_h$ of $\Omega$ into open cells $K$ with $\overline{\Omega}=\bigcup_{K\in\mathcal{T}_h}\overline{K}$.
 \begin{defn}
-    $(K,P_k,\mathcal{T}_h)$ is called a \emph{finite element}.
+    $(K,P_k(K),\Sigma_k)$ is called a \emph{finite element}, where $\Sigma_k$ denotes the set of degrees of freedom.
 \end{defn}
-   Not all $\tau_h$ are admissible.
+   Not all $\mathcal{T}_h$ are admissible.
 \begin{defn}
-    A decomposition of the domain $\Omega\subset\rr^d$ into cells $K\in\mathcal{T}_h$ is admissible if
+    A decomposition of the domain $\Omega\subset\rr^d$ into simplices $K\in\mathcal{T}_h$ is admissible if
     \begin{enumerate}
         \item $\overline{\Omega}=\bigcup_{K\in\tau_h}\overline{K}$,
         \item any nonempty intersection of two cells $\overline{K_1}\cap\overline{K_2}$ is either a vertex, an edge or a face of both cells.
@@ -485,9 +477,12 @@ We will construct a mesh by starting with a decomposition $\mathcal{T}_h$ of $\O
 \end{defn}
 The following theorem ensures that the combination of all cells still results in $V_h$ being a subset of $\mathrm{H}^1(\Omega)$.
 \begin{sa}
-    If for every $K\in\mathcal{T}_h,P_k\subset \mathrm{H}^1(K)$, and $V_h\subset \mathrm{C}^0(\Omega)$, then $V_h\subset \mathrm{H}^1(\Omega)$.
+    If for every $K\in\mathcal{T}_h,P_k(K)\subset \mathrm{H}^1(K)$, and $V_h\subset \mathrm{C}^0(\overline\Omega)$, then $V_h\subset \mathrm{H}^1(\Omega)$.
 \end{sa}
-\begin{proof}
+\begin{rem}
+    If we take a look back at the last theorem, we can see that the continuity of the degrees of freedom across neighboring faces is enough for our solution to be in $\mathrm{H}^1(\Omega)$. 
+\end{rem}
+\begin{proof}[Proof taken from \cite{Ganesan2017}]
     Let $v\in V_h$ be given. If we can show that the weak derivatives $D^\alpha v$ are in $ \mathrm{L}^2(\Omega)$ for $\abs{\alpha}=1$, we showed the theorem. The natural choice would be the piecewise defined function $w_K:=D^\alpha(v\vert_K)\in \mathrm{L}^2(K)$. Let $\varphi\in \mathrm{C}^\infty_0(\Omega)$ be arbitrary. It holds that 
     \begin{equation}
         \int_\Omega(w\varphi+vD^\alpha \varphi)\D x = \sum_{K\in\mathcal{T}_h}\int_K(D^\alpha(v\vert_K)\varphi+v\vert_K D^\alpha\varphi)\D x,
@@ -502,9 +497,7 @@ The following theorem ensures that the combination of all cells still results in
     \end{equation}
     That proofs that $w$ is indeed the weak derivative of $v$. Because $v$ was arbitrary, it follows that $V_h\subset \mathrm{H}^1(\Omega)$ and this proofs the theorem.
 \end{proof}
-\begin{rem}
-    If we take a look back at the last theorem, we can see that the continuity of the degrees of freedom across neighboring faces is enough for our solution to be in $\mathrm{H}^1(\Omega)$. 
-\end{rem}
+
 Another interesting topic to consider, is the order of convergence. If we choose $\dim P_k$ equally on all cells, one can expect a convergence of order $k+1$. However, in practice this is influenced by the time stepping scheme if the problem is time dependent. If the geometry is not rectangular, the mesh approximation to the geometry will also influence the order of convergence. To measure the order of convergence empirically, one defines the $EOC$
 \begin{defn}
     For a set of errors $\varepsilon_k$ and discretization $h_k$, where $h\to 0$ for $k\to\infty$, we define the \emph{experimental order of convergence (EOC)} as the limit of 
@@ -560,7 +553,7 @@ We can give a relationship between the \textsc{Laplace} and \textsc{Fourier} tra
 In this chapter, we gathered all the important general mathematical background information, which we will use heavily from now on. 
 \chapter{Modeling}
 \label{ch:model}
-Until now, our work was in no way specific to the problem, which we want to solve. In this chapter, we will be more specific. For this, we will give a (short) introduction into the macroscopic modeling of  non-\textsc{Newtonian} fluids. The introduction for this will, however, be intentionally vague as this work is more focused on mathematical than the physical aspects. After that, we will use some assumptions to make the problem accessible for a master's thesis.
+Up to now, our work was in no way specific to the problem that we want to solve. In this chapter, we will be more specific. For this, we will give a (short) introduction into the macroscopic modeling of  non-\textsc{Newtonian} fluids. The introduction for this will, however, be intentionally vague as this work is more focused on mathematical than the physical aspects. After that, we will employ some assumptions to make the problem accessible for a master's thesis.
 \section{\textsc{Navier-Stokes} Equation}
 Many books have been written about the \textsc{Navier-Stokes} equations. We will use some ideas from \cite{Lukaszewicz2016} and \cite{White2006} to outline the main facts. Just the incompressible variant of the equations will be considered and the density is normalized to one and therefore will be omitted.
 \subsection{Basics of fluid dynamics}
@@ -577,7 +570,7 @@ We use $u$ for the velocity, $p$ for the pressure with their normal physical int
 \end{rem}
 The main idea behind the \textsc{Navier-Stokes} equation is the concept of \emph{conservation}. 
 \begin{defn}
-    If for a property $P$, it holds that on some finite volume $\Omega$
+    If for a property $P$, it holds that on an arbitrary finite volume $\Omega$
     \begin{equation}
         \frac{d}{dt}\int_\Omega P\D\Omega = -\int_{\partial\Omega}Pu\cdot n\D\partial\Omega+\int_\Omega s\D\Omega,\label{eq:conservation}
     \end{equation}
@@ -589,7 +582,7 @@ The main idea behind the \textsc{Navier-Stokes} equation is the concept of \emph
 \subsection{Momentum equation}
 Because we assumed that the density of the fluid is one, the momentum is simply the velocity. The momentum is a conserved property so it holds that
 \begin{equation}
-    \frac{d}{dt}\int_\Omega u\D\Omega = -\int_{\partial\Omega}uu^T\cdot n\D\partial\Omega +\int_\Omega s\D\Omega,
+    \frac{d}{dt}\int_\Omega u\D\Omega = -\int_{\partial\Omega}uu^Tn\D\partial\Omega +\int_\Omega s\D\Omega,
 \end{equation} where we get a rank two tensor in the boundary term because we write $uu^T$ as the dyadic product of the two vectors. Using \textsc{Gauß}'s theorem, we can rewrite the boundary integral. This leads to 
 \begin{equation}
     \frac{d}{dt}\int_\Omega u\D\Omega = -\int_\Omega \nabla\cdot(uu^T)\D\Omega +\int_\Omega s\D\Omega.
@@ -607,12 +600,12 @@ Using the previous theorem and realizing that $\Omega$ is constant in time, we g
     \int_\Omega \partial_t u +\nabla\cdot(uu^T)-s\D\Omega =0.
 \end{equation}
 \begin{sa}
-    Let $x$ and $y$ be vectors of same length. It holds that
+    Let $f$ and $g$ be functions $f,g\colon\Omega\subset\rr^n\to\rr^n$. It holds that
     \begin{equation}
-    \nabla\cdot(xy^T)=(\nabla\cdot x)y+x\cdot\nabla y.
+    \nabla\cdot(fg^T)=(\nabla\cdot x)y+x\cdot\nabla y.
     \end{equation}
 \end{sa}
-As \eqref{eq:nswithint} holds for every $\Omega$ the integrand has to be zero. This realization and the previous theorem lead to 
+As \eqref{eq:nswithint} holds for every $\Omega$ the integrand has to be zero (Fundamental lemma of calculus of variations). This realization and the previous theorem lead to 
 \begin{equation}
     \partial_t u +u\cdot\nabla u+u\nabla\cdot u - s = 0.
 \end{equation}
@@ -642,40 +635,36 @@ Note that this equation is not complete. One has to give a model for the so-call
 \section{Non-\textsc{Newtonian} fluids}
 \label{sec:physics}
 
-Before we start discussing the two related models used to model the stress tensor, we will give a short introduction into non-\textsc{Newtonian} fluids. A nice general introduction is given in \cite{Ouellette2013}.
+Before we start discussing the two related models used to model the stress tensor, we will give a short introduction into non-\textsc{Newtonian} fluids. A general introduction can be found in \cite{Ouellette2013}.
 \subsection{What is a non-\textsc{Newtonian} fluid and why is it relevant?}
-Generally speaking, a non-\textsc{Newtonian} fluid differs from a \textsc{Newton} fluid in the behavior of the viscosity. \textsc{Newton} formulated several laws, which an ideal fluid should obey. One of them was that the viscosity should be independent of the stress that the fluid encounters. All fluids, which obey this law, are called \textsc{Newtonian} fluids and the others are called non-\textsc{Newtonian}. Non-\textsc{Newtonian} fluids are far more spread as one would imagine: from ketchup to honey and toothpaste to the famous water-cornstarch mixture that jumps on loudspeakers; these types of fluids are everywhere. Even granular movement in space and liquid plastic in 3D printers behaves that way. So there are plenty of reasons to care about the difficult task of modeling these fluids. \par 
+Generally speaking, a non-\textsc{Newtonian} fluid differs from a \textsc{Newtonian} fluid in the behavior of the viscosity. \textsc{Newton} formulated several laws, which an ideal fluid should obey. One of them was that the viscosity should be independent of the stress that the fluid encounters. All fluids, which obey this law, are called \textsc{Newtonian} fluids and the others are called non-\textsc{Newtonian}. Non-\textsc{Newtonian} fluids are far more spread as one would imagine: from ketchup to honey and toothpaste to the famous water-cornstarch mixture that jumps on loudspeakers; these types of fluids are everywhere. Even granular movement in space and liquid plastic in 3D printers behaves that way. So there are plenty of reasons to care about the difficult task of modeling these fluids. \par 
 There are many different types of non-\textsc{Newtonian} behavior. Ketchup for example has a so called \emph{pseudoplastic} behavior, that means that the viscosity decreases with increased stress. In this work we will cover the fluids that have the so-called \emph{viscoelastic} behavior. That means that elastic and viscous effects are working together as a linear combination. Liquid plastic and granular flows often show this type of non-\textsc{Newtonian} behavior.
 \subsection{\textsc{Maxwell} and \textsc{Oldroyd-B} models}
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{Maxwell_diagram.pdf}
+    \includegraphics[width=0.8\textwidth]{Maxwell_diagram.pdf}
     \caption{Illustration of the Maxwell model (from \cite{Pekaje})}
     \label{fig:maxwell}
 \end{figure}
-The \textsc{Maxwell} model is pone of the easiest models used to describe these viscoelastic fluids. It is obtained by combining dampers and springs and model them with known physical laws. The easiest case is shown in Figure \ref{fig:maxwell}. For more information see \cite{Owens2002} The stress tensor $\sigma$ is given by
+The \textsc{Maxwell} model is one of the easiest models used to describe such viscoelastic fluids. It is obtained by combining dampers and springs and model them with known physical laws. The easiest case is shown in Figure \ref{fig:maxwell}. The damper accounts for the viscous  and the spring for the elastic part of the fluid's behavior. For more information see \cite{Owens2002} The \textsc{Maxwell} model states that
 \begin{equation}
-    \sigma(t)=c\partial_t \bfB(t),
+    \frac{\lambda}{\mu_p}\partial_t\sigma +\frac{1}{\mu_p}\sigma = \partial_t \bfB,
 \end{equation}
-where $B$ is the strain at time $t$ and $c\in\rr^+$ some fluid parameter. The \textsc{Maxwell} model states that
+where $\mu_p\in\rr$ is the polymer viscosity, $\lambda$ the so called relaxation time and $\bfB$ the strain or \textsc{Finger} tensor. If we solve this ordinary differential equation for $\sigma$, we obtain
 \begin{equation}
-    \frac{1}{\mu_p}\partial_t\sigma +\frac{1}{c}\sigma = \partial_t B,
+    \sigma(t)=\int_{-\infty}^{t}-\mu_p\exp\left(-\frac{t-t'}{\lambda}\right)\partial_{t'} \bfB(t,t')\D t'.
 \end{equation}
-where $\mu_p\in\rr$ is the polymer viscosity. If we solve this ordinary differential equation for $\sigma$ and set $\lambda = \frac{c}{\mu_p}$ as the relaxation time, we obtain
+We now deduced a model for $\sigma$. However, it is unclear how $\bfB$ should be calculated.
+\textsc{Oldroyd} proposed to use the so called upper-convected time derivative $\overset{\nabla}{\bfB}$ to obtain an ordinary differential equation for $\bfB$. This leads to the governing equation
 \begin{equation}
-    \sigma(t)=\int_{-\infty}^{t}-\mu_p\exp\left(-\frac{t-t'}{\lambda}\right)\partial_{t'} B(t,t')\D t'.
+    \overset{\nabla}{\bfB}:=\partial_t \bfB  + (\bfu\cdot \nabla)\bfB-(\nabla \bfu)\bfB-\bfB(\nabla\bfu)^T=0,
 \end{equation}
-We now deduced a model for $\sigma$. However, it is unclear how $B$ should be calculated.
-\textsc{Oldroyd} proposed to use the upper-convected time derivate to obtain an ordinary differential equation for $B$. This leads to the governing equation
-\begin{equation}
-    \partial_t \bfB  + (\bfu\cdot \nabla)\bfB-(\nabla \bfu)\bfB-\bfB(\nabla\bfu)^T=0,
-\end{equation}
-where we have the velocity field $\bfu$. The difference between the Upper-convected \textsc{Maxwell} model (UCM) and the \textsc{Oldroyd-B} model (both introduced by James G. \textsc{Oldroyd}) lies in the solvent viscosity. The UCM model calculates the flow using the \textsc{Euler's} equations and the \textsc{Oldroyd-B} model uses the \textsc{Navier-Stokes} equations. Note, that one can extend the formula for $\sigma$ by allowing
+where $\bfu$ denotes the velocity field. The difference between the upper-convected \textsc{Maxwell} model (UCM) and the \textsc{Oldroyd-B} model (both introduced by James G. \textsc{Oldroyd}) lies in the solvent viscosity. The UCM model calculates the flow using the \textsc{Euler's} equations and the \textsc{Oldroyd-B} model uses the \textsc{Navier-Stokes} equations. Note, that one can extend the formula for $\sigma$ by allowing
 \begin{equation}
     \sigma(t)=\int_{-\infty}^{t}-\partial_{t'}\bfB(t,t')G(t,t')\D t',
 \end{equation}
-where $G$ is the so called \emph{relaxation modulus}. This opens the possibility for more advanced models. The whole integral for $\sigma$ can be interpreted as a history dependency. Every past timestep effect the current one. The relaxation modulus can be seen as a weight function in this context. We want the more a past timesteps lies in the history the less relevant it is for the current calculation.
-\section{Dimension reduction}
+where $G$ is the so called \emph{relaxation modulus}. This opens the possibility for more advanced models. The whole integral for $\sigma$ can be interpreted as a history dependency. Every past timestep affects the current one. The relaxation modulus can be seen as a weight function in this context. We want that the more a past timestep lies in the past the less relevant it is for the current calculation.
+\section{Dimensional reduction}
 After we have discussed the physical aspects in the previous sections, we will now focus on making these equations easier to handle. To provide better readability we will omit the arguments of the arising functions, where it is obvious. We start from the well-known \textsc{Navier-Stokes} equations
 \begin{align}
 \label{eq:NS3Dbegin}
@@ -848,6 +837,7 @@ where $\lambda$ is the material specific relaxation time, we can retrieve the \t
 \end{align}
 So using the assumptions on $G$ and $\bfu$, we removed the integral term completely! In this example the stress tensor is just the scaled conformation tensor. 
 \chapter{Simulation}
+This chapter will deal with all aspects of numerical considerations. At first, we will build the numerical scheme and discuss its convergence properties. After that we will look at some results that could be obtained.
 \section{Discretization and building the numerical scheme}
 The next step will be to build a numerical scheme. For this, we first need the weak formulation. Then we will discuss the discretizations in space and time. Our equations are given by 
 \begin{align}
@@ -859,7 +849,7 @@ The next step will be to build a numerical scheme. For this, we first need the w
     \label{eq:transfeq3}
 \end{align}
 \subsection{Weak formulation}
-To obtain the weak formulation for equations \eqref{eq:transfeq1} to \eqref{eq:transfeq3}, we will use the standard approach as discussed in subsection \ref{subsec:finitelem}. So let $\varphi = (\varphi_1,\varphi_2)\in \mathrm{C}^\infty_0(\Omega\times\rr)$ with values in $\rr^2$ and $\psi\in \mathrm{C}^\infty_0(\Omega\times\rr)$ real-valued be test functions of compact support. By integrating in space, we can transform \eqref{eq:transfeq3} to 
+To obtain the weak formulation for equations \eqref{eq:transfeq1} to \eqref{eq:transfeq3}, we will use the standard approach as discussed in subsection \ref{subsec:finitelem}. So let $\varphi = (\varphi_1,\varphi_2)\in \mathrm{C}^\infty_0(\Omega\times\rr)$ with values in $\rr^2$ and $\psi\in \mathrm{C}^\infty_0(\Omega\times\rr)$ with values in $\rr$ be test functions of compact support. We will later on discuss simulation cases, where the boundary conditions are not 0, but for now we will use this restriction. By integrating in space, we can transform \eqref{eq:transfeq3} to 
 \begin{equation}
     \int_\Omega(\partial_t\bfC_{1/\lambda}+\frac{1}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
    \int_\Omega \nabla u\cdot \varphi\D\Omega.
@@ -948,12 +938,12 @@ We will now discuss, which finite elements should be used. The software FEniCS p
 \end{equation}
 where 
 \begin{equation}
-    P_1(\Omega):=\bigcup_{K\in\mathcal{T}_h}P_1(K).
+    P_1(\Omega):=\{\varphi\in\mathrm{C}^0(\Omega)\colon \varphi|_K\in P_1(K)\quad\forall K\in\mathcal{T}_h\}.
 \end{equation}
  In this definition we use $\mathcal{T}_h$ and $P_1(K)$ as defined in subsection \ref{subsec:finitelem}. This is the smallest order a finite element can have to guarantee continuity across the cell boundary. A higher order element is also not necessary because we only use a time integration scheme of order 1. 
 \subsection{Existence of a solution}
 \label{sec:existence}
-We now want to proof, with the help of Theorem \ref{sa:LaxMilgram} (\textsc{Lax-Milgram}), that there exists a unique solution for the problem \eqref{eq:sumcon}. Firstly, we have to discuss the form of the solution space. Because $\bfC_{1/\lambda}$ has no spatial derivatives in the governing equations, we assume $\bfC_{1/\lambda}\in \mathrm{L}^2(\Omega)\times \mathrm{L}^2(\Omega)$. The velocity appears with a spatial derivative of order one, so we want $u\in \mathrm{H}^1(\Omega)$. This leads to 
+We now want to proof, with the help of Theorem \ref{sa:LaxMilgram} (\textsc{Lax-Milgram}), that there exists a unique solution for the problem \eqref{eq:sumcon}. Firstly, we have to discuss the form of the solution space. Because $\bfC_{1/\lambda}$ has no spatial derivatives in the governing equations, we assume $\bfC_{1/\lambda}\in \mathrm{L}^2(\Omega)\times \mathrm{L}^2(\Omega)$. The velocity appears with a spatial derivative of order one, so we want $u\in \mathrm{H}^1_0(\Omega)$. This leads to 
 \begin{equation}
     U\in \mathrm{L}^2(\Omega)\times \mathrm{L}^2(\Omega)\times \mathrm{H}^1(\Omega)=:X(\Omega).
 \end{equation} The test function $\phi$ should be of the same regularity. We define a norm on this space via the inner product. The product space of \textsc{Hilbert} spaces has an easy inner product
@@ -965,7 +955,7 @@ where we use the inner products on $\mathrm{L}^2$ and $\mathrm{H}^1$ as defined 
     \norm{U}_X^2=\norm{U_{1:2}}_{\mathrm{L}^2}^2+\norm{U_3}_{\mathrm{H}^1}^2
 \end{equation}
 \begin{sa}
-    Let $X=\mathrm{L}^2\times\mathrm{L}^2\times \mathrm{H}^1$ be a \textsc{Hilbert} space, $\mu_s\neq 0$ and $\mu_s(\frac{1}{\Delta t}+\frac{1}{\lambda})\g \frac{1}{4}(\mu_p-1)^2$.
+    Let $X=\mathrm{L}^2\times\mathrm{L}^2\times \mathrm{H}^1_0$ be a \textsc{Hilbert} space, $\mu_s\neq 0$ and $\mu_s(\frac{1}{\Delta t}+\frac{1}{\lambda})\g \frac{1}{4}(\mu_p-1)^2$.
     Then the problem in \eqref{eq:sumcon} has unique solution  in $X$.
 \end{sa}
 \begin{proof}
@@ -1013,9 +1003,9 @@ where we use the inner products on $\mathrm{L}^2$ and $\mathrm{H}^1$ as defined 
         \bigg)^{1/2}\bigg(\ltnorm{\phi_{1:2}}^2+\ltnorm{\phi_3}^2+\ltnorm{\nabla \phi_3}^2\bigg)^{1/2}\\&=\beta\norm{U}_X\norm{\phi}_X,
     \end{align}
     which is exactly the continuity constraint. 
-    \par The next thing to show is the coercivity. At the beginning will use \textsc{Young's}\footnote{add reference} inequality 
+    \par The next thing to show is the coercivity. At the beginning will use \textsc{Young's} inequality \cite{Young1912}
     \begin{equation}
-        \norm{a}\norm{b}\ge\frac{\gamma}{2}\norm{a}^2+\frac{1}{2\gamma}\norm{b}^2,
+        a\cdot b\le\norm{a}\norm{b}\le\frac{\gamma}{2}\norm{a}^2+\frac{1}{2\gamma}\norm{b}^2,
     \end{equation} where $a,b$ are in some normed space and $\gamma\in\rr^+$.
     Using the \textsc{Cauchy-Schwarz} inequality and taking care regarding the sign of $\mu_p-1$ yields
     \begin{equation}
@@ -1154,7 +1144,7 @@ We will now take a look at a more physically relevant example. Consider a fluid 
 The setup is shown in figure \ref{fig:unitdiscsetup}. We chose the no slip boundary condition $u=0$ on the boundary of the circle. We assumed a pressure gradient of $\partial_3 p=-5$ and a relaxation time of $\lambda=1$. 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{UnitDiscCenterline}
+    \includegraphics[width=0.8\textwidth]{UnitDiscCenterline}
     \caption{Centerline velocity with the unit disc domain and $\mu_s=0$, $\mu_p=1$}
     \label{fig:unitdisccenterline}
 \end{figure}
@@ -1169,11 +1159,11 @@ Figure \ref{fig:unitdisccenterline} shows the velocity at the centre of the circ
 Now we want to repeat this calculation but with a different domain. We will see that this will impact the result. The setup is shown in figure \ref{fig:squaresetup}. A related problem is solved in \cite{A.S.RDuarte2008}. Therefore, we choose periodic boundary conditions on the left and right sides and a no slip boundary condition $u=0$ at the top and bottom.
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{SquareCenterline}
+    \includegraphics[width=0.8\textwidth]{SquareCenterline}
     \caption{Centerline velocity of the start-up flow on the square domain}
     \label{fig:squarecenterline}
 \end{figure}
-We chose $\partial_3 p=-3$ to obtain the results from \cite{A.S.RDuarte2008}. However, the magnitude of the pressure only effects the amplitude and not the behavior of the fluid. As one can see in figure \ref{fig:squarecenterline} we obtain a very different behavior by changing the domain. This is also a difference to a \textsc{Newtonian} fluid, where we would have gotten the same graph for both domains. 
+We chose $\partial_3 p=-3$ to obtain the results from \cite{A.S.RDuarte2008}. However, the magnitude of the pressure only affects the amplitude and not the behavior of the fluid. As one can see in figure \ref{fig:squarecenterline} we obtain a very different behavior by changing the domain. This is also a difference to a \textsc{Newtonian} fluid, where we would have gotten the same graph for both domains. Another interesting observation is, that until $t=\lambda$ the behavior of the fluid is monotonous. If we interpret the relaxation time of a \textsc{Newtonian} fluid to be $\infty$ we can explain the absence of maximal and minimal points in their velocity graph. It also seems like every extrema can be found at a multiple of the relaxation time and that these extrema are not differentiable. Shocks, however, can not be found because we solve a linear system of equations where these cannot appear.
 \subsection{\enquote{Ideal} rheometer}
 \begin{figure}
     \centering
@@ -1181,28 +1171,24 @@ We chose $\partial_3 p=-3$ to obtain the results from \cite{A.S.RDuarte2008}. Ho
     \caption{Setup for the rheometer simulation case}
     \label{fig:rheometersetup}
 \end{figure}
-A rheometer is a laboratory device used by rheologists to measure the behaviour of a material to applied forces. It contains a container for the material and a whisk which mixes through it. Properties like viscosity and relaxation times can be studied.\footnote{enter figure} 
-\begin{figure}
-    \caption{A rheometer}
-    \label{fig:rheometer}
-\end{figure}
-A picture of a rheometer is shown in figure \ref{fig:rheometer}. To obtain a two-dimensional problem, this case represents a slice from top to bottom of an infinitively high rheometer.
+A rheometer is a laboratory device used by rheologists to measure the behaviour of a material to applied forces. It contains a container for the material and a whisk which mixes through it. Properties like viscosity and relaxation times can be studied.
+To obtain a two-dimensional problem, this case represents a slice from top to bottom of an infinitively high rheometer.
 The setup for this case is shown in figure \ref{fig:rheometersetup}. The left side of the square has the no slip boundary condition $u=0$. The top and bottom side are coupled with a periodic boundary condition. The right side has the \textsc{Dirichlet} boundary condition $u=10$. 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{RheometerCenterline}
+    \includegraphics[width=0.8\textwidth]{RheometerCenterline}
     \caption{Centerline velocity in the rheometer with $\mu_s=0.1$, $\mu_p=0.9$, $\lambda=2$ }
     \label{fig:rheomcenter}
 \end{figure} 
 \par The centerline velocity of this simulation can be seen in figure \ref{fig:rheomcenter}. We chose the \textsc{Oldroyd}-B model with $\mu_s=0.1$ and $\mu_p=0.9$. Our relaxation time was set to $\lambda=2$ and we calculated until $T=4$ with a step size of $\Delta t=0.001$. Like before one can clearly see that we do not have a fluid that is showing \textsc{Newtonian} behavior. This is the first case, where we have set $\mu_s>0$. This can be clearly observed in figure \ref{fig:rheomcenter} because the resulting graph looks like a differentiable function. This is typical for advective problems with dissipation from a second order derivative term.
 \chapter{Different approaches for the integral equation}
-In chapter \ref{ch:model} we could eliminate the integral from equation \eqref{eq:generalsig} completely by taking sensible assumptions on the memory function $G$. However, this is a very specific case and the more complex physical models do not have this nice feature. In this chapter we will discuss possibilities for a more general approach. 
+In chapter \ref{ch:model} we could eliminate the integral from equation \eqref{eq:generalsig} completely by taking sensible assumptions on the memory function $G$. However, this is a very specific case and the more complex physical models do not satisfy these assumptions. In this chapter we will discuss possibilities for a more general approach. 
 \section{Combination of relaxation times}
-In physics, most of the time it is sufficient to model the fluid's behavior using a combination of relaxation times. So let $N$ be an integer then we set
+In physics, most of the time it is sufficient to model the fluid's behavior using a combination of relaxation times. So for $N\in\nn$ we set
 \begin{equation}
     G(\tau)=\sum_{n=1}^{N}\mu_p^{(n)}e^{-\tau/\lambda_n},
 \end{equation}
-where $\mu_p^{(n)}$ and $\lambda_n$ are polymer viscosities and relaxation times, respectively. You can think of this process as descretizing the continuous spectrum of the fluid's relaxation times. We will now deduce a new formula for $\bfs$ by putting in our assumption. This yields
+where $\mu_p^{(n)}$ and $\lambda_n$ are polymer viscosities and relaxation times, respectively. One can think of this process as descretizing the continuous spectrum of the fluid's relaxation times. We will now deduce a new formula for $\bfs$ by inserting this assumption. This yields
 \begin{equation}
     \bfs(t)=\int_0^t\partial_\tau \bfb(t,t-\tau)\sum_{n=1}^{N}\mu_p^{(n)}e^{-\tau/\lambda_n}\D\tau.
 \end{equation}
@@ -1228,13 +1214,13 @@ If we look closely at the equation above one can see that we now have $N$ equati
 \end{equation}
 for all $n$. This increases the computational effort but should still be more efficient than brute force calculating the integral at every timestep. Because $G$ is just a linear combination, all proofs and statements we made about the simpler equation remain true for this one.
 \section{A simple integral equation}
-In this section we will take a look at a related integral equation. This has the same complexity regarding the integral as the ones we were looking at earlier, but the complexity regarding dimension and number of equations is much reduced. This makes it easier to concentrate on the main problem and to gather ideas, how one may approach the problem of an integro-dfferential equation in general. We use 
+In this section we will take a look at a related integral equation. Later on the solution of this equation can be interpreted as the square root of the relaxation modulus $G$. More information on this equation can be found in \cite{Gnann2012} The new equation has the same complexity regarding the integral as the ones we were looking at earlier, but the complexity regarding dimension and number of equations is much reduced. This makes it easier to concentrate on the main problem and to gather ideas, how one may approach the problem of an integro-dfferential equation in general. We use 
 \begin{align}
    \dot\phi(t)&=-\phi(t)-\int_0^tm(t-\tau)\dot\phi(\tau)\D\tau,\\
    m(t)&=v_1\phi(t)+v_2\phi(t)^2,
 \end{align}
 where we use the dot notation for the derivative and $v_1$ and $v_2$ are given constants. This equation is also studied in \cite{Goetze1995}.
-The integral is the convolution of $m$ and $\dot\phi$. The convolution is symmetric and because $m(\tau)$ is independent of $T$ the derivative can be applied to the whole product instead of just $\phi$. This is allowed, because if $\phi$ is differentiable then, by definition, $m$ is as well. Using these ideas we get
+The integral is the convolution of $m$ and $\dot\phi$. The convolution is symmetric and because $m(\tau)$ is independent of $t$ the derivative can be applied to the whole product instead of just $\phi$. This is allowed, because if $\phi$ is differentiable then, by definition, $m$ is as well. Using these ideas we get
 \begin{equation}
     \dot\phi(t)=-\phi(t)-\int_0^t\frac{\D}{\D t}(m(\tau)\phi(t-\tau))\D\tau.
 \end{equation}
@@ -1253,9 +1239,13 @@ where we renamed the integration variable to $t'$ to be able to shorten the expr
 Now we have a pure integral equation. The next step will be to discretize the integral and $t$.
 We will use timesteps $0=t_0,\dotsc,t_N=T$, where $T$ is the end time. The timestep length is given by $h_j=t_{j+1}-t_j$, where $h_j$ does not have to be constant. For the integral we will use 
 \begin{equation}
-    \int_0^{t_n}f(t)=\sum_{j=0}^{n-1}\int_{t_j}^{t_{j+1}}f(t)\D t\label{eq:generalint}
+    \int_0^{t_n}f(t)\D t=\sum_{j=0}^{n-1}\int_{t_j}^{t_{j+1}}f(t)\D t\label{eq:generalint}
 \end{equation}
-for a generic $f$. Now, we have to choose a method to calculate the integral in \eqref{eq:generalint}. By using the trapezoidal rule and $h_j\equiv \Delta t$, we could solve this problem in $\mathcal{O}(N^2)$ calculations. But that is very inefficient so we will try to find a better method. However, we implemented this brute force approach to obtain a reference for the next algorithms.
+for a generic $f$. We will denote $f_{n+1}:=f(t_{n+1})$. Now, we have to choose a method to calculate the integral in \eqref{eq:generalint}. By using a simple quadrature rule and $h_j\equiv \Delta t$, we could solve this problem in $\mathcal{O}(N^2)$ calculations. The discretization can be obtained easily. It yields
+\begin{equation}
+    \phi_{n+1}=\phi_0 + \sum_{j=0}^{n-1}\Delta t\frac{m_i(\phi_0-\phi_{n+1-i})-\phi_i+m_{i-1}(\phi_0-\phi_{n-i+2})-\phi_{i-1}}{2}
+\end{equation}
+But that is very inefficient so we will try to find a better method. However, we implemented this brute force approach to obtain a reference for the next algorithms.
 \subsection{Exponentially increasing time intervals}
 We try to employ, that the resulting solution $\phi$ is exponentially declining. Therefore it would make sense that we use intervals that increase their size exponentially. A similar trick is done in calculating the Fast-\textsc{Fourier}-Transformation. For more on this topic see \cite{Cooley1965}. So we set $t_j=h2^j$ and choose 
 \begin{equation}
