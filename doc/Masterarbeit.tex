@@ -20,6 +20,13 @@
 \usepackage{framed}
 \usepackage[german]{fancyref}
 \usepackage{listings}
+\usepackage{tikz} % Erlaubt es mit tikz zu zeichnen
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+\usepgfplotslibrary{groupplots}
+\usepgfplotslibrary{dateplot}
+\usepgfplotslibrary{external} 
+\tikzexternalize
 \usepackage{color}
 \usepackage{pdfpages}
 \definecolor{mygreen}{RGB}{28,172,0} % Define colour
@@ -37,7 +44,7 @@
 \usepackage{wrapfig} % Das Paket ermöglicht es von Schrift umflossene Bilder und Tabellen einzufügen.
 %\numberwithin{equation}{section} % Nummerierungen der Gleichungen, die durch equation erstellt werden, sind gebunden an die section
 \usepackage{latexsym} % LaTeX-Symbole werden geladen
-\usepackage{tikz} % Erlaubt es mit tikz zu zeichnen
+
 \usepackage{tabularx} % Erlaubt Tabellen 
 \usepackage{algorithm} % Erlaubt Pseudocode
 \usepackage{algorithmic}
@@ -155,7 +162,7 @@
   
 
 \chapter*{Danksagung}
-Als Erstes möchte ich mich bei Herrn Professor Gassner für die gute Betreuung und die Flexibilität bedanken, dass ich in Kooperation mit dem Deutschen Zentrum für Luft- und Raumfahrt meine Masterarbeit anfertigen konnte. Darüber hinaus gilt mein Dank Herrn Dr. Basermann für Möglichkeit der Beschäftigung in der Abteilung High-Performance Computing (SC-HPC). Genau dieser Abteilung möchte ich vom ganzen Herzen für die tolle kollegiale Zusammenarbeit schon vor Beginn meiner Masterarbeit und die vielfältige Unterstützung bedanken. Insbesondere Herrn Dr. Kontak und Herrn Dr. Knechtges gilt meine große Wertschätzung für die viele Zeit, das Engagement und die große fachliche und menschliche Unterstützung in dieser Zeit. Natürlich möchte ich mich in diesem Zuge auch bei Herrn Professor Sperl für die Beschäftigung in der zweiten Hälfte meiner Masterarbeit und die Bereitstellung des Themas bedanken. \par
+Als Erstes möchte ich mich bei Herrn Professor Gassner für die sehr gute Betreuung und die Flexibilität bedanken, dass ich in Kooperation mit dem Deutschen Zentrum für Luft- und Raumfahrt meine Masterarbeit anfertigen konnte. Darüber hinaus gilt mein Dank Herrn Dr. Basermann für die Möglichkeit, Betreuung für meine Masterarbeit in der Abteilung High-Performance Computing (SC-HPC) zu erhalten. Genau dieser Abteilung möchte ich vom ganzen Herzen für die tolle kollegiale Zusammenarbeit schon vor Beginn meiner Masterarbeit und währenddessen sowie die vielfältige Unterstützung bedanken. Insbesondere Herrn Dr. Kontak und Herrn Dr. Knechtges gilt meine große Wertschätzung für die viele Zeit, das Engagement und die große fachliche und menschliche Unterstützung in dieser Zeit. Natürlich möchte ich mich in diesem Zuge auch bei Herrn Professor Sperl für die Bereitstellung des Themas bedanken. \par
 Zusätzlich bedanke ich mich noch bei meiner Familie, meinen Freunden und Kommilitonen und meiner Freundin für ihre Geduld und ihr Verständnis.
 \\[1cm]
 Köln, \today 
@@ -1241,17 +1248,22 @@ We will use timesteps $0=t_0,\dotsc,t_N=T$, where $T$ is the end time. The times
 \begin{equation}
     \int_0^{t_n}f(t)\D t=\sum_{j=0}^{n-1}\int_{t_j}^{t_{j+1}}f(t)\D t\label{eq:generalint}
 \end{equation}
-for a generic $f$. We will denote $f_{n+1}:=f(t_{n+1})$. Now, we have to choose a method to calculate the integral in \eqref{eq:generalint}. By using a simple quadrature rule and $h_j\equiv \Delta t$, we could solve this problem in $\mathcal{O}(N^2)$ calculations. The discretization can be obtained easily. It yields
+for a generic $f$. We will denote $f_{n+1}:=f(t_{n+1})$. Now, we have to choose a method to calculate the integral in \eqref{eq:generalint}. By using a simple quadrature rule and $h_j\equiv \Delta t$, we obtain
 \begin{equation}
-    \phi_{n+1}=\phi_0 + \sum_{j=0}^{n-1}\Delta t\frac{m_i(\phi_0-\phi_{n+1-i})-\phi_i+m_{i-1}(\phi_0-\phi_{n-i+2})-\phi_{i-1}}{2}
+    \phi_{n+1}=\phi_0 + \sum_{j=0}^{n}\left(\Delta t\, m_j\,(\phi_0-\phi_{n+1-j})-\phi_j\right).
+\end{equation} We call this algorithm (A1).
+One can observe that to calculate timestep $t_n$ from $t_{n-1}$ we need computational effort $\mathcal{O}(n)$. So to calculate $t_N$ from the start $t_0$ results in effort
+\begin{equation}
+    \sum_{n=1}^Nn=\frac{N(N+1)}{2},
 \end{equation}
+where we used the \textsc{Gaussian} summation rule. So it results that the calculation of $t_N$ from the initial condition results in $\mathcal{O}(N^2)$ effort.
 But that is very inefficient so we will try to find a better method. However, we implemented this brute force approach to obtain a reference for the next algorithms.
 \subsection{Exponentially increasing time intervals}
-We try to employ, that the resulting solution $\phi$ is exponentially declining. Therefore it would make sense that we use intervals that increase their size exponentially. A similar trick is done in calculating the Fast-\textsc{Fourier}-Transformation. For more on this topic see \cite{Cooley1965}. So we set $t_j=h2^j$ and choose 
+We try to employ, that the resulting solution $\phi$ is exponentially decaying. Therefore it makes sense that we use intervals that increase their size exponentially. We hope that this approach is successful because a similar trick is done in calculating the Fast-\textsc{Fourier}-Transformation. For more on this topic see \cite{Cooley1965}. So we set $t_j=h2^j$ and choose 
 \begin{equation}
     \sum_{j=0}^{n-1}\int_{t_j}^{t_{j+1}}f(t)\D t\approx\sum_{j=0}^{n-1}(t_{j+1}-t_j)f_{j+1}.
 \end{equation}
-So we approximate the integral with the rectangle formed by the value on the right side and the interval length. This underestimates the true value because the function is monotonously declining. Replacing the integral in \eqref{eq:phianalytic} yields
+So we approximate the integral with the rectangle formed by the value on the right side and the interval length. This underestimates the true value because the function is monotonously decreasing. Replacing the integral in \eqref{eq:phianalytic} yields
 \begin{equation}
     \phi_n = \phi_0 + \sum_{j=0}^{n-1}h_j[m_{j+1}(\phi_0-\phi(t_n-t_{j+1}))-\phi_{j+1}]\label{eq:phidisc}
 \end{equation} 
@@ -1268,7 +1280,7 @@ This means that the first term lies completely in the already known interval fro
 \begin{equation}
     t_{n+1}=h2^{n+1}\ge t_{n+1}-t_{j+1}\ge h(2^{n+1}-2^{n-1})=h\frac{3}{2}2^n=\frac{3}{2}t_n,
 \end{equation}
-where $0\le j\le n-2$ as before. This however presents the challenge, that we have to interpolate in the yet unknown interval $[t_{n+1},3/2t_{n}]$. We hope to achieve greater accuracy by taking $t_{n+1}$. Putting the assumptions for the interpolation into \eqref{eq:phidiff} we obtain
+where $0\le j\le n-2$ as before. This however presents the challenge, that we have to interpolate in the yet unknown interval $[t_{n+1},3/2t_{n}]$. As we want to obtain an implicit method we use $t_{n+1}$. Putting the assumptions for the interpolation into \eqref{eq:phidiff} we obtain
 \begin{equation}
     \phi_{n+1}(1 + h_n + \sum_{j=0}^{n-2}h_jm_{j+1})=\phi_n(1+\sum_{j=0}^{n-2}h_jm_{j+1})+h_{n-1}m_n(\phi_0-\phi_n).
 \end{equation}
@@ -1287,15 +1299,16 @@ We introduce $\beta_n=2^{-n}s_n$. We obtain
      \phi_{n+1}(2^{-n}+h+\beta_n) &= \phi_n(2^{-n}+\beta-\frac{h}{2}m_n)+\frac{h}{2}m_n\phi_0,\\
      \beta_{n+1} &= 2^{-n-1}s_{n+1}=\frac{1}{2}(\beta_n+\frac{h}{2}m_n) .
 \end{align}
+
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{Phidiff}
+    \includegraphics[width=0.8\textwidth]{Phidiff.pdf}
     \caption{Both $\phi$ with $h=\Delta t=0.01$ and $v_1=1.5,~v_2=0.5$}
     \label{fig:phifalse}
 \end{figure}
-This is now an explicit algorithm with $\mathcal{O}(N)$ to solve the equation for $\phi$. However as one can see in figure \ref{fig:phifalse}, it does not converge to the correct solution. Moreover it is unclear if for $h\to 0$ the error would become better as it would lead to $T-t_{N-1}\to T$. This means that this method is not suitable for our problem and we need to find a new approach.
+This is now an explicit algorithm, called (A2) with $\mathcal{O}(N)$ to solve the equation for $\phi$. However as one can see in figure \ref{fig:phifalse}, it does not converge to the correct solution. Moreover it is unclear if for $h\to 0$ the error would become better as it would lead to $T-t_{N-1}\to T$. This means that this method is not suitable for our problem and we need to find a new approach.
 \subsection{Transformation of the argument}
-The reason that the previous method did not work was probably due to the fact that we eliminated the effect of the history completely. So we need an algorithm with runtime between $\mathcal{O}(n)$ and $\mathcal{O}(n^2)$. The next idea one could follow is to transform $t=f(u)$ and $\tilde\phi(u)=\phi(f(u))$ (and $m$ accordingly), where $f$ is a diffeomorphism (bijective function with differentiable inverse).  Let $u_{-1}=f^{-1}(0)$, which is unique because $f$ is especially injective. If we recall \eqref{eq:phianalytic} and insert the transformation for $t$, we obtain
+The reason that the previous method did not work was probably due to the fact that we eliminated the effect of the history completely. So we need an algorithm with a runtime between $\mathcal{O}(n)$ and $\mathcal{O}(n^2)$. The next idea one could follow is to transform $t=f(u)$ and $\tilde\phi(u)=\phi(f(u))$ (and $m$ accordingly), where $f$ is a diffeomorphism (bijective function with differentiable inverse).  Let $u_{-1}=f^{-1}(0)$, which is unique because $f$ is especially injective. If we recall \eqref{eq:phianalytic} and insert the transformation for $t$, we obtain
 \begin{equation}
     \phi(f(u)) = \phi(f(u_{-1}))+\int_{u_{-1}}^{u}f'(u')[m(f(u'))(\phi(f(u_{-1}))-\phi(f(u)-f(u')))-\phi(f(u'))]\D u'.
 \end{equation}
@@ -1305,28 +1318,31 @@ Now we can replace $\phi$ by $\tilde\phi$. The transformed equation reads
 \end{equation}
 The goal of this transformation is that we can use equally spaced points in $u$ and $u'$ but do not have effort $\mathcal{O}(N^2)$. The important term is $\tilde\phi(f^{-1}(f(u)-f(u')))$ because this is the only time that old timesteps effect the current one. Ideally 
 \begin{equation}
-    F(u,u'):=f^{-1}(f(u)-f(u'))=u,\quad u'\in(u_{-1},u]
-\end{equation}
+    F(u,u'):=f^{-1}(f(u)-f(u'))\approx u,\quad u'\in(u_{-1},u]
+    \end{equation}
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{HistoryF}
-    \caption{History dependency for different $f$}
+    \includegraphics[width=0.8\textwidth]{HistoryF.pdf}
+    \caption{History dependency for different $f$ with $u=3$}
     \label{fig:Fustrich}
-\end{figure}
-almost everywhere. This would again eliminate the history completely like in the previous example. In figure \ref{fig:Fustrich} $F(u')$ is shown for a fixed $u$. We can see that for both functions $f$ we have a long interval, in which $u=F(u,u')$ is a good approximation. \par 
-Now let $f(u)=e^u$. We choose this because $F(u,u')$ is qualitatively the same function for every $u$ just translated. This will help us immensely later on. We then have $u_{-1}=-\infty$. Obviously we cannot start our calculation at $-\infty$ so we introduce an arbitrary $u_0$ where $\abs{f(u_0)-f(-\infty)}$ is negligible. From there we introduce a discretization for $u$ as
+\end{figure}almost everywhere. This would again eliminate the history completely like in the previous example. In figure \ref{fig:Fustrich} $F(u')$ is shown for a fixed $u$. We can see that for both functions $f$ we have a long interval, in which $u=F(u,u')$ is a good approximation. \par 
+Now let $f(u)=e^u$. We choose this because $F(u,u')$ is qualitatively the same function for every $u$ just translated. For $f(u)=\exp(u)$ we have
+\begin{equation}
+    F(u,u')=\log(\exp(u)-\exp(u')).
+\end{equation}
+This will help us immensely later on. We then have $u_{-1}=-\infty$. Obviously we cannot start our calculation at $-\infty$ so we introduce an arbitrary $u_0$ where $\abs{f(u_0)-f(-\infty)}$ is negligible. This is possible, because $\exp(u)\to 0$ as $u\to-\infty$. From there we introduce a discretization for $u$ as
 \begin{equation}
     u_i = u_0+ih,\quad\forall i=0,\dotsc,N
 \end{equation}
-where $h = \frac{\log(T) -u_0}{N}$ is a fixed interval length and we stop at $u_N=\log(T)$, where $T$ is the end time and $N$ the given number of steps. Our goal now is to calculate values for all $\tilde\phi(u_i)$. We assume that for all $i=0\dotsc,N$ we have
+where $h = \frac{\log(T) -u_0}{N}$ is a fixed interval length and we stop at $u_N=\log(T)$, where $T$ is the end time and $N$ the given number of steps. Our goal now is to calculate values for $\tilde\phi(u_i)$ for all $i=1,\dotsc,N$. We assume that for all $i=0\dotsc,N$ we have
 \begin{equation}
     \tilde\phi(u) \equiv \tilde\phi(u_i), \quad\forall u\in(u_{i-1},u_i].
 \end{equation}
-This is where we introduce the discretization error. The integral evaluation will be exact under this assumption. Let us now take a look back at \eqref{eq:phitilde} and look at the integral part by part. Let us assume we know the values for each $\tilde\phi(u_i)$ for $i\le n$ and want to calculate $\tilde\phi(u_{n+1})$. For the first part we get
+This is where we introduce the discretization error. The evaluation of the integral will be exact under this assumption. Let us now take a look back at \eqref{eq:phitilde} and look at the integral part by part. Let us assume we know the values for each $\tilde\phi(u_i)$ for $i\le n$ and want to calculate $\tilde\phi(u_{n+1})$. For the first part we get
 \begin{equation}
     I_1:=\int_{-\infty}^{u_{n+1}}f'(u')\tilde{m}(u')\tilde\phi(-\infty)\D u'=\tilde\phi(-\infty)\sum_{i=0}^{n+1}\int_{u_{i-1}}^{u_i}f'(u')\tilde{m}(u')\D u'
 \end{equation}
-We assumed that $\tilde{m}$ is piecewise constant. The jump is on each integral boundary so we obtain
+Assuming $\tilde{m}$ to be piecewise constant on the integration interval, this also holds for $\tilde{m}$. As such, jumps only occur on the integral boundary and we obtain
 \begin{equation}
     I_1 = \tilde{\phi}(-\infty)\sum_{i=0}^{n+1}\tilde{m}(u_i)\int_{u_{i-1}}^{u_i}f'(u')\D u' = \tilde{\phi}(-\infty)\sum_{i=0}^{n+1}\tilde{m}(u_i)[f(u_i)-f(u_{i-1})].
 \end{equation}
@@ -1335,7 +1351,7 @@ We set
     I_1 = \tilde\phi(-\infty)[S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]].
 \end{equation}
 This way we can perform an update for $S(n+1) = S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]$ and  only use linear effort for this part. The summand for $n+1$ will have to be regarded separately because it is implicitly depending on the value of $\tilde\phi$ we are trying to calculate. We will actually discover later on that we can at worst obtain a cubic problem in $\tilde\phi(u_{n+1})$, which we will solve using \textsc{Newton's} method.
-\par After we now handled the first part successfully we will take a look at the third part because the second will be the most challenging. Consider
+\par After we now handled the first part of the integral successfully we will take a look at the third part because the second will be the most challenging. Consider
 \begin{equation}
     I_3:=-\int_{u_{-1}}^{u_{n+1}}f'(u')\tilde\phi(u')\D u' = -\sum_{i=0}^{n+1}\int_{u_{i-1}}^{u_i}f'(u')\tilde\phi(u')\D u'.
 \end{equation} Using the same arguments as for $I_1$ we obtain
@@ -1346,39 +1362,39 @@ with the update rule
 \begin{equation}
     M(n+1) = M(n) + \tilde\phi(u_{n+1})[f(u_{n+1})-f(u_{n})].
 \end{equation}
-For understanding the second part we will first rename the integration variable to avoid confusion
+To understand the second part we will first rename the integration variable to avoid confusion and arrive at
 \begin{equation}
     I_2:=\int_{u_{-1}}^{u_{n+1}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v.
 \end{equation}
-Now let us recall the behavior of $F(u,v)$ in figure \ref{fig:Fustrich}. We can see that in the beginning we can set $\tilde\phi(F(u_{n+1},v))=\tilde\phi(u_{n+1})$. But what do we do with the remaining interval? To answer this question we have to see that $F$ is its own inverse in the second argument. Let $x = F(u,v)$. We want to find a $v$ for a given $u$ to solve this. We get
+Now let us recall the behavior of $F(u,v)$ in figure \ref{fig:Fustrich}. Heuristically, we can see that in the beginning we can set $\tilde\phi(F(u_{n+1},v))=\tilde\phi(u_{n+1})$. But what do we do with the remaining interval? To answer this question we observe that $F$ is its own inverse in the second argument. Let $x = F(u,v)$. It yields
 \begin{equation}
     f(x)=f(u)-f(v)\quad\Rightarrow f(v)=f(u)-f(x)\quad\Rightarrow v= F(u,x).
 \end{equation}
-The remaining discretization will be built on this fact. Specifically we set $w_i^n=F(u_n,u_i)$. This ensures that 
+The remaining discretization will be built on this fact. Specifically, we set $w_i^n=F(u_n,u_i)$. This ensures that 
 \begin{equation}
     \tilde\phi(F(u_{n+1},w^{n+1}_i))=\tilde{\phi}(u_j),
 \end{equation}
 for some $j=0,\dotsc,n$. Note that the $w_i^n$ are decreasing as $i$ increases for a fixed $n$. The lowest value of $w_i^n$ will be $w_{n-1}^n$. Our discretization $I_2$ will be 
 \begin{equation}
-    \{v_i\}_i=\text{sort}(\{u_i\}_i\cup \{w_i^{n+1}\}_i),
+    \{v_i\}_i=\text{sort}(\{u_i\}_i\cup \{w_i^{n+1}\}_i).
 \end{equation}
-so it will differ in each timestep. One might be tempted to think that this will at least result in an $\mathcal{O}(N^2)$ algorithm because we have to sort every timestep, but we will solve this issue later on.
-\par An important thing to know during the simulation, is the first index $j$ so that $v_j\in\{w_i^{n+1}\}$ for each $n$. Because we know that $v_j = w_{n}^{n+1}$ we can calculate this directly. We introduce 
+In other word, the sequence $\{v_i\}$ is the union of the sequences on the right hand side but sorted. The sequence $\{v_i\}$ will differ in each timestep. One might be tempted to think that this will at least result in an $\mathcal{O}(N^2)$ algorithm because we have to sort in every timestep, but we will solve this issue later on.
+\par An important thing to know during the simulation is the first index $j$ so that $v_j\in\{w_i^{n+1}\}_i$ for each $n$. Because we know that $v_j = w_{n}^{n+1}$ we can calculate this directly. We introduce the index
 \begin{equation}
     l^*:=\left\lceil  \frac{u_n -w_{n}^{n+1}}{h}\right\rceil.
 \end{equation}
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{Tranformls1}
-    \caption{Visualization of discretization for $I_2$, where $n=3$}
+    \caption{Visualization of the discretization for $I_2$, where $n=3$}
     \label{fig:vis1}
 \end{figure}
- This is constant in $n$ and equals the number of intervals, which the $w_i^{n+1}$ spread. Therefore we know that all intervals until $u_{n-l^*+1}$ do not contain any points $w_i^{n+1}$.
- Figure \ref{fig:vis1} shows the discretization of $I_2$, where $n=3$. Both lines represent $[u_0,u_4]$. The top line shows the equal distant discretization used for $\tilde{m}$ and the bottom line shows the discretization for $\tilde\phi(F(u_{4},v))$ The value below the respective lines denote the discretization points. Above the respective lines one can see the values of the factors $\tilde{m}$ and $\tilde\phi(F(u_4,v))$ for that specific interval. In the case shown above we have $l^*=1$. As a next step, we will divide the integral $I_2$ to become
+This is constant in $n$ because of our choice for $f$ and equals the number of intervals, over which the $w_i^{n+1}$ spread. Therefore we know that all intervals until $u_{n-l^*+1}$ do not contain any points $w_i^{n+1}$.
+ Figure \ref{fig:vis1} shows the discretization of $I_2$, where $n=3$. Both lines represent $[u_0,u_4]$. The top line shows the equidistant discretization used for $\tilde{m}$ and the bottom line shows the discretization for $\tilde\phi(F(u_{4},v))$ The value below the respective lines denote the discretization points. Above the respective lines one can see the values of the factors $\tilde{m}$ and $\tilde\phi(F(u_4,v))$ for that specific interval. In the case shown above we have $l^*=1$. As a next step, we will divide the integral $I_2$ to become
 \begin{equation}
     I_2 = \int_{-\infty}^{u_{n-l^*+1}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v + \int_{u_{n-l^* +1}}^{u_{n+1}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v.
 \end{equation}
-We will assume that \begin{equation}
+We see that \begin{equation}
     \tilde\phi(F(u_{n+1},v))=\tilde\phi(u_{n+1})
 \end{equation}
 in the first part of this integral. So we get 
@@ -1426,7 +1442,7 @@ So it yields
 \begin{align}
      \int_{u_{n-l^*+1}}^{w^{n+1}_n}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v = \tilde\phi(u_{n+1})\tilde{m}(u_{n-l^*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l^*+1})].
 \end{align}
-So what remains of the integral is the part, where the two discretizations overlap. We also have to discuss how we can eliminate the sorting process from the main loop as this would result in $\mathcal{O}(n^2\log(n))$ effort. We know that after calculating $l^*$ time steps we have the first appearance of a $w$ which is larger than $u_0$ and therefore needs consideration. But this is independent of $n$ and can be calculated in advance as a result. The part of $w$ which overlaps is exactly the part that is not entirely in the interval $[u_n,u_{n+1}]$. So it is given by
+So what remains of the integral is the part, where the two discretizations overlap. We also have to discuss how we can eliminate the sorting process from the main loop as this would result in $\mathcal{O}(n^2\log(n))$ effort. We know that after calculating $l^*$ time steps we have the first appearance of a $w$ which is larger than $u_0$ and therefore needs consideration. But this is independent of $n$ and can be calculated in advance as a result. The part of $w$ which overlaps with the equidistant discretization is exactly the part that is not entirely in the interval $[u_n,u_{n+1}]$. So it is given by
 \begin{equation}
     w^{l^*}_{l^*-i},\quad\forall i=1,\dotsc,j^*.
 \end{equation}
@@ -1434,20 +1450,20 @@ Because the $u_i$ are equally spaced, we know that
 \begin{equation}
     u_{n+1}=u_{l^*}+u_{n+1-l^*}.
 \end{equation}
-We can therefore add $u_{n+1-l^*}$ each timestep and obtain the current position of these $w$s. For each $n$ we know that the points $u_{n+1-l^*},\dotsc,u_n$ overlap. By applying the shift backwards we find that the $w$ as above overlap with 
+We can therefore add $u_{n+1-l^*}$ each timestep and obtain the current position of these $w$s. For each $n$ we know that the points $u_{n+1-l^*},\dotsc,u_n$ overlap with the other discretization. By applying the shift backwards we find that the $w$ as above overlap with 
 \begin{equation}
     u_i,\quad\forall i=1,\dotsc,l^*-1.
 \end{equation}
 This way we can define the overlapping points 
 \begin{equation}
-    \tilde{u}= \bigcup\left(\bigcup_{i=1}^{l^*-1}u_i\bigcup_{j=1}^{j^*}w^{l^*}_{l^*-j}\right).
+    \tilde{u}= \bigcup_{i=1}^{l^*-1}u_i\,\cup\,\bigcup_{j=1}^{j^*}w^{l^*}_{l^*-j}
 \end{equation}
-We can sort these in preprocessing. If we keep the permutation array that resulted during the sorting process, we can later recall, from which discretization each point came. We introduce two new variables
+We can sort the $\tilde(u)$ in the preprocessing. If we keep the permutation array that resulted during the sorting process, we can later recall, from which discretization each point came. We introduce two new variables
 \begin{equation}
     q_i:=\abs{\{u_j\colon u_j\in\tilde{u} \text{ and }u_j\le\tilde{u_i} \}},\quad
     y_i:=\abs{\{w^{l^*}_j\colon w^{l^*}_j\in\tilde{u} \text{ and }w^{l^*}_j\le\tilde{u_i} \}}.
 \end{equation}
-Now we gathered all the information we need in preprocessing, we can get back to $I_{2,2}$. With the new defined variables inserted, we obtain
+Now we gathered all the information we need in the preprocessing, we can get back to $I_{2,2}$. With the new defined variables inserted, we obtain
 \begin{align}
     I_{2,2}&= \sum_{i=1}^{l^*+j^*-1}\tilde{m}(u_{n+2-l^*+q_{i-1}})\tilde{\phi}(u_{n+1-y_{i-1}})[f(u_{n+1-l^*}+\tilde{u_i})-f(u_{n+1-l^*}+\tilde{u}_{i-1})]\\&+\tilde{m}(u_{n+1})\sum_{i=0}^{n-j^*}\tilde\phi(u_{i-1})[f(u_i)-f(u_{i-1})] \\&+ \tilde\phi(u_{n+1})\tilde{m}(u_{n-l^*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l^*+1})].
 \end{align}
@@ -1473,7 +1489,7 @@ As initial condition we set $S(-1)=M(-1)=0$. However due to the sums in \eqref{e
 \end{equation}
 and 
 \begin{equation}
-    Q(n):=\sum_{i=0}^{n-j^*}\tilde\phi(u_{i})[f(u_i)-f(u_{i-1})]
+    Q(n):=\sum_{i=j^*}^{n-j^*}\tilde\phi(u_{i})[f(u_i)-f(u_{i-1})]+\tilde\phi(f(u_0-h(j^*+1)))
 \end{equation}
 with the update rules
 \begin{equation}
@@ -1506,7 +1522,7 @@ Putting $O$ and $Q$ into \eqref{eq:discphit1} to \eqref{eq:discphit4} yields
 \end{align}
 The sum in the last equation above will yield a quadratic and linear term in $\tilde{\phi}(u_{n+1})$ so we will split it up. This way we obtain
 \begin{align}
-   \tilde\phi(u_{n+1})&=\tilde\phi(-\infty) +\tilde\phi(-\infty)[S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]]\\&-M(n) -\tilde\phi(u_{n+1})[f(u_{n+1})-f(u_{n})] -\tilde{\phi}(u_{n+1})O(n)-\tilde{m}(u_{n+1})Q(n)\\&-\tilde\phi(u_{n+1})\tilde{m}(u_{n-l^*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l^*+1})] \\&-\sum_{i=1}^{l^*+j^*-2}\tilde{m}(u_{n+2-l^*+q_{i-1}})\tilde{\phi}(u_{n+1-y_{i-1}})[f(u_{n+1-l^*}+\tilde{u_i})-f(u_{n+1-l^*}+\tilde{u}_{i-1})]\\&-\tilde{m}(u_{n+1})\tilde{\phi}(u_{n+1-j^*})[f(w^{n+1}_{n+1-j^*})-f(u_n)].
+   \tilde\phi(u_{n+1})&=\tilde\phi(-\infty) +\tilde\phi(-\infty)[S(n)+\tilde{m}(u_{n+1})[f(u_{n+1})-f(u_n)]]\\&-M(n) -\tilde\phi(u_{n+1})[f(u_{n+1})-f(u_{n})] -\tilde{\phi}(u_{n+1})O(n)-\tilde{m}(u_{n+1})Q(n)\\&-\tilde\phi(u_{n+1})\tilde{m}(u_{n-l^*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l^*+1})] \\&-\sum_{i=1}^{l^*+j^*-2}\tilde{m}(u_{n+2-l^*+q_{i-1}})\tilde{\phi}(u_{n+1-y_{i-1}})[f(u_{n+1-l^*}+\tilde{u_i}-u_0)-f(u_{n+1-l^*}+\tilde{u}_{i-1}-u_0)]\\&-\tilde{m}(u_{n+1})\tilde{\phi}(u_{n+1-j^*})[f(w^{n+1}_{n+1-j^*})-f(u_n)].
 \end{align}
 \begin{table}
     \centering
@@ -1522,34 +1538,34 @@ The sum in the last equation above will yield a quadratic and linear term in $\t
     \caption{Convergence of the new algorithm for the simpler integral equation}
     \label{tab:integral}
 \end{table}
-One can observe that $l^*=1$ is a special case because then we obtain a cubic problem in $\tilde\phi$. Otherwise the problem becomes quadratic. In the code this problem will be solved using \textsc{Newton's} method. If we compare the results that this algorithms produces with the one, which has $\mathcal{O}(n^2)$ runtime, we obtain table \ref{tab:integral}. One can clearly observe that convergence is obtained in both norms. Because we used constant ansatz functions we would expect an order of 1. However, because we approximated the history integral with a much higher order, we obtain a slightly better convergence. This effect becomes less relevant the more elements we use. To understand the values for the $L^\infty$ norm we have to recall that we do not compare our results to a known exact solution but we rather compare it to another approximation by an algorithm we trust. This can explain the drop in order of convergence for the $L^\infty$ norm. \par 
+One can observe that $l^*=1$ is a special case because then we obtain a cubic problem in $\tilde\phi$. Otherwise the problem becomes quadratic. In the code this problem will be solved using \textsc{Newton's} method. If we compare the results that this algorithms produces with the one, which has $\mathcal{O}(N^2)$ runtime, we obtain table \ref{tab:integral}. One can clearly observe that convergence is obtained in both norms. Because we used constant ansatz functions we would expect an order of 1. Possibly, because we approximated the history integral with a much higher order, we obtain a slightly better convergence. This effect becomes less relevant the more elements we use. To understand the values for the $L^\infty$ norm we have to recall that we do not compare our results to a known exact solution but we rather compare it to another approximation by an algorithm we trust. This can explain the drop in order of convergence for the $L^\infty$ norm. \par 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{runtime}
+    \includegraphics[width=0.8\textwidth]{runtime.pdf}
     \caption{Relationship of $l^*$ and $N$}
     \label{fig:runtime}
 \end{figure}
-The last thing to consider is the computational effort of this method. One might be tempted to think of linear runtime. However, $l^*$ and $j^*$ increase as $n$ increases. A priori we cannot give a formula for this so we will empirically take a look at this relationship in figure \ref{fig:runtime}. This clearly shows a linear relationship in $l^*$. This leads to a $\mathcal{O}(n^2)$ algorithm. However, every time step within one discretization is equally fast. The brute force algorithm on the other hand slows down from time step to time step. In the last chapter we will discuss possibilities, which could improve the newly developed algorithm.
+The last thing to consider is the computational effort of this method. One might be tempted to think of linear runtime. However, $l^*$ and $j^*$ increase as $h$ decreases and $h$ decreases only as $N$ increases for a fixed end time $T$. A priori we cannot give a formula for this so we will empirically take a look at this relationship in figure \ref{fig:runtime}. This clearly shows a linear relationship in $l^*$. This leads to a $\mathcal{O}(N^2)$ algorithm. However, every time step within one discretization takes the same amount of time. The brute force algorithm on the other hand slows down from time step to time step. In the outlook given in chapter 6, we will discuss possibilities, which could improve the newly developed algorithm.
 
 \chapter{Conclusion and Outlook}
 In this chapter we will wrap up all results we obtained throughout this work and give an idea for future research in this topic. \par 
 In the introduction we formulated the goal to be the development of an efficient method to simulate the governing equations for non-\textsc{Newtonian} fluids in two spatial dimensions. This was achieved using the \textsc{Laplace} transform to eliminate the bothering integral from the governing equations completely. The resulting algorithm is as efficient as a normal CFD simulation. We could simulate the cross section of a rheometer, which has practical value. Theoretical existence and uniqueness of the solution to the governing equation could be shown for a sensible set of parameters. Even though this could not be shown for $\mu_s=0$ we saw empirical convergence in the numerical experiments. \par 
-The second thing we looked at was the possibility to solve the integral from the governing equations without the \textsc{Laplace} transform to be able to loosen some of the necessary assumptions. Three approaches have been considered:
+The second thing we looked at was the possibility to solve the integral from the governing equations without the \textsc{Laplace} transform to be able to loosen some of the necessary assumptions. To accomplish this we studied the equation from \cite{Gnann2012}. Three approaches have been considered:
 \begin{itemize}
     \item brute force
     \item exponentially increasing time intervals
     \item transformation of the argument
 \end{itemize}
-However, all of them were perfectly suited. The first and third approach have a computational effort of $\mathcal{O}(n^2)$ and are therefore not appropriate for the five-dimensional system of equations with a sensible number of degrees of freedom. The second approach did unfortunately not lead to a correct solution as the calculation error was to great. \\
+However, all of them were not perfectly suited. The first and third approach have a computational effort of $\mathcal{O}(N^2)$ and would therefore not be appropriate for an extension to the five-dimensional system of equations with a sensible number of degrees of freedom. The second approach did unfortunately not lead to a correct solution as the calculation error was to great. \\
 \par 
-For future research it might be worth to take a look at our newly developed algorithm from the third approach again. In it current state in timestep $n\to n+1$ n history points are considered. Maybe one could carefully choose a subset of them and still obtain a good approximation? Another point to consider could be the difficulties that arise by introducing nonlinearity into the equations by either increasing the spatial dimension or allowing more flow directions. The theoretical existence of a solution might be interesting to study for this case. Another possibility to enhance the newly developed algorithm could lie in the choice of $f$. We have shown that $f(u)=\exp(\pi/2\sinh(u))$ has better properties regarding the history dependency. However, $F(u,u')$ then becomes heavily dependent on $u$ and introduces new effort each timestep.\\
+For future research it might be worth to take a look at our newly developed algorithm from the third approach again. In it current state in timestep $n\to n+1$ $n$ history points are considered. Maybe one could carefully choose a subset of them and still obtain a good approximation? Another point to consider could be the difficulties that arise by introducing nonlinearity into the equations by either increasing the spatial dimension or allowing more flow directions. The theoretical existence of a solution might be interesting to study for this case. Another possibility to enhance the newly developed algorithm could lie in the choice of $f$. We saw in figure \ref{fig:Fustrich} that $f(u)=\exp(\pi/2\sinh(u))$ has better properties regarding the history dependency. However, $F(u,u')$ then becomes heavily dependent on $u$ and introduces new effort each timestep.\\
 \par 
-All in all, one can say that for a spatial two-dimensional problem with one flow direction and a memory function of special form we could present an efficient algorithm. For a more general case, we studied some approaches that can be a good starting point for further studies.
-\addcontentsline{toc}{chapter}{List of figures}
+All in all, one can say that for a spatial two-dimensional problem with one flow direction and a memory function of special form we could present an efficient algorithm. For a related equation, we studied some approaches that can be a good starting point for further studies.
+\addcontentsline{toc}{chapter}{List of Figures}
 \setcounter{lofdepth}{2}
 \listoffigures
 \newpage
-\addcontentsline{toc}{chapter}{List of figures}
+\addcontentsline{toc}{chapter}{List of Tables}
 \setcounter{lofdepth}{2}
 \listoftables
 \newpage
