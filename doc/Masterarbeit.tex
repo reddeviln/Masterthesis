@@ -351,7 +351,7 @@ From now on let $\Omega$ be an open and bounded subset of $\rr^n$, with $n\in\nn
     This definition is motivated by the integration by parts method. One wants to find functions that obey integration by parts but are not necessarily differentiable in the classical sense. However, if $f$ is differentiable then the weak and classic derivatives match. It is also important to note that the weak derivative of a function, if it exists, is unique if we identify functions, which only differ on sets of zero measure.
 \end{rem}
 \begin{defn}
-    We denote by $W^{m,p}(\Omega)$, for $p\in[1,\infty]$ and $m\in\nn_0$, the set of all functions $f\in \mathrm{L}^p(\Omega)$ with weak derivatives in $\mathrm{L}^p(\Omega)$ up to the order $\abs{\alpha}\le m$. These sets are called \textsc{Sobolev} \emph{spaces}. We define $\mathrm{H}^m(\Omega):=W^{m,2}(\Omega)$.
+    We denote by $W^{m,p}(\Omega)$, for $p\in\nn\cup\{\infty\}$ and $m\in\nn_0$, the set of all functions $f\in \mathrm{L}^p(\Omega)$ with weak derivatives in $\mathrm{L}^p(\Omega)$ up to the order $\abs{\alpha}\le m$. These sets are called \textsc{Sobolev} \emph{spaces}. We define $\mathrm{H}^m(\Omega):=W^{m,2}(\Omega)$.
 \end{defn}
 \begin{sa}
     The \textsc{Sobolev} space $W^{m,p}(\Omega)$ with the norm
@@ -567,14 +567,12 @@ Many books have been written about the \textsc{Navier-Stokes} equations. We will
 To understand fluid dynamics one must consider two coordinate systems. At first, there is the usual fixed \textsc{Eulerian} coordinate system (spatial coordinates) that is stationary. Secondly, there is the \textsc{Lagrangian} coordinate system (material coordinates) that follows one particle in the flow. 
 We use $u$ for the velocity, $p$ for the pressure with their normal physical interpretations.
 \begin{defn}[material derivative]
-    If we want to take the derivative of a quantity $f(x,t)$ in the fluid flow direction we get the \emph{material derivative}, which is given by 
+    If we want to take the derivative of a quantity $f(x,t)$ in time with respect to the fluid flow direction we get the \emph{material derivative}, which is given by 
     \begin{equation}
         \frac{D}{Dt}f(x,t):=\frac{\partial f}{\partial t} + u\cdot\nabla f.
     \end{equation}
 \end{defn}
-\begin{rem}
-    Note that instead of $u$ one could choose any vector $x$ to obtain a derivative in the direction of $x$.
-\end{rem}
+
 The main idea behind the \textsc{Navier-Stokes} equation is the concept of \emph{conservation}. 
 \begin{defn}
     If for a property $P$, it holds that on an arbitrary finite volume $\Omega$
@@ -1220,8 +1218,8 @@ If we look closely at the equation above one can see that we now have $N$ equati
     \partial_t \bfC_{1/\lambda_n}+\frac{1}{\lambda_n}\bfC_{1/\lambda_n}=\nabla u
 \end{equation}
 for all $n$. This increases the computational effort but should still be more efficient than brute force calculating the integral at every timestep. Because $G$ is just a linear combination, all proofs and statements we made about the simpler equation remain true for this one.
-\section{A simple integral equation}
-In this section we will take a look at a related integral equation. Later on the solution of this equation can be interpreted as the square root of the relaxation modulus $G$. More information on this equation can be found in \cite{Gnann2012} The new equation has the same complexity regarding the integral as the ones we were looking at earlier, but the complexity regarding dimension and number of equations is much reduced. This makes it easier to concentrate on the main problem and to gather ideas, how one may approach the problem of an integro-dfferential equation in general. We use 
+\section{A reduced integral equation}
+In this section we will take a look at a related integral equation. Later on the solution of this equation can be interpreted as the square root of the relaxation modulus $G$. More information on the relationship of this equation and non-\textsc{Newtonian} fluids can be found in \cite{Gnann2012}. The new equation has the same complexity regarding the integral as the ones we were looking at earlier, but the complexity regarding dimension and number of equations is much reduced. This makes it easier to concentrate on the main problem and to gather ideas, how one may approach the problem of an integro-dfferential equation in general. We use 
 \begin{align}
    \dot\phi(t)&=-\phi(t)-\int_0^tm(t-\tau)\dot\phi(\tau)\D\tau,\\
    m(t)&=v_1\phi(t)+v_2\phi(t)^2,
@@ -1325,12 +1323,12 @@ The goal of this transformation is that we can use equally spaced points in $u$ 
     \includegraphics[width=0.8\textwidth]{HistoryF.pdf}
     \caption{History dependency for different $f$ with $u=3$}
     \label{fig:Fustrich}
-\end{figure}almost everywhere. This would again eliminate the history completely like in the previous example. In figure \ref{fig:Fustrich} $F(u')$ is shown for a fixed $u$. We can see that for both functions $f$ we have a long interval, in which $u=F(u,u')$ is a good approximation. \par 
+\end{figure}almost everywhere. This would again eliminate the history completely like in the previous example. In figure \ref{fig:Fustrich} $F(u')$ is shown for a fixed $u$ and two choices of $f$. We can see that for both functions $f$ we have a long interval, in which $u=F(u,u')$ is a good approximation. \par 
 Now let $f(u)=e^u$. We choose this because $F(u,u')$ is qualitatively the same function for every $u$ just translated. For $f(u)=\exp(u)$ we have
 \begin{equation}
     F(u,u')=\log(\exp(u)-\exp(u')).
 \end{equation}
-This will help us immensely later on. We then have $u_{-1}=-\infty$. Obviously we cannot start our calculation at $-\infty$ so we introduce an arbitrary $u_0$ where $\abs{f(u_0)-f(-\infty)}$ is negligible. This is possible, because $\exp(u)\to 0$ as $u\to-\infty$. From there we introduce a discretization for $u$ as
+This will help us immensely later on. It is true that $f(u)=\exp(\frac{\pi}{2}\sinh(u))$ is decreasing even faster, but because $F(u,u')$ is then qualitatively dependent on $u$ it would introduce new effort to each timestep. We then have $u_{-1}=-\infty$. Obviously we cannot start our calculation at $-\infty$ so we introduce an arbitrary $u_0$ where $\abs{f(u_0)-f(-\infty)}$ is negligible. This is possible, because $\exp(u)\to 0$ as $u\to-\infty$. From there we introduce a discretization for $u$ as
 \begin{equation}
     u_i = u_0+ih,\quad\forall i=0,\dotsc,N
 \end{equation}
