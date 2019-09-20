@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot
 
-deltat=0.01
+deltat=0.04
 tau0=1.0
 v1=1.5
 v2=0.5
@@ -22,7 +22,7 @@ for n in range(1,numsteps+1):
     diffarray[n] *= -deltat*denom
     phiarray1[n] = phiarray1[n-1] + diffarray[n]
     print("Step {}: diffarray[n]={} phiarray[n]={}".format(n,diffarray[n],phiarray1[n]))
-h=deltat
+h=0.01
 numsteps=14
 phiarray  = np.zeros((numsteps+1,))
 beta = 0
@@ -39,7 +39,6 @@ for n in range(1,numsteps+1):
 
 pyplot.plot(tarray,phiarray)
 pyplot.plot(deltat*np.arange(5001),phiarray1)
-pyplot.title("Approximations of $\phi$")
 pyplot.xlabel("t")
-pyplot.legend(["$\phi$ using new algorithm","$\phi$ using $\mathcal{O}(n^2)$ algorithm"])
-pyplot.show()
+pyplot.legend(["$\phi$ using (A2)","$\phi$ using (A1)"])
+pyplot.savefig('Phidiff.pdf')

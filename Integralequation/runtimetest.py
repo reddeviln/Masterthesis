@@ -50,6 +50,6 @@ for numSteps in numStepss:
     print(numSteps)
 plt.plot(numStepss,lstar)
 plt.plot(numStepss,numStepss)
-plt.legend(['lstar','Identity'])
+plt.legend(['$l^*$','Identity'])
 plt.xlabel('N')
-plt.show()
+plt.savefig('runtime.pdf')
