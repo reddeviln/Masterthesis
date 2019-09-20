@@ -166,7 +166,7 @@ class FEniCSSimulation:
         L = rhs(self.F)
         A = assemble(a)
         U.assign(self.u_n)
-        vtkfile << (U.sub(4), t)
+        vtkfile << (U.sub(6), t)
         [bcu.apply(A) for bcu in self.bc]
         for n in range(num_steps):
             t += dt
@@ -175,7 +175,7 @@ class FEniCSSimulation:
             solve(A, U.vector(), b)
             print("time: ",t)
             if n % 10 == 0:
-                vtkfile << (U.sub(4), t)
+                vtkfile << (U.sub(6), t)
             self.u_n.assign(U)
         self.result = U
 
