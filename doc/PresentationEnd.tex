@@ -8,6 +8,9 @@
 \usepackage[T1]{fontenc} % westeuropäische Codierung wird verlangt
 \usepackage[utf8]{inputenc}% Umlaute werden erlaubt
 \usetheme{Berlin}
+    \expandafter\def\expandafter\insertshorttitle\expandafter{%
+    \insertshorttitle\hfill%
+    \insertframenumber\,/\,\inserttotalframenumber}
 %\usepackage{showkeys} % Labels anzeigen
 \usepackage{amsmath} % Erweiterung für den Mathe-Satz
 \usepackage{amssymb} % alle Zeichen aus msam und msmb werden dargestellt
@@ -113,49 +116,39 @@
 \begin{document}
     \title{Numerical Solution of Integro-Differential Equations}
     \author{Nils Dornbusch}
-    \date{July 09, 2019}
+    \date{September 26, 2019}
     \maketitle
-    \begin{frame}
-    \tableofcontents[pausesections]
-    \end{frame}
-\section{Introduction}
-\frame{
-    \frametitle{Introduction}
-    A Non-Newtonian fluid is a fluid that changes its viscosity under stress.
-        There are many examples for them. These include
-        \begin{itemize}[<+->]
+   
+\section{Motivation}
+\begin{frame}
+    \frametitle{Motivation}
+    For a \textsc{Newtonian} fluid it holds that
+    \begin{equation*}
+        \text{shear stress} \propto \text{strain.}
+    \end{equation*}
+    However, for many fluids this relationship is not valid. We call them non-\textsc{Newtonian} fluids.
+\end{frame}
+\begin{frame}
+     \frametitle{Introduction}
+    There are many examples for non-\textsc{Newtonian} fluids. These include
+    \begin{itemize}[<+->]
         \item toothpaste
         \item liquid plastic
         \item granular flow
         \item and many more.
-        \end{itemize}}
-\begin{frame}
-    \frametitle{Motivation}
-    \begin{itemize}[<+->]
-        \item Simulation of this particular fluid model does not exist 
-        \item First step in trying to develop a stable numerical approach
-        \item To develop a starting point for future projects
     \end{itemize}
 \end{frame}
-\section{Physics}
-    \begin{frame}
-        \frametitle{Physics}
-        \begin{itemize}[<+->]
-            \item  The physical model uses the well-known Navier Stokes equations
-            \item The stress tensor is modeled using an integral model
-        \end{itemize}
-    \end{frame}
 
-       \begin{frame}
-        \frametitle{The incompressible Navier Stokes equations}
-        \begin{align*}
+\begin{frame}
+\frametitle{The incompressible Navier Stokes equations}
+    \begin{align*}
         \frac{\partial \bfu}{\partial t}+(\bfu\cdot \nabla)\bfu &= \bff +\nabla\cdot\sigma +\mu_s\Delta\bfu-\nabla p,\\
         \ddiv(\bfu)&= 0,\\
         \sigma(t,\hat\bfx)&= \int_{-\infty}^t-\partial_{t'}\bfB(t,t',\hat\bfx)G(t,t')\D t',\\
         \partial_t \bfB &=- (\bfu\cdot\nabla)\bfB+(\nabla \bfu)\bfB+\bfB(\nabla\bfu)^T.
-        \end{align*}
-        with e.g. $G(t,t')=\mu_p\cdot e^{-(t-t')/\lambda}$, $\bfu$ the velocity vector, $\bff$ a generic source term, $\sigma$ the stress tensor, $\mu_s, \mu_p$ the solvent and polymer viscosity respectively, $p$ the pressure, $\lambda$ the relaxation time and $\bfB$ the Finger tensor.
-     \end{frame}
+    \end{align*}
+with e.g. $G(t,t')=\mu_p\cdot e^{-(t-t')/\lambda}$, $\bfu$ the velocity vector, $\bff$ a generic source term, $\sigma$ the stress tensor, $\mu_s, \mu_p$ the solvent and polymer viscosity respectively, $p$ the pressure, $\lambda$ the relaxation time and $\bfB$ the Finger tensor.
+\end{frame}
  \begin{frame}
      \frametitle{Boundary conditions}
      We choose suitable initial and boundary conditions for the velocity. For $\bfB$ we use
@@ -165,7 +158,36 @@
      \end{align*}
      which means that we assume a stress free start of the simulation.
  \end{frame}
-\section{Transformation of the equation}
+\begin{frame}
+\frametitle{Another possibility for $G$}
+In more advanced physical models, $G$ is given by $G\propto\phi^2$, where $\phi$ is defined as the solution of 
+\begin{align*}
+\dot\phi(t)&=-\phi(t)-\int_0^tm(t-\tau)\dot\phi(\tau)\D\tau,\\
+m(t)&=v_1\phi(t)+v_2\phi(t)^2,
+\end{align*}
+where we choose $v_1,v_2\in\rr$.
+\end{frame}
+\begin{frame}
+\frametitle{Motivation}
+\begin{itemize}[<+->]
+    \item Physical interest in e.g. a glass transition of a fluid or granular flow
+    \item Simulation of this particular fluid model does not exist 
+    \item First step in trying to develop a stable numerical approach
+    \item To develop a starting point for future projects
+\end{itemize}
+\end{frame}
+\begin{frame}
+    \frametitle{Outline}
+    The talk will have two main parts:
+    \begin{itemize}
+        \item \textsc{Navier-Stokes} equations for $G=\sum_{i=1}^{n}\mu_p^{(i)}e^{-(t-t')/\lambda_i}$
+        \item Look at the equation for $\phi$ only to study different approaches
+    \end{itemize}
+\end{frame}
+\begin{frame}
+    \Huge{Part I: \textsc{Navier-Stokes} equations}
+\end{frame}
+\section{3D to 2D reduction}
     \begin{frame}
         \frametitle{Assumptions for the dimension reduction}
         These are very complex equations. This work uses the following assumptions:
@@ -176,16 +198,31 @@
     \uncover<3->{This yields a 2D model for the cross sectional flow in a e.g. tube.}\\
     
     \only<4>{\begin{figure}
-            \includegraphics[width=0.5\textwidth]{h006-laminar-flow}
-            \caption{Visualization of the assumptions (reference in the thesis)}
+            \includegraphics[width=0.5\textwidth]{laminarflow}
+            \caption{Visualization of the assumptions}
          \end{figure}}
     \end{frame}
 \begin{frame}
-    \frametitle{Dimension reduction}
+    \frametitle{Introducing new variables}
+    We define
+     \begin{equation*}
+    \bfB=\begin{pmatrix}
+    1&0&\bfb_1\\
+    0&1&\bfb_2\\
+    \bfb_1&\bfb_2&*
+    \end{pmatrix}
+    \end{equation*}
+    and
+    \begin{equation*}
+        s:=\sigma_{3,j},\quad \text{for }j=1,2
+    \end{equation*}
+\end{frame}
+\begin{frame}
+    \frametitle{Reduced 2D equations}
     These assumptions yield the 2D equations 
     \begin{align*}
     \partial_t u(t,\bfx) &= -\partial_3 p +\nabla\cdot \bfs+\mu_s\Delta u,\\
-    \bfs(t,\bfx) &=\int_{-\infty}^t-\partial_{t'}\bfb(t,t',\bfx)G(t,t')\D t',\label{eq:s2D}\\
+    \bfs(t,\bfx) &=\int_{-\infty}^t-\mu_p\partial_{t'}\bfb(t,t',\bfx)e^{-(t-t')/\lambda}\D t',\label{eq:s2D}\\
     \partial_t\bfb(t,t',\bfx)&=
     \begin{pmatrix}
     \partial_1 u(t,\bfx)\\\partial_2 u(t,\bfx)
@@ -193,48 +230,42 @@
     \end{align*}
 \end{frame}
 \begin{frame}
-    \frametitle{Laplace transform}
-    We want to eliminate the integral. Our solution: 
-    \begin{enumerate}[<+->]
-        \item introduce $\tau= t-t'$ (age variable)
-        \item put this into the equations
-        \item perform the Laplace transform of $\bfb$ with respect to $\tau$
-    \end{enumerate}
+    \frametitle{\textsc{Laplace} transform}
+    We want to eliminate \begin{equation*}
+        \bfs(t,\bfx)=\int_{-\infty}^t-\mu_p\partial_{t'}\bfb(t,t',\bfx)e^{-(t-t')/\lambda}\D t'
+    \end{equation*}
+    To achieve this, introduce $\tau=t-t'$ (age variable) to obtain
+    \begin{equation*}
+    \bfs(t,\bfx)=\int_0^\infty\mu_p\partial_\tau\bfb(t,t-\tau,\bfx)e^{-(t-t')/\lambda}\D\tau.
+    \end{equation*}
+    Using the chain rule the governing equation for the \textsc{Finger} tensor transforms to  
+    \begin{equation*}
+    \partial_t \bfb +\partial_\tau\bfb=\nabla u.
+    \end{equation*}
 \end{frame}
 \begin{frame}
-    \frametitle{Laplace transform}
-    The equation for the stress tensor with $\tau$ reads
+    \frametitle{\textsc{Laplace} transform}
+    Use $\bfb\mapsto \mathcal{L}_\tau\{\bfb\}:=\int_0^\infty \bfb(x,t,t-\tau)e^{-s\tau}\D \tau$ to transform
     \begin{equation*}
-        \bfs(t,\bfx)=\int_0^\infty\partial_\tau\bfb(t,t-\tau,\bfx)G(t,t-\tau)\D\tau.
+    \partial_t \bfb +\partial_\tau\bfb=\nabla u.
     \end{equation*}
-   Using the chain rule the governing equation for the Finger tensor transforms to  
-   \begin{equation*}
-   \partial_t \bfb +\partial_\tau\bfb=\nabla u
-   \end{equation*}
+     This yields
+    \begin{equation*}
+    \partial_t\mathcal{L}_\tau\{\bfb\}(t,\bfx,s) + \mathcal{L}_\tau\{\partial_\tau\bfb\}(t,\bfx,s) = \frac{1}{s}\nabla u.
+    \end{equation*} Using the transformation rules for the \textsc{Laplace} transform results in
+    \begin{equation*}
+        (\partial_t +s)\mathcal{L}_\tau{\bfb}(t,\bfx,s) = \frac{1}{s}\nabla u.
+    \end{equation*}
 \end{frame}
 \begin{frame}
-    \frametitle{Laplace transform}
-    Transform $\bfb\mapsto L_b:=\int_0^\infty \bfb(x,t,t-\tau)e^{-s\tau}\D \tau$. This yields
+    \frametitle{\textsc{Laplace} transform}
+    Using the conformation tensor $\bfC_s:=s\mathcal{L}_\tau{\bfb}(t,\bfx,s)$ we obtain
     \begin{equation*}
-    \partial_tL_{\bfb}(t,\bfx,s) + L_{\partial_\tau\bfb}(t,\bfx,s) = \frac{1}{s}\nabla u.
+         \partial_t\bfC_s(t,\bfx)+s\bfC_s(t,\bfx)=\nabla u.
     \end{equation*}
-    Second part of the sum:
-        \begin{align*}
-        L_{\partial_\tau\bfb}(t,\bfx,s) &= \int_0^\infty\partial_\tau\bfb(t,t-\tau,\bfx)e^{-s\tau}\D\tau\\ &=\lim_{r\to\infty}\bfb(t,t-r,\bfx)e^{-sr}-\bfb(t,t,\bfx)e^{-s\cdot 0}\\&+s\int_0^\infty\bfb(t,t-\tau,\bfx)e^{-s\tau}\D\tau.\\
-        &= -\bfb(t,t,\bfx) +sL_{\bfb}(t,\bfx, s)\\
-        &= sL_{\bfb}(t,\bfx,s).
-        \end{align*}
-\end{frame}
-\begin{frame}
-    \frametitle{Laplace transform}
-    Using $C_s:=sL_b(t,\bfx,s)$ we obtain
+    If we set $s:=\frac{1}{\lambda}$, it follows
     \begin{equation*}
-         \partial_t\bfC_s(t,\bfx)+s\bfC_s(t,\bfx)=\nabla u
-    \end{equation*}
-    Until now no assumptions on the function type of $G$ were made.
-    If we set $s:=\frac{1}{\lambda}$ and use $G(t,t-\tau)=\mu_pe^{-\tau/\lambda}$, it follows
-    \begin{equation*}
-        \bfs(t,\bfx)=\mu_pC_{1/\lambda}(t,\bfx)
+        \bfs(t,\bfx)=\mu_p\bfC_{1/\lambda}(t,\bfx).
     \end{equation*}
 \end{frame}
 \begin{frame}
@@ -243,60 +274,47 @@
         \partial_t u(t,\bfx) &= -\partial_3 p +\nabla\cdot \bfs+\mu_s\Delta u,\\
         \label{eq:transfeq2}
         \bfs(t,\bfx)&=\mu_p\bfC_{1/\lambda},\\
-        \partial_t\bfC_{1/\lambda}(t,\bfx) &= -\frac{1}{\lambda}\bfC_{1/\lambda}(t,\bfx)+\frac{1}{\lambda}\nabla u    \end{align*}
-        This is a linear system of which the existence and uniqueness of the solution is proven in the thesis.
+        \partial_t\bfC_{1/\lambda}(t,\bfx) &= -\frac{1}{\lambda}\bfC_{1/\lambda}(t,\bfx)+\nabla u    \end{align*}
+        This is a linear system of which the existence and uniqueness of the solution is proven in the thesis for $\mu_s>0$ in the weak formulation.
 \end{frame}
 \section{Numerics}
-\begin{frame}
+\begin{frame}[fragile]
     \frametitle{The software}
     The software used is FEniCS. 
     \begin{itemize}[<+->]
         \item Framework for solving PDEs with finite element discretization (limited DG support available)
         \item have to plug in the weak form and maybe time loop
-        \item MPI support, however not tested yet 
     \end{itemize}
-    \begin{figure}
-        \includegraphics[width=0.5\textwidth]{FenicsCode}
-        \caption{Weak formulation for the derived equations with timestepping}
-    \end{figure}
+A Code example:
+\begin{verbatim}
+F = u * v * dx - un3 * v * dx + dt * (gradP * v * dx 
+  + dot(mup * as_vector([C1, C2]), grad(v)) * dx 
+  + mus * dot(grad(u), grad(v)) * dx) 
+  + (C1 - un1 + dt / Lambda * C1) * CV1 * dx 
+  + (C2 - un2 + dt / Lambda * C2) * CV2 * dx 
+  - dt * dot(grad(u), as_vector([CV1, CV2])) * dx
+\end{verbatim}
 \end{frame}
 \begin{frame}
-\frametitle{Simulation cases}
-The following cases were simulated
-\begin{itemize}[<+->]
-    \item Circle mesh 
-    \begin{itemize}[<+->]
-        \item Startup flow with a fixed pressure 
-        \item Flow with manufactured solution for convergence
-    \end{itemize}
-    \item square mesh (side length = 2)
-    \begin{itemize}[<+->]
-        \item cross section of an ideal rheometer
-    \end{itemize}
-\end{itemize}
-\uncover<6>{Note: Units have been omitted but have to be chosen consistently. }
-\end{frame}
-\begin{frame}
-    \frametitle{Numerical results}
-    Two domains: circle and square
+    \frametitle{Setup startup flow}
+    
     \begin{figure}
-        \caption{Meshes with }
-        \subfigure[402987 cells]{\includegraphics[width=0.4\textwidth]{MeshCircle}}
-        \subfigure[4852 cells]{\includegraphics[width=0.4\textwidth]{MeshSquare}}
+        \includegraphics[width=0.8\textwidth]{setupsquare}
     \end{figure}
 \end{frame}
 
 \begin{frame}
-    \frametitle{Startup flow fixed pressure}
+    \frametitle{Startup flow}
     \begin{figure}
+        \centering
         \subfigure{\includegraphics[width=0.4\textwidth]{vel}}
-        \subfigure{\includegraphics[width=0.5\textwidth]{centerlinevel}}
-        \caption{Startup flow Maxwell with $E=1$ and $p=-3$}
+        \subfigure{\includegraphics[width=0.55\textwidth]{centerlinevel.pdf}}
+        \caption{Startup flow Maxwell with $\lambda=1,\mu_p=1$ and $\partial_3p=-3$}
     \end{figure}
 \end{frame}
 \begin{frame}
     \frametitle{Numerical results}
-    Convergence in the $L^2$-norm was achieved with a timestep width of $0.1$ and an end time of $1$.
+    Convergence in the $L^2$-norm was achieved with a timestep width of $0.1$ and an end time of $1$ for a manufactured solution on a unit disc.
     \begin{table}
         \centering
         \begin{tabular}{c|c|c}
@@ -310,6 +328,13 @@ The following cases were simulated
         \end{tabular}
         \caption{Convergence of the \textsc{Maxwell} model $(\mu_s=0)$}
     \end{table}
+\end{frame}
+\begin{frame}
+    \frametitle{Setup rheometer}
+    We choose $\lambda =2,\,\mu_p=0.9,\,\mu_s=0.1$ and $\partial_3 p=0$.
+    \begin{figure}
+        \includegraphics[width=0.8\textwidth]{setuprheo}
+    \end{figure}
 \end{frame}
 \begin{frame}
     \frametitle{Cross section of an ideal rheometer}
@@ -346,7 +371,24 @@ The following cases were simulated
 \end{frame}
 \begin{frame}
     \frametitle{Combination of relaxation times}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.5\textwidth]{multilam}
+        \caption{startup flow with $\lambda=\{0.1,1,3\}$ and $\mu_p=1$}
+    \end{figure}
+\end{frame}
+\begin{frame}
+\frametitle{Combination of relaxation times}
     How do we interpret the result?
+    \begin{itemize}[<+->]
+        \item qualitatively behavior of non-\textsc{Newtonian} fluid
+        \item similar to previous results
+        \item extrema seem to be at multiples of the geometric mean ($\approx 0.66$)  
+    \end{itemize}
+\end{frame}
+\begin{frame}
+    \frametitle{Combination of relaxation times}
+    Advantages and disadvantages
     \begin{itemize}[<+->]
         \item For each relaxation time we obtain
         \begin{equation*}
@@ -516,7 +558,7 @@ for a generic function $f$.
 \frametitle{Transformation of the argument}
     \begin{figure}
         \centering
-        \includegraphics[width=\textwidth]{Tranformls1}
+        \includegraphics[width=\textwidth]{I2ls2}
         \caption{Visualization of discretization for $I_2$, where $n=3$}
         \label{fig:vis1}
     \end{figure}
