@@ -83,7 +83,7 @@ class FEniCSSimulation:
     def form_variational_problem_full2D(self, Lambda, residualon, dt):
         """define the variational problem for the equations with stress tensor"""
         t = 0
-        if len(Lambda) ==1 :
+        if type(Lambda) == int :
             Lambda = Constant(Lambda)
             self.U = TrialFunction(self.V[0])
             C1, C2, u = split(self.U)
@@ -103,8 +103,7 @@ class FEniCSSimulation:
                          + Constant(self.mu) * dot(grad(u), grad(v)) * dx) \
                          + (C1 - un1 + dt / Lambda * C1) * CV1 * dx \
                          + (C2 - un2 + dt / Lambda * C2) * CV2 * dx \
-                         - dt * (u.dx(0) * CV1 * dx \
-                         + u.dx(1) * CV2 * dx)
+                         - dt * dot(grad(u), as_vector([CV1, CV2])) * dx
             else:
                 raise ValueError('residualon needs to be 0 or 1 but it was ', residualon)
         else:
@@ -166,7 +165,7 @@ class FEniCSSimulation:
         L = rhs(self.F)
         A = assemble(a)
         U.assign(self.u_n)
-        vtkfile << (U.sub(6), t)
+        vtkfile << (U.sub(2), t)
         [bcu.apply(A) for bcu in self.bc]
         for n in range(num_steps):
             t += dt
@@ -175,7 +174,7 @@ class FEniCSSimulation:
             solve(A, U.vector(), b)
             print("time: ",t)
             if n % 10 == 0:
-                vtkfile << (U.sub(6), t)
+                vtkfile << (U.sub(2), t)
             self.u_n.assign(U)
         self.result = U
 

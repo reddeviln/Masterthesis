@@ -52,5 +52,5 @@ WithStressTensorSim.impose_initial_condition(Constant((0,0,0)))
 WithStressTensorSim.form_variational_problem_full2D(2, 0, 0.001)
 
 # run
-WithStressTensorSim.run_simulation_full(4,4000,"output/withstressPeriodic/solution.pvd")
+WithStressTensorSim.run_simulation_full(12,12000,"output/withstressPeriodic/solution.pvd")
 
