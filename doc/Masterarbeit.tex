@@ -176,7 +176,7 @@ Nils Dornbusch
 This work aims to provides an analysis of the integro-differential equations which occur while modeling the behavior of non-\textsc{Newtonian} fluids. The motivation to model these fluids arises when studying for example liquid glass or granular flow. This is often needed in space applications. This work should be seen as a first step in studying these governing equations. The long term goal is to develop a method to simulate an arbitrary non-\textsc{Newtonian} fluid in three spatial dimensions. Such a method does not exist as of now. An approach taken in \cite{Hulsen2001} and \cite{Hulsen2018} is the deformation fields method, which we will follow in part. However, not the whole method is suited for our needs. This is due to the fact that this method would result in the calculation of an integral in each timestep even if the timesteps are chosen carefully. What is even worse is that the more timesteps one calculates the more expensive the integral becomes. As the full system of equations is five-dimensional, one can imagine that this is not efficient for a reasonable number of degrees of freedom. This works aims to provide a possibility to reduce the calculation effort. However, as this is a master's thesis only a reduced three-dimensional system will be considered. To obtain this reduction, sensible assumptions will be taken.
 \\
 \par 
-The goal is that every reader that is proficient in Mathematics on a master's level is able to follow the arguments given in this work. To achieve this, some basic mathematical facts will be given in the beginning of this work. We will also introduce some notation that will be used. The second chapter will deal with the Physics behind the governing equation. As this is a mathematical work most of the time we will only discuss ideas rather than discussing the whole physical theory. After that we will reduce the system of equations from three to two spatial dimensions. The elimination of a second time variable will take place in chapter 4, where we will use the \textsc{Laplace} transform. Chapter 4 will deal with all aspects of numerics. At first we will discretize the continuous equations from chapter 3 in space and time. After we have built the numerical scheme we will study the convergence and other properties of the algorithm. Some aspects regarding the implementation will also be discussed.\\
+The goal is that every reader that is proficient in Mathematics on a master's level is able to follow the arguments given in this work. To achieve this, some basic mathematical facts will be given in the beginning of this work. We will also introduce some notation that will be used. The second chapter will deal with the Physics behind the governing equation. As this is a mathematical work most of the time we will only discuss ideas rather than discussing the whole physical theory. After that we will reduce the system of equations from three to two spatial dimensions. The elimination of a second time variable will take place in chapter 3, where we will use the \textsc{Laplace} transform. Chapter 4 will deal with all aspects of numerics. At first we will discretize the continuous equations from chapter 3 in space and time. After we have built the numerical scheme we will study the convergence and other properties of the algorithm. Some aspects regarding the implementation will also be discussed.\\
 \par
 Chapter 5 will mostly take a look at a different integro-differential equation. It can be found in \cite{Goetze1995}. The equation from \cite{Goetze1995} is easier in the sense that is does not have a spatial component or multiple variables but it is as complex as the full system regarding the calculation of the integral. Therefore it is much easier to study the simpler equation and try out different ideas, which can then be transfered back to the original problem. This is necessary, because it turns out that we can only deduce a better algorithm under the assumptions we took to reduce the five-dimensional system of equations. \par
 In the last chapter we will conclude all results and give an outlook on what could be next sensible points to consider.
@@ -201,8 +201,7 @@ In the beginning, we will quickly state basic mathematical facts and introduce s
     We will use $\nn$ as the natural numbers starting from 1, $\nn_0$ represent the natural numbers starting from 0. $\rr,\cc,\qq$ denote the real, complex and rational numbers. With $\kk$ we denote a field, which can be $\rr$ or $\cc$. $\rr^+_0$ shall denote $[0,\infty)$.
 \end{notation} 
 \begin{defn}[Essential supremum]
-    Let $X\subset\rr^n$ for $n\in\nn$ and $f\colon X\to \rr$ be a function. 
-    We call 
+    Let $f\colon X\to \rr$ be a function with $X\subset\rr^n$ and $n\in\nn$. We call 
     \begin{equation}
         \esssup_{x\in X}f(x):=\inf\{a\in\rr\colon f(x)\le a\quad\text{almost everywhere}\}
     \end{equation}
@@ -248,7 +247,7 @@ It is well-known that a \textsc{Cauchy} sequence does not converge in general. T
 \begin{defn}
     A normed space $(X, \norm{\cdot})$ is called \emph{complete} if every \textsc{Cauchy} sequence in $X$ converges in $X$. A complete normed space is also called a \textsc{Banach} \emph{space}.
 \end{defn}
-From now on let $\Omega$ be an open and bounded subset of $\rr^n$, with $n\in\nn$
+From now on let $\Omega$ be an open and bounded subset of $\rr^n$, with $n\in\nn$.
 \begin{defn}
     For a function $f\colon\Omega\to\rr$ and $p\in[1,\infty)$ we define the norm
      \begin{equation}
@@ -267,7 +266,7 @@ From now on let $\Omega$ be an open and bounded subset of $\rr^n$, with $n\in\nn
     \end{equation}
 \end{lem}
 \begin{sa}
-    The space $L^p(\Omega)$, $p\in[1,\infty]$ is a \textsc{Banach} space.
+    The space $L^p(\Omega)$, $p\in\nn\cup\{\infty\}$ is a \textsc{Banach} space.
 \end{sa}
 \begin{defn}
     Let $V$ be a $\kk$ vector space. A mapping $\dotp{\cdot}{\cdot}\colon V\times V\to\rr$ is called an \emph{inner product} or \emph{dot product} if 
@@ -358,7 +357,7 @@ From now on let $\Omega$ be an open and bounded subset of $\rr^n$, with $n\in\nn
     \begin{equation}
         \norm{f}_{W^{m,p}}:=\left(\int_\Omega\sum_{\abs{\alpha}\le m}\abs{D^{\alpha} f(x)}^p\D\Omega\right)^{1/p},
     \end{equation}
-    for $p\in[1,\infty)$, and 
+    for $p\in\nn$, and 
     \begin{equation}
         \norm{f}_{W^{m,p}}:=\max_{\abs{\alpha}\le m}\left(\esssup_{x\in\Omega}\abs{D^{\alpha}f(x)}\right)
     \end{equation}
@@ -369,7 +368,7 @@ From now on let $\Omega$ be an open and bounded subset of $\rr^n$, with $n\in\nn
     is a \textsc{Hilbert} space.
 \end{sa}
 \begin{rem}
-    The spaces $\mathrm{H}^m$ are very important for many numerical methods because of the property that they are \textsc{Hilbert} spaces. The whole theory, which follows hereafter, relies heavily on this assumption. We will also use $\mathrm{H}_0^m$ to denote the closure of $\mathrm{C}^\infty_0$ with respect to $\norm{\cdot}_{\mathrm{H}^m}$. Further explanation on this process is given in \cite{Jost2013}
+    The spaces $\mathrm{H}^m$ are very important for many numerical methods because of the property that they are \textsc{Hilbert} spaces. The whole theory, which follows hereafter, relies heavily on this assumption. We will also use $\mathrm{H}_0^m$ to denote the closure of $\mathrm{C}^\infty_0$ with respect to $\norm{\cdot}_{\mathrm{H}^m}$. Further explanation on this process is given in \cite{Jost2013}.
 \end{rem}
 
 \section{The finite element method}
@@ -382,7 +381,7 @@ Let us start by introducing the concept of \emph{weak solutions}. Consider the \
 \end{equation}
 and $u=0$ on the boundary $\partial\Omega$ of $\Omega$, where $u,f\colon \Omega\to\rr$. This formulation requires $u\in \mathrm{C}^2(\Omega)$ if $f\in\mathrm{C}^0(\Omega)$ is prescribed. In other examples this often excludes the physical solution, so we want to reduce the required regularity. For this, we integrate both sides over $\Omega$ and multiply with a test function $\varphi\in \mathrm{C}^\infty_0(\Omega)$ to obtain
 \begin{equation}
-    -\int_\Omega \Delta u\varphi\D\Omega =\int_\Omega f\varphi\D\Omega,\quad\forall\phi\in\mathrm{C}^\infty_0(\Omega).
+    -\int_\Omega \Delta u\varphi\D\Omega =\int_\Omega f\varphi\D\Omega,\quad\forall\varphi\in\mathrm{C}^\infty_0(\Omega).
 \end{equation}
 If we now apply \textsc{Green}'s theorem on the left side, we obtain
 \begin{equation}
@@ -431,7 +430,7 @@ Our new problem is given by
 \begin{equation}
 a(u_h,v_h) = F(v_h) \quad \forall v_h\in V_h \label{eq:galerkindiscrete}
 \end{equation}
-for the discrete solution $u_h\in V_h$. We want that the discrete solution converges to the continuous one, when $h\to 0$. Because the properties of $a$ and $F$ are also fulfilled restricted to $V_h$, the \textsc{Lax-Milgram} theorem still guarantees existence and uniqueness of the solution. 
+for the discrete solution $u_h\in V_h$. We want that the discrete solution converges to the continuous one for $h\to 0$. Because the properties of $a$ and $F$ are also fulfilled restricted to $V_h$, the \textsc{Lax-Milgram} theorem still guarantees existence and uniqueness of the solution. 
 We will rewrite \eqref{eq:galerkindiscrete} as a linear system of equations. By $\{\varphi_i\}$ for $i=1,\dotsc,n$, we denote a basis of $V_h$. Obviously, there exist coefficients $(U_j)_1^n\subset\rr$ such that
 \begin{equation}
     u_h=\sum_{j=1}^{n}U_j\varphi_j,\quad \nabla u_h=\sum_{j=1}^{n}U_j\nabla\varphi_j.
@@ -454,11 +453,11 @@ This already looks like a matrix-vector multiplication. If we define $a_{i,j}=a(
         F(u,v) = 0 \quad\forall v \in V\label{eq:nonlinear}
     \end{equation}
     with some nonlinear operator $F:V\times V\to\rr$.
-    This problem can also be projected to a finite-dimensional subspace with basis functions of $V_h$ as above. \eqref{eq:nonlinear} can then be rewritten as 
+    This problem can also be projected to a finite-dimensional subspace with basis functions of $V_h$ as above. The equation \eqref{eq:nonlinear} can then be rewritten as 
     \begin{equation}
         F(u_h, \varphi_i) = 0 \quad \forall i=1,\dotsc,n,
     \end{equation}
-    to obtain a discrete solution $u_h\in V_h$. This would then be plugged into a non-linear solver. However, the existence or even uniqueness of a solution cannot be guaranteed and must often be assessed on a case-by-case basis. This is an open research topic. There exist some approaches to this problem, which can be found in \cite{Girault1986}
+    to obtain a discrete solution $u_h\in V_h$. This would then be plugged into a non-linear solver. However, the existence or even uniqueness of a solution cannot be guaranteed and must often be assessed on a case-by-case basis. This is an open research topic. There exist some approaches to this problem. A few of them can be found in \cite{Girault1986}.
 \end{rem}
 \subsection{Finite element spaces}
 \label{subsec:finitelem}
@@ -466,7 +465,7 @@ For now, we handled the problem with an arbitrary subspace $V_h$. But how would 
 \begin{notation}
     Let $K\subset \Omega$. We denote by
     \begin{equation}
-        P_k(K):=\left\{p\colon K\to\rr\left\vert p(x)=\sum_{\abs{\alpha}\le k}c_\alpha x^\alpha,\right.\quad x\in K\right\}
+        P_k(K):=\left\{p\colon K\to\rr\colon p(x)=\sum_{\abs{\alpha}\le k}c_\alpha x^\alpha,\quad x\in K\right\}
     \end{equation}
     the set of all polynomials of degree less than or equal to $k$ and $c_\alpha$ are constant coefficients.
 \end{notation}
@@ -502,12 +501,12 @@ The following theorem ensures that the combination of all cells still results in
     \begin{equation}
         \sum_{K\in\tau_h}\int_{\partial K}v\vert_K\varphi n_K\D\partial K=0 \quad \forall\varphi\in \mathrm{C}^\infty_0.
     \end{equation}
-    That proofs that $w$ is indeed the weak derivative of $v$. Because $v$ was arbitrary, it follows that $V_h\subset \mathrm{H}^1(\Omega)$ and this proofs the theorem.
+    That proofs that $w$ is indeed the weak derivative of $v$ over the whole domain. Because $v$ was arbitrary, it follows that $V_h\subset \mathrm{H}^1(\Omega)$ and this proofs the theorem.
 \end{proof}
 
-Another interesting topic to consider, is the order of convergence. If we choose $\dim P_k$ equally on all cells, one can expect a convergence of order $k+1$. However, in practice this is influenced by the time stepping scheme if the problem is time dependent. If the geometry is not rectangular, the mesh approximation to the geometry will also influence the order of convergence. To measure the order of convergence empirically, one defines the $EOC$
+Another interesting topic to consider, is the order of convergence. If we choose $\dim P_k$ equally on all cells, one can expect a convergence of order $k+1$. However, in practice this is influenced by the time stepping scheme if the problem is time dependent. If the geometry is not rectangular, the mesh approximation to the geometry will also influence the order of convergence. To measure the order of convergence empirically, one defines the $EOC$.
 \begin{defn}
-    For a set of errors $\varepsilon_k$ and discretization $h_k$, where $h\to 0$ for $k\to\infty$, we define the \emph{experimental order of convergence (EOC)} as the limit of 
+    For a set of errors $\varepsilon_k$ and discretizations $h_k$, where $h\to 0$ for $k\to\infty$, we define the \emph{experimental order of convergence (EOC)} as the limit of 
     \begin{equation}
         EOC_k(\varepsilon_k,h_k)=-\frac{\log\frac{\varepsilon_k}{\varepsilon_{k-1}}}{\log{\frac{h_k}{h_{k-1}}}}.\label{eq:EOC},
     \end{equation} 
@@ -523,7 +522,7 @@ In this section we will introduce the \textsc{Laplace} transform and some of its
 \begin{defn}
     For a function $f\colon\Omega\times\rr^+_0\to\rr$, we call
     \begin{equation}
-        L_f(x,s):=\mathcal{L}\{f\}(s):=\int_0^\infty f(x,t)e^{-st}\D t\label{eq:laplacetrafo}
+       \mathcal{L}_t\{f\}(s):=\int_0^\infty f(x,t)e^{-st}\D t\label{eq:laplacetrafo}
     \end{equation}
     the \emph{\textsc{Laplace} transform} of $f$, where $s\in\cc$ is the so-called frequency parameter. 
 \end{defn}
@@ -607,7 +606,7 @@ Using the previous theorem and realizing that $\Omega$ is constant in time, we g
 \begin{sa}
     Let $f$ and $g$ be functions $f,g\colon\Omega\subset\rr^n\to\rr^n$. It holds that
     \begin{equation}
-    \nabla\cdot(fg^T)=(\nabla\cdot x)y+x\cdot\nabla y.
+    \nabla\cdot(fg^T)=(\nabla\cdot f)g+f\cdot\nabla g.
     \end{equation}
 \end{sa}
 As \eqref{eq:nswithint} holds for every $\Omega$ the integrand has to be zero (Fundamental lemma of calculus of variations). This realization and the previous theorem lead to 
@@ -651,7 +650,7 @@ There are many different types of non-\textsc{Newtonian} behavior. Ketchup for e
     \caption{Illustration of the Maxwell model (from \cite{Pekaje})}
     \label{fig:maxwell}
 \end{figure}
-The \textsc{Maxwell} model is one of the easiest models used to describe such viscoelastic fluids. It is obtained by combining dampers and springs and model them with known physical laws. The easiest case is shown in Figure \ref{fig:maxwell}. The damper accounts for the viscous  and the spring for the elastic part of the fluid's behavior. For more information see \cite{Owens2002} The \textsc{Maxwell} model states that
+The \textsc{Maxwell} model is one of the easiest models used to describe such viscoelastic fluids. It is obtained by combining dampers and springs and model them with known physical laws. The easiest case is shown in Figure \ref{fig:maxwell}. The damper accounts for the viscous  and the spring for the elastic part of the fluid's behavior. For more information see \cite{Owens2002}. The \textsc{Maxwell} model states that
 \begin{equation}
     \frac{\lambda}{\mu_p}\partial_t\sigma +\frac{1}{\mu_p}\sigma = \partial_t \bfB,
 \end{equation}
@@ -669,16 +668,16 @@ where $\bfu$ denotes the velocity field. The difference between the upper-convec
     \sigma(t)=\int_{-\infty}^{t}-\partial_{t'}\bfB(t,t')G(t,t')\D t',
 \end{equation}
 where $G$ is the so called \emph{relaxation modulus}. This opens the possibility for more advanced models. The whole integral for $\sigma$ can be interpreted as a history dependency. Every past timestep affects the current one. The relaxation modulus can be seen as a weight function in this context. We want that the more a past timestep lies in the past the less relevant it is for the current calculation.
-\section{Dimensional reduction}
+\section{Dimension reduction}
 After we have discussed the physical aspects in the previous sections, we will now focus on making these equations easier to handle. To provide better readability we will omit the arguments of the arising functions, where it is obvious. We start from the well-known \textsc{Navier-Stokes} equations
 \begin{align}
 \label{eq:NS3Dbegin}
     \frac{\partial \bfu}{\partial t}+(\bfu\cdot \nabla)\bfu &= \bff +\nabla\cdot\sigma +\mu_s\Delta\bfu-\nabla p,\\
-    \ddiv(\bfu)&= 0,\label{eq:div0}\\
+    \nabla \cdot \bfu &= 0,\label{eq:div0}\\
     \bfu &= \bfu_b \text{ on }\partial\hat\Omega,\\
     \bfu(t=0) &=\bfu_0,
 \end{align}
-where $t\in[0,T]$ is the current time and $T$ the end time of our simulation. We set a domain $\hat\Omega\subset\rr^3$ and an element $\hat\bfx\in\hat\Omega$. We also have $\bfu(t,\hat\bfx)\colon \rr^+\times\hat\Omega\to\rr^3$ as the velocity vector, $\bff(t,\hat\bfx)\colon\rr^+\times\hat\Omega\to\rr^3$ a generic source or sink term and $\sigma(t,\hat\bfx)\colon\rr^+\times\hat\Omega\to\rr^{3\times 3}$ the stress tensor. As usual $\mu_s\in\rr^+$ denotes the solvent viscosity. We will use $p(t,\hat\bfx)\colon\rr^+\times\hat\Omega\to\rr$ as the pressure. Our boundary condition for $\bfu$ is denoted by $\bfu_b$.
+where $t\in[0,T]$ is the current time and $T$ the end time of our simulation. We set a domain $\hat\Omega\subset\rr^3$ and an element $\hat\bfx\in\hat\Omega$. We also have $\bfu(t,\hat\bfx)\colon \rr^+\times\hat\Omega\to\rr^3$ as the velocity vector, $\bff(t,\hat\bfx)\colon\rr^+\times\hat\Omega\to\rr^3$ a generic source or sink term, which is modeling the body forces, and $\sigma(t,\hat\bfx)\colon\rr^+\times\hat\Omega\to\rr^{3\times 3}$ the stress tensor. As usual $\mu_s\in\rr^+_0$ denotes the solvent viscosity. We will use $p(t,\hat\bfx)\colon\rr^+\times\hat\Omega\to\rr$ as the pressure. Our boundary condition for $\bfu$ is denoted by $\bfu_b$.
 The difference between \textsc{Newtonian} and non-\textsc{Newtonian} fluids lies in the definition of $\sigma$. In the UCM or \textsc{Oldroyd-B} model the stress tensor is given by (see \ref{sec:physics}):
 \begin{equation}
     \sigma(t,\hat\bfx) = \int_{-\infty}^t-\partial_{t'}\bfB(t,t',\hat\bfx)G(t,t')\D t',
@@ -689,7 +688,7 @@ where $G\colon\rr^+\times\rr^+\to\rr$ is a weight function which decays fast in 
     G(t,t')=\mu_p\cdot e^{-(t-t')/\lambda},
     \label{eq:G}
 \end{equation} 
-where $\mu_p\in\rr^+$ is the polymer viscosity and $\lambda\in\rr$ the relaxation time. Both are fluid- dependent parameters. However, $G$ can be more complex. For example, if $G$ becomes space-dependent, this introduces many new problems. This is why we will stick to \eqref{eq:G} for now.
+where $\mu_p\in\rr^+$ is the polymer viscosity and $\lambda\in\rr$ the relaxation time. Both are fluid- dependent parameters. However, $G$ can be more complex. For example, if $G$ becomes space-dependent, this introduces many new problems. This is why we will stick to \eqref{eq:G} for most of this work.
 \par 
 The term $\bfB\colon\rr^+\times\rr^+\times\hat\Omega\to\rr^{3\times 3}$ in \eqref{eq:generalsig} is called the \emph{\textsc{Finger} tensor} and obeys the differential equation
 \begin{equation}
@@ -701,7 +700,7 @@ We introduce the initial and boundary conditions
     \bfB(t',t', \hat\bfx) &\equiv\bm{1},\\
     \bfB(0,t',\hat\bfx) &\equiv\bm{1},
 \end{align}
-where the last condition implies the assumption that we start the computation stress free. \par
+where both conditions imply the assumption that we start the computation stress free. \par
 The variable $t'$, which appears in the last equation, is called \enquote{history variable}. We will discuss its impact later on.
 \par 
 For now, we will assume that $\bfu, \nabla p $ and $\bff$ are only non-zero in one direction, that is,
@@ -709,7 +708,7 @@ For now, we will assume that $\bfu, \nabla p $ and $\bff$ are only non-zero in o
     \bfu=(0, 0, u)^T,\quad\nabla p= (0,0,\partial_3 p),\quad \bff=(0,0,f),
 \end{equation}
 where $u,f,p\colon\rr^+\times\hat\Omega\to\rr$.
-Because $\ddiv(\bfu)=0$ (see \eqref{eq:div0}), we immediately obtain $\partial_3 u=0$, which leads to
+Because $\nabla \cdot \bfu=0$ (see \eqref{eq:div0}), we immediately obtain $\partial_3 u=0$, which leads to
 \begin{equation}
     [(\bfu\cdot\nabla)\bfu]_3 = u_1\partial_1 u_3+u_2\partial_2 u_3+u_3\partial_3 u_3 = 0
 \end{equation}
@@ -772,7 +771,7 @@ The next step, that is usually taken, is the introduction of an \enquote{age} va
 \begin{equation}
     \bfs(t,\bfx)=\int_0^\infty\partial_\tau\bfb(t,t-\tau,\bfx)G(t,t-\tau)\D\tau.\label{eq:sage}
 \end{equation}
-This integral runs \enquote{backwards} in time. Using the chain rule the governing equation for the Finger tensor transforms to  
+This integral runs \enquote{backwards} in time. Using the chain rule the governing equation for the \textsc{Finger} tensor transforms to  
 \begin{equation}
     \partial_t \bfb +\partial_\tau\bfb = \nabla u,
 \end{equation}
@@ -783,31 +782,31 @@ with the corresponding boundary and initial conditions
 \end{align}
 At first glance this appears to have made our situation worse because we now have two time derivatives in the equation. Luckily, there is a tool that can help us with that: the \textsc{Laplace} transformation. This is explained extensively in section \ref{sec:laplacetransform}. We have
 \begin{equation}
-L_{\bfb}(t,\bfx,s) =\int_0^\infty\bfb(t,t-\tau,\bfx)e^{-s\tau}\D\tau
+\mathcal{L}_\tau\{\bfb\}(t,\bfx,s) =\int_0^\infty\bfb(t,t-\tau,\bfx)e^{-s\tau}\D\tau
 \end{equation}
 as the \textsc{Laplace} transform of $\bfb$, where $s\in\cc$ is the frequency parameter. 
 We can switch derivative and integral because we assume both limits to exist.
 \begin{equation}
-    \partial_tL_{\bfb}(t,\bfx,s) + L_{\partial_\tau\bfb}(t,\bfx,s) = \frac{1}{s}\nabla u.
+    \partial_t\mathcal{L}_\tau\{\bfb\}(t,\bfx,s) + \mathcal{L}_\tau\{\partial_\tau\bfb\}(t,\bfx,s) = \frac{1}{s}\nabla u.
 \end{equation}
 However, because $\partial_\tau$ is not independent of $\tau$, we have to use integration by parts to transform it to
 \begin{align}
-    L_{\partial_\tau\bfb}(t,\bfx,s) &= \int_0^\infty\partial_\tau\bfb(t,t-\tau,\bfx)e^{-s\tau}\D\tau\\ &=\lim_{r\to\infty}\bfb(t,t-r,\bfx)e^{-sr}-\bfb(t,t,\bfx)e^{-s\cdot 0}+s\int_0^\infty\bfb(t,t-\tau)e^{-s\tau}\D\tau.\\
+    \mathcal{L}_\tau{\partial_\tau\bfb}(t,\bfx,s) &= \int_0^\infty\partial_\tau\bfb(t,t-\tau,\bfx)e^{-s\tau}\D\tau\\ &=\lim_{r\to\infty}\bfb(t,t-r,\bfx)e^{-sr}-\bfb(t,t,\bfx)e^{-s\cdot 0}+s\int_0^\infty\bfb(t,t-\tau)e^{-s\tau}\D\tau.\\
     \intertext{The first term vanishes because the exponential function dominates the behaviour of this term. This is a necessary condition for the \textsc{Laplace} transform to converge.}
-    &= -\bfb(t,t,\bfx) +sL_{\bfb}(t,\bfx, s)\\
-    &= sL_{\bfb}(t,\bfx,s).
+    &= -\bfb(t,t,\bfx) +s\mathcal{L}_\tau\{\bfb\}(t,\bfx, s)\\
+    &= s\mathcal{L}_\tau(t,\bfx,s).
 \end{align}
 We have successfully eliminated the time derivative in $\tau$ direction. The governing equation for the \textsc{Laplace} transform of the finger tensor is given by
 \begin{equation}
-(\partial_t +s)L_{\bfb}(t,\bfx,s) = \frac{1}{s}\nabla u
+(\partial_t +s)\mathcal{L}_\tau{\bfb}(t,\bfx,s) = \frac{1}{s}\nabla u
 \end{equation}
 The corresponding initial condition is 
 \begin{equation}
-    L_{\bfb}(0,\bfx,s) = \bm{0}.
+   \mathcal{L}_\tau\{\bfb\}(0,\bfx,s) = \bm{0}.
 \end{equation} 
-As a next step, we will introduce the conformation tensor, which non-dimensionalizes $L_{\bfb}$ . It is defined as 
+As a next step, we will introduce the conformation tensor, which non-dimensionalizes $\mathcal{L}_\tau\{\bfb\}$ . It is defined as 
 \begin{equation}
-    \bfC_s(t,\bfx) := sL_{\bfb}(t,\bfx,s),
+    \bfC_s(t,\bfx) := s\mathcal{L}_\tau\{\bfb\}(t,\bfx,s),
 \end{equation}
 and has the governing equation
 \begin{equation}
@@ -827,7 +826,7 @@ Then $\bfs$ is simply given by an inverse Laplace transform so specifically
 \begin{equation}
     \bfs(t,\bfx) =\mathcal{L}^{-1}\{\bfC_s(t,\bfx)g(t,\bfx,s)\}(t,\bfx).
 \end{equation}
-At first glance one may be tempted to be satisfied with this. However, numerically it is unclear how this would work. One of the nice properties of this approach is that if we choose 
+At first glance one may be tempted to be satisfied with this. However, numerically it is unclear how this could result in an efficient algorithm. One of the nice properties of this approach is that if we choose 
 \begin{equation}
     G(t,t-\tau)= \mu_p e^{-\tau/\lambda},\quad s=\frac{1}{\lambda},
 \end{equation}
@@ -842,7 +841,7 @@ where $\lambda$ is the material specific relaxation time, we can retrieve the \t
 \end{align}
 So using the assumptions on $G$ and $\bfu$, we removed the integral term completely! In this example the stress tensor is just the scaled conformation tensor. 
 \chapter{Simulation}
-This chapter will deal with all aspects of numerical considerations. At first, we will build the numerical scheme and discuss its convergence properties. After that we will look at some results that could be obtained.
+This chapter will deal with all aspects of numerical considerations. At first, we will build the numerical scheme and discuss its convergence properties. After that we will take a look at some results that could be obtained.
 \section{Discretization and building the numerical scheme}
 The next step will be to build a numerical scheme. For this, we first need the weak formulation. Then we will discuss the discretizations in space and time. Our equations are given by 
 \begin{align}
@@ -854,12 +853,12 @@ The next step will be to build a numerical scheme. For this, we first need the w
     \label{eq:transfeq3}
 \end{align}
 \subsection{Weak formulation}
-To obtain the weak formulation for equations \eqref{eq:transfeq1} to \eqref{eq:transfeq3}, we will use the standard approach as discussed in subsection \ref{subsec:finitelem}. So let $\varphi = (\varphi_1,\varphi_2)\in \mathrm{C}^\infty_0(\Omega\times\rr)$ with values in $\rr^2$ and $\psi\in \mathrm{C}^\infty_0(\Omega\times\rr)$ with values in $\rr$ be test functions of compact support. We will later on discuss simulation cases, where the boundary conditions are not 0, but for now we will use this restriction. By integrating in space, we can transform \eqref{eq:transfeq3} to 
+To obtain the weak formulation for equations \eqref{eq:transfeq1} to \eqref{eq:transfeq3}, we will use the standard approach as discussed in subsection \ref{subsec:finitelem}. So let $\varphi = (\varphi_1,\varphi_2)\in \mathrm{C}^\infty_0(\Omega\times\rr)$ with values in $\rr^2$ and $\psi\in \mathrm{C}^\infty_0(\Omega\times\rr)$ with values in $\rr$ be test functions of compact support. We will discuss simulation cases, where the boundary conditions are not 0 later on, but for now we will use this restriction. By integrating in space, we can transform \eqref{eq:transfeq3} to 
 \begin{equation}
     \int_\Omega(\partial_t\bfC_{1/\lambda}+\frac{1}{\lambda}\bfC_{1/\lambda})\cdot\varphi\D\Omega = 
    \int_\Omega \nabla u\cdot \varphi\D\Omega.
 \end{equation}
-We will not modify this equation further, as we do not have any knowledge about the boundary values of $\bfC$. The spatial derivatives of $u$ however, are not a problem during the simulation as $u$ not time-dependent in this equation and therefore known. Equation \eqref{eq:transfeq2} does not need to be handled, so what remains is equation \eqref{eq:transfeq1}, which is also the most complicated one. Integration over $\Omega$ and multiplication with the respective test function yields
+We will not modify this equation further, as we do not have any knowledge about the boundary values of $\bfC$. The spatial derivatives of $u$ however, are not a problem during the simulation as $u$ is not time-dependent in this equation and therefore known. Equation \eqref{eq:transfeq2} does not need to be handled, so what remains is equation \eqref{eq:transfeq1}, which is also the most complicated one. Integration over $\Omega$ and multiplication with the respective test function yields
 \begin{equation}
     \int_\Omega(\partial_t u + \partial_3 p -\nabla\cdot \bfs -\mu_s\Delta u)\psi\D\Omega = 0.
 \end{equation}
@@ -890,7 +889,7 @@ In summary, we can give the following system of weak formulations for our govern
 \end{align}
 
 \subsection{Time discretization}
-Our goal in this section is to discretize the time dimension in this equation. To achieve this goal, we will introduce the timesteps
+Our goal in this subsection is to discretize the time dimension in this equation. To achieve this goal, we will introduce the timesteps
 \begin{equation}
     0=t_0,t_1,\dotsc,t_N=T.
 \end{equation}
@@ -936,7 +935,7 @@ Putting $U$ and $\phi$ into \eqref{eq:sum} results in the equation
     &=\int_\Omega [U^n\cdot\phi-\Delta t\partial_3 p\phi_3]\D\Omega.
 \end{align}
 We denoted with 1:2 that the vector containing the first and second entry should be taken. We define $a(U,\phi)$ as the left hand side of the equation. That this is a bilinear form is trivially true due to the linearity of the integral and the dot product. However, it is not symmetric and therefore no inner product. That means, that our resulting matrix $A$ is not symmetric, which will impact the choice of a suited linear solver.\par 
-The right hand side of \eqref{eq:sum} is defined as the linear form $F$, which only consists of the term from the time discretization and the derivative of the pressure. We will proof in \ref{sec:existence} that this problem has a unique solution. \par 
+The right hand side of \eqref{eq:sumcon} is defined as the linear form $F$, which only consists of the term from the time discretization and the derivative of the pressure. We will proof in \ref{sec:existence} that this problem has a unique solution. \par 
 We will now discuss, which finite elements should be used. The software FEniCS provides a mesh generator, that uses triangles. We define the ansatz functions $\phi$ as
 \begin{equation}
     \phi\in P_1(\Omega)\times P_1(\Omega)\times P_1(\Omega),
@@ -946,9 +945,9 @@ where
     P_1(\Omega):=\{\varphi\in\mathrm{C}^0(\Omega)\colon \varphi|_K\in P_1(K)\quad\forall K\in\mathcal{T}_h\}.
 \end{equation}
  In this definition we use $\mathcal{T}_h$ and $P_1(K)$ as defined in subsection \ref{subsec:finitelem}. This is the smallest order a finite element can have to guarantee continuity across the cell boundary. A higher order element is also not necessary because we only use a time integration scheme of order 1. 
-\subsection{Existence of a solution}
+\subsection{Existence and uniqueness of a solution}
 \label{sec:existence}
-We now want to proof, with the help of Theorem \ref{sa:LaxMilgram} (\textsc{Lax-Milgram}), that there exists a unique solution for the problem \eqref{eq:sumcon}. Firstly, we have to discuss the form of the solution space. Because $\bfC_{1/\lambda}$ has no spatial derivatives in the governing equations, we assume $\bfC_{1/\lambda}\in \mathrm{L}^2(\Omega)\times \mathrm{L}^2(\Omega)$. The velocity appears with a spatial derivative of order one, so we want $u\in \mathrm{H}^1_0(\Omega)$. This leads to 
+We now want to proof, with the help of Theorem \ref{sa:LaxMilgram} (\textsc{Lax-Milgram}), that there exists a unique solution for the problem \eqref{eq:sumcon}. Firstly, we have to discuss the form of the solution space. Because $\bfC_{1/\lambda}$ has no spatial derivatives in the governing equations, we assume $\bfC_{1/\lambda}\in \mathrm{L}^2(\Omega)\times \mathrm{L}^2(\Omega)$. The velocity appears with a spatial derivative of order one, so we want $u\in \mathrm{H}^1(\Omega)$. This leads to 
 \begin{equation}
     U\in \mathrm{L}^2(\Omega)\times \mathrm{L}^2(\Omega)\times \mathrm{H}^1(\Omega)=:X(\Omega).
 \end{equation} The test function $\phi$ should be of the same regularity. We define a norm on this space via the inner product. The product space of \textsc{Hilbert} spaces has an easy inner product
@@ -960,11 +959,11 @@ where we use the inner products on $\mathrm{L}^2$ and $\mathrm{H}^1$ as defined 
     \norm{U}_X^2=\norm{U_{1:2}}_{\mathrm{L}^2}^2+\norm{U_3}_{\mathrm{H}^1}^2
 \end{equation}
 \begin{sa}
-    Let $X=\mathrm{L}^2\times\mathrm{L}^2\times \mathrm{H}^1_0$ be a \textsc{Hilbert} space, $\mu_s\neq 0$ and $\mu_s(\frac{1}{\Delta t}+\frac{1}{\lambda})\g \frac{1}{4}(\mu_p-1)^2$.
-    Then the problem in \eqref{eq:sumcon} has unique solution  in $X$.
+    Let $X=\mathrm{L}^2\times\mathrm{L}^2\times \mathrm{H}^1$ be a \textsc{Hilbert} space, $\mu_s> 0$ and $\mu_s(\frac{1}{\Delta t}+\frac{1}{\lambda})\g \frac{1}{4}(\mu_p-1)^2$.
+    Then the problem in \eqref{eq:sumcon} has a unique solution  in $X$.
 \end{sa}
 \begin{proof}
-    We will use theorem \ref{sa:LaxMilgram}(\textsc{Lax-Milgram}) to show this theorem. Therefore we have to show $\abs{a(U,\phi)}\le \beta\norm{U}_X\norm{\phi}_X$ for all $U,\phi\in X$ and for $\beta >0$ (continuity) . Secondly we have to show coercivity so $a(U,U)\ge \alpha\norm{U}^2_X$ for all $U\in X$. \par 
+    We will use theorem \ref{sa:LaxMilgram} (\textsc{Lax-Milgram}) to show this theorem. Therefore we have to show $\abs{a(U,\phi)}\le \beta\norm{U}_X\norm{\phi}_X$ for all $U,\phi\in X$ and for $\beta >0$ (continuity) . Secondly we have to show coercivity so $a(U,U)\ge \alpha\norm{U}^2_X$ for all $U\in X$. \par 
     Let us consider the continuity inequality first. Because $a$ is a bilinear form it is sufficient to show 
     \begin{equation}
         a(U,\phi)\le\beta\norm{U}_X\norm{\phi}_X.
@@ -1023,7 +1022,7 @@ where we use the inner products on $\mathrm{L}^2$ and $\mathrm{H}^1$ as defined 
     \begin{align}
         a(U,U)&\ge \left(1+\frac{\Delta t}{\lambda}\right)\ltnorm{U_{1:2}}^2+\ltnorm{U_3}^2+\Delta t\mu_s\ltnorm{\nabla U_3}^2\\&-\Delta t\abs{\mu_p-1}\left(\frac{\gamma}{2}\ltnorm{U_{1:2}}+\frac{1}{2\gamma}\ltnorm{\nabla U_3}^2\right).
     \end{align}
-    If collect the terms with same factors we obtain
+    If we collect the terms with the same factors we obtain
     \begin{equation}
         a(U,U)\ge \left(1+\frac{\Delta t}{\lambda}-\Delta t\abs{\mu_p-1}\frac{\gamma}{2}\right)\ltnorm{U_{1:2}}^2+\ltnorm{U_3}^2+\left(\Delta t\mu_s-\frac{\Delta t\abs{\mu_p -1}}{2\gamma}\right)\ltnorm{\nabla U_3}^2.
     \end{equation}
@@ -1053,10 +1052,10 @@ where we use the inner products on $\mathrm{L}^2$ and $\mathrm{H}^1$ as defined 
     \end{equation}
     Continuity and coercitivity implies the statement of the theorem as mentioned at the beginning of the proof.
 \end{proof}
-The condition 
+The boundary conditions were not necessary in the proof because we have a unique continuation from the previous time step for a given initial condition. The condition 
 \begin{equation}
 \mu_s\left(\frac{1}{\Delta t}+\frac{1}{\lambda}\right)>\frac{1}{4}(\mu_p-1)^2.
-\end{equation} needs some discussion. Does it not impose a strong restriction? Consider a given set of $\lambda,\mu_s$ and $\mu_p$. We can always find a $\Delta t$ small enough that the inequality holds. To put it in terms of numerics, we find that we can only guarantee the existence and uniqueness of the solution if the time step size is small enough. Such a constraint reminds one of the \textsc{CFL} condition for Finite Volume schemes. More information on the CFL condition can be found in the original German paper \cite{Courant1928}.
+\end{equation} needs some discussion. Does it not impose a strong restriction? Consider a given set of $\lambda,\mu_s$ and $\mu_p$. We can always find a $\Delta t$ small enough that the inequality holds.  To put it in terms of numerics, we find that we can only guarantee the existence and uniqueness of the solution if the time step size is small enough. Such a constraint reminds one of the \textsc{CFL} condition for Finite Volume schemes. However in this case the \textsc{CFL} condition dictates a relationship between spatial and time discretization for an explicit time stepping scheme. In the case of the last theorem it is not dependent on the spatial discretization and we use an implicit scheme. That we obtain some sort of condition on $\Delta t$ however, should be expected because the \textsc{Navier-Stokes} equations have a hyperbolic part, which needs some consideration for Finite Element Methods. More information on the CFL condition can be found in the original German paper \cite{Courant1928}.
 \section{Numerical results}
 Now we have everything we need to put our equations into a simulation. We will first introduce the framework, which we use to handle most of the calculations performed for this work. After that we will perform an empirical convergence study and discuss some test cases and limitations of this approach.
 \subsection{Software}
@@ -1064,8 +1063,6 @@ Most of the simulations conducted for this work used the FEniCS framework (\cite
 \par 
 The advantages of using a framework at all are obvious. The less time one spends coding, the more one can assign to theoretical tasks. Another nice property is that the whole debugging process is shortened by a large bit. The software is also throughly tested so bugs are much less frequent. The responsibility of the user is to implement all properties of the finite element approach, one wants to use. This includes the finite element spaces, the weak formulation and the time discretization. Literature on how to get started with FEniCS is easy to find. A nice tutorial is given by the founders of FEniCS in  \cite{Langtangen2017a}. The code, that has been written for this work, can be found on the CD, which accompanies this. 
 \subsection{Simulation cases}
-The next sections will deal with simulations and their results. This subsection should give a quick overview of all the relevant cases studied. \\
-Two domains were used throughout the simulations. 
 \begin{figure}
     \includegraphics[width=\textwidth]{meshcircle}
     \caption{Finest mesh of the unit disc}
@@ -1076,7 +1073,8 @@ Two domains were used throughout the simulations.
     \caption{Mesh of a square with sidelength 2}
     \label{fig:meshsquare}
 \end{figure}
-They can be seen in figures \ref{fig:mesh} and \ref{fig:meshsquare}. The boundary of the unit disc is approximated using a polygonal chain. It is interesting to observe that even for the square the mesh generator returns an unstructured mesh.
+The next subsections will deal with simulations and their results. This subsection should give a quick overview of all the relevant cases studied. \par
+Two domains were used throughout the simulations. They can be seen in figures \ref{fig:mesh} and \ref{fig:meshsquare}. The boundary of the unit disc is approximated using a polygonal chain. It is interesting to observe that even for the square the mesh generator returns an unstructured mesh.
 We used the unit disc for the following simulation cases:
 \begin{itemize}
     \item Convergence of our implementation
@@ -1088,8 +1086,8 @@ The square had applications in these cases:
     \item \enquote{ideal} rheometer cross-section
 \end{itemize}
 The reason why we simulated the startup flow case twice will be obvious once we compare the results. Videos of these testcases will be available on the CD that accompanies this work.
-\subsection{Convergence}
-In this section we will use a setup study convergence of the implementation and the order of convergence. We will use the unit disc as a domain that is
+\subsection{Empirical convergence}
+In this section we will use a setup to study the empirical convergence of the implementation and its order. We will use the unit disc as a domain that is
 \begin{equation}
     \Omega =\{x\in\rr^2|\abs{x}\le 1\}.
 \end{equation} 
@@ -1097,7 +1095,7 @@ As a boundary condition, we require
 \begin{equation}
 u = 0\quad\forall\bfx\in\partial\Omega.
 \end{equation}
-We want study convergence for the \textsc{Maxwell} model $(\mu_s=0)$, because it is more challenging due to the missing dissipation term.
+We want to study empirical convergence for the \textsc{Maxwell} model $(\mu_s=0)$, because it is more challenging due to the missing dissipation term.
 We set the initial conditions
 \begin{equation}
 u(t=0) = e^{-\norm{x}_2-1}-1,
@@ -1136,13 +1134,13 @@ The solution of this system is exactly our initial condition. This way we can ea
     \label{tab:maxwellconv}
 \end{table}
 
-We used $\Delta t = 0.1$ and calculated until $T=1$. As the polymer viscosity we used $1$. Table \ref{tab:maxwellconv} shows the $\mathrm{L}^2$ and $\mathrm{L}^\infty$ error and the experimental order of convergence of both errors. We can observe that the $\mathrm{L}^2$ error is well behaved and results in an EOC, which approaches 2. Unfortunately the error in the $\mathrm{L}^\infty$ does not return something similar. The important thing to note is that the $\mathrm{L}^\infty$ error is monotonously decreasing. It is well-known that it is very difficult to obtain a smooth convergence in $\mathrm{L}^\infty$. It is typical for these kind of simulations that the $\mathrm{L}^\infty$ error is worse than $\mathrm{L}^2$. Also, remember that the boundary of the domain has been approximated by a polygonal chain, which increases proportionally with the number of cells. The order of the geometry approximation influences the order of convergence just like the spatial or time discretization. This might also explain, why in the beginning the EOC is a bit far from the expected 2. As we have 320 elements per diameter we also approximate the circle with 320 segments in the polygonal chain which, to a naked eye, is indistinguishable from a true circle. The time integration order of one is also negatively influencing the EOC. 
+We used $\Delta t = 0.1$ and calculated until $T=1$. As the polymer viscosity we used $1$. Table \ref{tab:maxwellconv} shows the $\mathrm{L}^2$ and $\mathrm{L}^\infty$ error and the experimental order of convergence for both errors. We can observe that the $\mathrm{L}^2$ error is well behaved and results in an EOC, which approaches 2. Unfortunately the error in the $\mathrm{L}^\infty$ does not return something similar. The important thing to note is that the $\mathrm{L}^\infty$ error is monotonously decreasing. It is well-known that it is very difficult to obtain a smooth convergence in $\mathrm{L}^\infty$. It is typical for these kind of simulations that the $\mathrm{L}^\infty$ error is worse than $\mathrm{L}^2$. Also, remember that the boundary of the domain has been approximated by a polygonal chain, which increases proportionally with the number of cells. The order of the geometry approximation influences the order of convergence just like the spatial or time discretization. This might also explain, why in the beginning the EOC is a bit far from the expected 2. As we have 320 elements per diameter we also approximate the circle with 320 segments in the polygonal chain which, to a naked eye, is indistinguishable from a true circle. The time integration order of one is also negatively influencing the EOC. 
 
 \subsection{Startup flow on unit disc}
 We will now take a look at a more physically relevant example. Consider a fluid at rest that is subject to a perpendicular pressure gradient. This is basically the setup for the next two simulation cases. However, we will choose different domains and show that this leads to very different results. 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{UnitDiscSetup}
+    \includegraphics[width=0.6\textwidth]{setupcircle}
     \caption{Setup startup flow unit disc}
     \label{fig:unitdiscsetup}
 \end{figure}
@@ -1150,29 +1148,29 @@ The setup is shown in figure \ref{fig:unitdiscsetup}. We chose the no slip bound
 \begin{figure}
     \centering
     \includegraphics[width=0.8\textwidth]{UnitDiscCenterline}
-    \caption{Centerline velocity with the unit disc domain and $\mu_s=0$, $\mu_p=1$}
+    \caption{Centerline velocity on the unit disc domain with $\mu_s=0$, $\mu_p=1$, $\partial_3 p=-5$ and $\lambda=1$}
     \label{fig:unitdisccenterline}
 \end{figure}
-Figure \ref{fig:unitdisccenterline} shows the velocity at the centre of the circle. We used the \textsc{Maxwell} model this time with $\mu_p=1$. The typical non-\textsc{Newtonian} oscillations can be seen. We calculated until $T=12$ with $\Delta t=0.001$. The graph for a \textsc{Newtonian} fluid would be monotonously increasing to the steady state velocity.
+Figure \ref{fig:unitdisccenterline} shows the velocity at the center of the circle. We used the \textsc{Maxwell} model this time with $\mu_p=1$. The typical non-\textsc{Newtonian} oscillations can be seen. We calculated until $T=12$ with $\Delta t=0.001$. The graph for a \textsc{Newtonian} fluid would be monotonously increasing to the steady state velocity.
 \subsection{Startup flow on square}
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{SquareSetup}
+    \includegraphics[width=0.6\textwidth]{Setupsquare}
     \caption{Setup of the startup flow simulation on the square domain}
     \label{fig:squaresetup}
 \end{figure}
 Now we want to repeat this calculation but with a different domain. We will see that this will impact the result. The setup is shown in figure \ref{fig:squaresetup}. A related problem is solved in \cite{A.S.RDuarte2008}. Therefore, we choose periodic boundary conditions on the left and right sides and a no slip boundary condition $u=0$ at the top and bottom.
 \begin{figure}
     \centering
-    \includegraphics[width=0.8\textwidth]{SquareCenterline}
-    \caption{Centerline velocity of the start-up flow on the square domain}
+    \includegraphics[width=0.8\textwidth]{Centerlinevel}
+    \caption{Centerline velocity of the start-up flow on the square domain $\mu_s=0$, $\mu_p=1$, $\partial_3 p=-3$ and $\lambda=1$}
     \label{fig:squarecenterline}
 \end{figure}
-We chose $\partial_3 p=-3$ to obtain the results from \cite{A.S.RDuarte2008}. However, the magnitude of the pressure only affects the amplitude and not the behavior of the fluid. As one can see in figure \ref{fig:squarecenterline} we obtain a very different behavior by changing the domain. This is also a difference to a \textsc{Newtonian} fluid, where we would have gotten the same graph for both domains. Another interesting observation is, that until $t=\lambda$ the behavior of the fluid is monotonous. If we interpret the relaxation time of a \textsc{Newtonian} fluid to be $\infty$ we can explain the absence of maximal and minimal points in their velocity graph. It also seems like every extrema can be found at a multiple of the relaxation time and that these extrema are not differentiable. Shocks, however, can not be found because we solve a linear system of equations where these cannot appear.
+We chose $\partial_3 p=-3$ to obtain the results from \cite{A.S.RDuarte2008}. However, the magnitude of the pressure only affects the amplitude and not the behavior of the fluid. As one can see in figure \ref{fig:squarecenterline} we obtain a very different behavior by changing the domain. This is also a difference to a \textsc{Newtonian} fluid, where we would have gotten the same graph for both domains. It also seems like every extrema can be found at a multiple of the relaxation time and that these extrema are not differentiable. If we interpret the relaxation time of a \textsc{Newtonian} fluid to be $0$ we can explain the absence of maximal and minimal points in their velocity graph. Shocks cannot be found because we solve a linear system of equations where these cannot appear. 
 \subsection{\enquote{Ideal} rheometer}
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{RheometerSetup}
+    \includegraphics[width=0.6\textwidth]{setuprheo}
     \caption{Setup for the rheometer simulation case}
     \label{fig:rheometersetup}
 \end{figure}
@@ -1189,15 +1187,15 @@ The setup for this case is shown in figure \ref{fig:rheometersetup}. The left si
 \chapter{Different approaches for the integral equation}
 In chapter \ref{ch:model} we could eliminate the integral from equation \eqref{eq:generalsig} completely by taking sensible assumptions on the memory function $G$. However, this is a very specific case and the more complex physical models do not satisfy these assumptions. In this chapter we will discuss possibilities for a more general approach. 
 \section{Combination of relaxation times}
-In physics, most of the time it is sufficient to model the fluid's behavior using a combination of relaxation times. So for $N\in\nn$ we set
+In physics, even for a complex relaxation modulus $G$ it is sufficient most of the time to model the fluid's behavior using a combination of relaxation times. So for $N\in\nn$ we set
 \begin{equation}
     G(\tau)=\sum_{n=1}^{N}\mu_p^{(n)}e^{-\tau/\lambda_n},
 \end{equation}
-where $\mu_p^{(n)}$ and $\lambda_n$ are polymer viscosities and relaxation times, respectively. One can think of this process as descretizing the continuous spectrum of the fluid's relaxation times. We will now deduce a new formula for $\bfs$ by inserting this assumption. This yields
+where $\mu_p^{(n)}$ and $\lambda_n$ are polymer viscosities and relaxation times, respectively. One can think of this process as descretizing the continuous spectrum of the fluid's relaxation times dictated by $G$. We will now deduce a new formula for $\bfs$ by inserting this assumption. This yields
 \begin{equation}
     \bfs(t)=\int_0^t\partial_\tau \bfb(t,t-\tau)\sum_{n=1}^{N}\mu_p^{(n)}e^{-\tau/\lambda_n}\D\tau.
 \end{equation}
-Because all $\mu_p^{(n)}$ are constant and the integral is linear we can rewrite this to read
+Because all $\mu_p^{(n)}$ are constant and the integral is linear, we can rewrite this to read
 \begin{equation}
     \bfs(t) = \sum_{n=1}^{N}\mu_p^{(n)}\int_0^t\partial_\tau \bfb(t,t-\tau)e^{-\tau/\lambda_n}\D\tau.
 \end{equation}
@@ -1217,7 +1215,14 @@ If we look closely at the equation above one can see that we now have $N$ equati
 \begin{equation}
     \partial_t \bfC_{1/\lambda_n}+\frac{1}{\lambda_n}\bfC_{1/\lambda_n}=\nabla u
 \end{equation}
-for all $n$. This increases the computational effort but should still be more efficient than brute force calculating the integral at every timestep. Because $G$ is just a linear combination, all proofs and statements we made about the simpler equation remain true for this one.
+for all $n$.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{multilam}
+    \caption{Centerline velocity graph for the unit disc domain and relaxation times $0.1,1$ and 3 with $\mu_p^{(n)}\equiv 1$}
+    \label{fig:multilam}
+\end{figure}
+Because $G$ is just a linear combination, all proofs and statements we made about the simpler equation remain true for this one. The discretization can be handled as before. However, we obtain $n$ additional equations and $2n$ additional variables for $n$ relaxation times . This is not ideal from an efficiency point of view. A simulation on the before mentioned unit disc mesh with $\mu_p^{(n)}\equiv 1$ and $\lambda_1=0.1,\quad\lambda_2=1,\quad\lambda_3 =3$ resulted in \ref{fig:multilam}. This figure shows the centerline velocity over time for a startup flow as in the previous examples. For the pressure we used $\partial_3 p=-5$. The computation time was significantly longer than in the earlier examples. This highlights the necessity for a performance discussion, which is out of scope for this work. One can also observe that the extrema have now moved to approximately multiples of the geometric mean of the relaxation times.
 \section{A reduced integral equation}
 In this section we will take a look at a related integral equation. Later on the solution of this equation can be interpreted as the square root of the relaxation modulus $G$. More information on the relationship of this equation and non-\textsc{Newtonian} fluids can be found in \cite{Gnann2012}. The new equation has the same complexity regarding the integral as the ones we were looking at earlier, but the complexity regarding dimension and number of equations is much reduced. This makes it easier to concentrate on the main problem and to gather ideas, how one may approach the problem of an integro-dfferential equation in general. We use 
 \begin{align}
@@ -1252,10 +1257,10 @@ for a generic $f$. We will denote $f_{n+1}:=f(t_{n+1})$. Now, we have to choose 
 \end{equation} We call this algorithm (A1).
 One can observe that to calculate timestep $t_n$ from $t_{n-1}$ we need computational effort $\mathcal{O}(n)$. So to calculate $t_N$ from the start $t_0$ results in effort
 \begin{equation}
-    \sum_{n=1}^Nn=\frac{N(N+1)}{2},
+    \sum_{n=1}^Nn=\frac{N(N+1)}{2}.
 \end{equation}
-where we used the \textsc{Gaussian} summation rule. So it results that the calculation of $t_N$ from the initial condition results in $\mathcal{O}(N^2)$ effort.
-But that is very inefficient so we will try to find a better method. However, we implemented this brute force approach to obtain a reference for the next algorithms.
+So it results that the calculation of $t_N$ from the initial condition results in $\mathcal{O}(N^2)$ effort.
+But that is very inefficient so we will try to find a better method. However, we implemented this brute force approach to obtain a reference for the next algorithms. The results for (A1) are shown e.g in figure \ref{fig:phifalse}.
 \subsection{Exponentially increasing time intervals}
 We try to employ, that the resulting solution $\phi$ is exponentially decaying. Therefore it makes sense that we use intervals that increase their size exponentially. We hope that this approach is successful because a similar trick is done in calculating the Fast-\textsc{Fourier}-Transformation. For more on this topic see \cite{Cooley1965}. So we set $t_j=h2^j$ and choose 
 \begin{equation}
@@ -1323,7 +1328,7 @@ The goal of this transformation is that we can use equally spaced points in $u$ 
     \includegraphics[width=0.8\textwidth]{HistoryF.pdf}
     \caption{History dependency for different $f$ with $u=3$}
     \label{fig:Fustrich}
-\end{figure}almost everywhere. This would again eliminate the history completely like in the previous example. In figure \ref{fig:Fustrich} $F(u')$ is shown for a fixed $u$ and two choices of $f$. We can see that for both functions $f$ we have a long interval, in which $u=F(u,u')$ is a good approximation. \par 
+\end{figure}almost everywhere. This would again eliminate the history completely like in the previous example. In figure \ref{fig:Fustrich} $F(u')$ is shown for a fixed $u$ and two choices of $f$. The points $w^3_i$ will be introduced later. We can see that for both functions $f$ we have a long interval, in which $u=F(u,u')$ is a good approximation. \par 
 Now let $f(u)=e^u$. We choose this because $F(u,u')$ is qualitatively the same function for every $u$ just translated. For $f(u)=\exp(u)$ we have
 \begin{equation}
     F(u,u')=\log(\exp(u)-\exp(u')).
@@ -1336,11 +1341,11 @@ where $h = \frac{\log(T) -u_0}{N}$ is a fixed interval length and we stop at $u_
 \begin{equation}
     \tilde\phi(u) \equiv \tilde\phi(u_i), \quad\forall u\in(u_{i-1},u_i].
 \end{equation}
-This is where we introduce the discretization error. The evaluation of the integral will be exact under this assumption. Let us now take a look back at \eqref{eq:phitilde} and look at the integral part by part. Let us assume we know the values for each $\tilde\phi(u_i)$ for $i\le n$ and want to calculate $\tilde\phi(u_{n+1})$. For the first part we get
+This is where we introduce the discretization error. The evaluation of the integral will be exact under this assumption. Let us now take a look back at \eqref{eq:phitilde} and look at the integral part by part. Let us assume we know the values for each $\tilde\phi(u_i)$ for $i\le n$ and we want to calculate $\tilde\phi(u_{n+1})$. For the first part we get
 \begin{equation}
     I_1:=\int_{-\infty}^{u_{n+1}}f'(u')\tilde{m}(u')\tilde\phi(-\infty)\D u'=\tilde\phi(-\infty)\sum_{i=0}^{n+1}\int_{u_{i-1}}^{u_i}f'(u')\tilde{m}(u')\D u'
 \end{equation}
-Assuming $\tilde{m}$ to be piecewise constant on the integration interval, this also holds for $\tilde{m}$. As such, jumps only occur on the integral boundary and we obtain
+Assuming $\tilde{\phi}$ to be piecewise constant on the integration interval, this also holds for $\tilde{m}$. As such, jumps only occur on the integral boundary and we obtain
 \begin{equation}
     I_1 = \tilde{\phi}(-\infty)\sum_{i=0}^{n+1}\tilde{m}(u_i)\int_{u_{i-1}}^{u_i}f'(u')\D u' = \tilde{\phi}(-\infty)\sum_{i=0}^{n+1}\tilde{m}(u_i)[f(u_i)-f(u_{i-1})].
 \end{equation}
@@ -1360,7 +1365,7 @@ with the update rule
 \begin{equation}
     M(n+1) = M(n) + \tilde\phi(u_{n+1})[f(u_{n+1})-f(u_{n})].
 \end{equation}
-To understand the second part we will first rename the integration variable to avoid confusion and arrive at
+To understand the second part, we will first rename the integration variable to avoid confusion and arrive at
 \begin{equation}
     I_2:=\int_{u_{-1}}^{u_{n+1}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v.
 \end{equation}
@@ -1368,7 +1373,7 @@ Now let us recall the behavior of $F(u,v)$ in figure \ref{fig:Fustrich}. Heurist
 \begin{equation}
     f(x)=f(u)-f(v)\quad\Rightarrow f(v)=f(u)-f(x)\quad\Rightarrow v= F(u,x).
 \end{equation}
-The remaining discretization will be built on this fact. Specifically, we set $w_i^n=F(u_n,u_i)$. This ensures that 
+The remaining discretization will be built on this fact. Specifically, we set $w_i^n=F(u_n,u_i)$. Some of these points are shown in figure \ref{fig:Fustrich}. This ensures that 
 \begin{equation}
     \tilde\phi(F(u_{n+1},w^{n+1}_i))=\tilde{\phi}(u_j),
 \end{equation}
@@ -1383,12 +1388,12 @@ In other word, the sequence $\{v_i\}$ is the union of the sequences on the right
 \end{equation}
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{Tranformls1}
+    \includegraphics[width=\textwidth]{I2ls2}
     \caption{Visualization of the discretization for $I_2$, where $n=3$}
     \label{fig:vis1}
 \end{figure}
 This is constant in $n$ because of our choice for $f$ and equals the number of intervals, over which the $w_i^{n+1}$ spread. Therefore we know that all intervals until $u_{n-l^*+1}$ do not contain any points $w_i^{n+1}$.
- Figure \ref{fig:vis1} shows the discretization of $I_2$, where $n=3$. Both lines represent $[u_0,u_4]$. The top line shows the equidistant discretization used for $\tilde{m}$ and the bottom line shows the discretization for $\tilde\phi(F(u_{4},v))$ The value below the respective lines denote the discretization points. Above the respective lines one can see the values of the factors $\tilde{m}$ and $\tilde\phi(F(u_4,v))$ for that specific interval. In the case shown above we have $l^*=1$. As a next step, we will divide the integral $I_2$ to become
+ Figure \ref{fig:vis1} shows the discretization of $I_2$, where $n=3$. Both lines represent $[u_0,u_4]$. The top line shows the equidistant discretization used for $\tilde{m}$ and the bottom line shows the discretization for $\tilde\phi(F(u_{4},v))$ The value below the respective lines denote the discretization points. Above the respective lines one can see the values of the factors $\tilde{m}$ and $\tilde\phi(F(u_4,v))$ for that specific interval. In the case shown above we have $l^*=2$. As a next step, we will divide the integral $I_2$ to become
 \begin{equation}
     I_2 = \int_{-\infty}^{u_{n-l^*+1}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v + \int_{u_{n-l^* +1}}^{u_{n+1}}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v.
 \end{equation}
@@ -1440,7 +1445,7 @@ So it yields
 \begin{align}
      \int_{u_{n-l^*+1}}^{w^{n+1}_n}f'(v)\tilde{m}(v)\tilde{\phi}(F(u_{n+1},v))\D v = \tilde\phi(u_{n+1})\tilde{m}(u_{n-l^*+2})[f(u_{n+1})-f(u_n)-f(u_{n-l^*+1})].
 \end{align}
-So what remains of the integral is the part, where the two discretizations overlap. We also have to discuss how we can eliminate the sorting process from the main loop as this would result in $\mathcal{O}(n^2\log(n))$ effort. We know that after calculating $l^*$ time steps we have the first appearance of a $w$ which is larger than $u_0$ and therefore needs consideration. But this is independent of $n$ and can be calculated in advance as a result. The part of $w$ which overlaps with the equidistant discretization is exactly the part that is not entirely in the interval $[u_n,u_{n+1}]$. So it is given by
+So what remains of the integral is the part, where the two discretizations overlap. We also have to discuss how we can eliminate the sorting process from the main loop as this would result in $\mathcal{O}(N^2\log(N))$ effort. We know that after calculating $l^*$ time steps we have the first appearance of a $w$ which is larger than $u_0$ and therefore needs consideration. But this is independent of $n$ and can be calculated in advance as a result. The part of $w$ which overlaps with the equidistant discretization is exactly the part that is not entirely in the interval $[u_n,u_{n+1}]$. So it is given by
 \begin{equation}
     w^{l^*}_{l^*-i},\quad\forall i=1,\dotsc,j^*.
 \end{equation}
@@ -1456,7 +1461,7 @@ This way we can define the overlapping points
 \begin{equation}
     \tilde{u}= \bigcup_{i=1}^{l^*-1}u_i\,\cup\,\bigcup_{j=1}^{j^*}w^{l^*}_{l^*-j}
 \end{equation}
-We can sort the $\tilde(u)$ in the preprocessing. If we keep the permutation array that resulted during the sorting process, we can later recall, from which discretization each point came. We introduce two new variables
+We can sort the vector $\tilde{u}$ in the preprocessing. If we keep the permutation array that resulted during the sorting process, we can later recall, from which discretization each point came. We introduce two new variables
 \begin{equation}
     q_i:=\abs{\{u_j\colon u_j\in\tilde{u} \text{ and }u_j\le\tilde{u_i} \}},\quad
     y_i:=\abs{\{w^{l^*}_j\colon w^{l^*}_j\in\tilde{u} \text{ and }w^{l^*}_j\le\tilde{u_i} \}}.
@@ -1481,7 +1486,7 @@ and
 \begin{equation}
     M(n+1) = M(n) + \tilde\phi(u_{n+1})[f(u_{n+1})-f(u_{n})].
 \end{equation}
-As initial condition we set $S(-1)=M(-1)=0$. However due to the sums in \eqref{eq:discphit2} and \eqref{eq:discphit4}, we still have quadratic effort. But this can be avoided by introducing 
+As the initial condition we set $S(-1)=M(-1)=0$. However due to the sums in \eqref{eq:discphit2} and \eqref{eq:discphit4}, we still have quadratic effort. But this can be avoided by introducing 
 \begin{equation}
     O(n):=\sum_{i=0}^{n+1-l^*}\tilde{m}(u_i)[f(u_i)-f(u_{i-1})]
 \end{equation}
@@ -1505,7 +1510,7 @@ and
 \begin{equation}
 Q(n)= Q(n-1)+\tilde{\phi}(-\infty)[f(u_0+(n-j^*)h)-f(u_0+(n-1-j^*)h)]
 \end{equation}
-for $n<l^*-1$ and $n<j^*$ respectively. As initial values we use 
+for $n<l^*-1$ and $n<j^*$ respectively. As the initial values we use 
 \begin{equation}
     O(-1) = \tilde{m}(-\infty)f(u_0-hl^*)
 \end{equation}
@@ -1536,7 +1541,7 @@ The sum in the last equation above will yield a quadratic and linear term in $\t
     \caption{Convergence of the new algorithm for the simpler integral equation}
     \label{tab:integral}
 \end{table}
-One can observe that $l^*=1$ is a special case because then we obtain a cubic problem in $\tilde\phi$. Otherwise the problem becomes quadratic. In the code this problem will be solved using \textsc{Newton's} method. If we compare the results that this algorithms produces with the one, which has $\mathcal{O}(N^2)$ runtime, we obtain table \ref{tab:integral}. One can clearly observe that convergence is obtained in both norms. Because we used constant ansatz functions we would expect an order of 1. Possibly, because we approximated the history integral with a much higher order, we obtain a slightly better convergence. This effect becomes less relevant the more elements we use. To understand the values for the $L^\infty$ norm we have to recall that we do not compare our results to a known exact solution but we rather compare it to another approximation by an algorithm we trust. This can explain the drop in order of convergence for the $L^\infty$ norm. \par 
+One can observe that $l^*=1$ is a special case because then we obtain a cubic problem in $\tilde\phi$. Otherwise the problem becomes quadratic. In the code this problem will be solved using \textsc{Newton's} method. If we compare the results that this algorithms (A3) produces with (A1), we obtain table \ref{tab:integral}. One can clearly observe that convergence is obtained in both norms. Because we used constant ansatz functions we would expect an order of 1. Possibly, because we approximated the history integral with a much higher order, we obtain a slightly better convergence. This effect becomes less relevant the more elements we use. To understand the values for the $L^\infty$ norm we have to recall that we do not compare our results to a known exact solution but we rather compare it to another approximation by an algorithm we trust. This can explain the drop in order of convergence for the $L^\infty$ norm. \par 
 \begin{figure}
     \centering
     \includegraphics[width=0.8\textwidth]{runtime.pdf}
@@ -1546,9 +1551,9 @@ One can observe that $l^*=1$ is a special case because then we obtain a cubic pr
 The last thing to consider is the computational effort of this method. One might be tempted to think of linear runtime. However, $l^*$ and $j^*$ increase as $h$ decreases and $h$ decreases only as $N$ increases for a fixed end time $T$. A priori we cannot give a formula for this so we will empirically take a look at this relationship in figure \ref{fig:runtime}. This clearly shows a linear relationship in $l^*$. This leads to a $\mathcal{O}(N^2)$ algorithm. However, every time step within one discretization takes the same amount of time. The brute force algorithm on the other hand slows down from time step to time step. In the outlook given in chapter 6, we will discuss possibilities, which could improve the newly developed algorithm.
 
 \chapter{Conclusion and Outlook}
-In this chapter we will wrap up all results we obtained throughout this work and give an idea for future research in this topic. \par 
+In this chapter we will wrap up all results, we obtained throughout this work and give an idea for future research in this topic. \par 
 In the introduction we formulated the goal to be the development of an efficient method to simulate the governing equations for non-\textsc{Newtonian} fluids in two spatial dimensions. This was achieved using the \textsc{Laplace} transform to eliminate the bothering integral from the governing equations completely. The resulting algorithm is as efficient as a normal CFD simulation. We could simulate the cross section of a rheometer, which has practical value. Theoretical existence and uniqueness of the solution to the governing equation could be shown for a sensible set of parameters. Even though this could not be shown for $\mu_s=0$ we saw empirical convergence in the numerical experiments. \par 
-The second thing we looked at was the possibility to solve the integral from the governing equations without the \textsc{Laplace} transform to be able to loosen some of the necessary assumptions. To accomplish this we studied the equation from \cite{Gnann2012}. Three approaches have been considered:
+The second thing we looked at was the possibility to solve the integral from the governing equations without the \textsc{Laplace} transform to be able to loosen some of the necessary assumptions. One approach we took was to allow a combination of multiple relaxation times instead of one. This had the advantage that all methods and proofs, which we developed in this work, hold for the new system of equations. However, for each additional relaxation time we obtain two variables and one equation more, which is not ideal performance-wise but it returns the expected results. For other ideas, we studied the equation from \cite{Gnann2012}. Three approaches have been considered:
 \begin{itemize}
     \item brute force
     \item exponentially increasing time intervals
@@ -1557,6 +1562,7 @@ The second thing we looked at was the possibility to solve the integral from the
 However, all of them were not perfectly suited. The first and third approach have a computational effort of $\mathcal{O}(N^2)$ and would therefore not be appropriate for an extension to the five-dimensional system of equations with a sensible number of degrees of freedom. The second approach did unfortunately not lead to a correct solution as the calculation error was to great. \\
 \par 
 For future research it might be worth to take a look at our newly developed algorithm from the third approach again. In it current state in timestep $n\to n+1$ $n$ history points are considered. Maybe one could carefully choose a subset of them and still obtain a good approximation? Another point to consider could be the difficulties that arise by introducing nonlinearity into the equations by either increasing the spatial dimension or allowing more flow directions. The theoretical existence of a solution might be interesting to study for this case. Another possibility to enhance the newly developed algorithm could lie in the choice of $f$. We saw in figure \ref{fig:Fustrich} that $f(u)=\exp(\pi/2\sinh(u))$ has better properties regarding the history dependency. However, $F(u,u')$ then becomes heavily dependent on $u$ and introduces new effort each timestep.\\
+One could also take a look back at the combination of relaxation times. It turns out that in Physics one often just needs a sufficient number of relaxation times to correctly model a fluids behavior. Therefore, it could be interesting to study the resulting system of equations with respect to the linear algebra. The only nonlinear component, which could be introduced into the system of equations, would be in the velocity equation. Therefore, one could discuss the opportunities to optimize performance for the solver.
 \par 
 All in all, one can say that for a spatial two-dimensional problem with one flow direction and a memory function of special form we could present an efficient algorithm. For a related equation, we studied some approaches that can be a good starting point for further studies.
 \addcontentsline{toc}{chapter}{List of Figures}
