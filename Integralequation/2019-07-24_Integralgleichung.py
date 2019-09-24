@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot
 
-deltat=0.04
+deltat=0.01
 tau0=1.0
 v1=1.5
 v2=0.5
@@ -22,23 +22,8 @@ for n in range(1,numsteps+1):
     diffarray[n] *= -deltat*denom
     phiarray1[n] = phiarray1[n-1] + diffarray[n]
     print("Step {}: diffarray[n]={} phiarray[n]={}".format(n,diffarray[n],phiarray1[n]))
-h=0.01
-numsteps=14
-phiarray  = np.zeros((numsteps+1,))
-beta = 0
-phiarray[0] = 1.0
-m = 0
-tarray = np.asarray([h*(2**n - 1) for n in range(0, numsteps+1)])
-for n in range(1,numsteps+1):
-    m = (v1 * phiarray[n-1] + v2 * phiarray[n-1]**2)
-    beta = beta * 0.5 +  m * h / 4
-    phiarray[n]= (2**(-n) + beta - m * h / 2) * phiarray[n-1] + m * h / 2 * phiarray[0]
-    phiarray[n] *= 1/(h + 2**(-n) + beta)
-    print("Step {}: t[n]={} phiarray[n]={}".format(n,tarray[n], phiarray[n]))
 
-
-pyplot.plot(tarray,phiarray)
-pyplot.plot(deltat*np.arange(5001),phiarray1)
-pyplot.xlabel("t")
-pyplot.legend(["$\phi$ using (A2)","$\phi$ using (A1)"])
-pyplot.savefig('Phidiff.pdf')
+pyplot.plot((deltat*np.arange(5001)),phiarray1)
+pyplot.xlabel("$t$")
+pyplot.ylabel("$\phi$")
+pyplot.show()
